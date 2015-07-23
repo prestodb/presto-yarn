@@ -1,0 +1,16 @@
+{
+  "schema": "http://example.org/specification/v2.0.0",
+  "metadata": {
+  },
+  "global": {
+    "application.def": ".slider/package/PRESTO/presto.zip",
+    "java_home": "/usr/lib/jvm/java",
+
+    "site.global.pid_file": "/var/presto/data/var/run/launcher.pid"
+  },
+  "components": {
+    "slider-appmaster": {
+      "jvm.heapsize": "256M"
+    }
+  }
+}
