@@ -18,7 +18,6 @@ limitations under the License.
 
 """
 
-import sys
 from resource_management import *
 
 class Prestoserver(Script):

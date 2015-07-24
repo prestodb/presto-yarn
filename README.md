@@ -11,13 +11,13 @@
 * Untar the file to presto-server-0.110, create a configuration directory, etc under presto-server-0.110.
 * Create node.properties, jvm.config and config.properties under this etc. For now, we manually create and populate it with appropriate values. Make sure you configure it for single-node mode (coordinator and worker on same node)
 * The data directory's (added in node.properties eg: /var/presto/) should be owned by user yarn, otherwise slider will fail to start Presto with permission errors. 
-* Now tar the presto-server-0.110 (including the etc directory) and put it under app-package/presto/package/files/presto-server-0.110.tar.gz
+* Now tar the presto-server-0.110 (including the etc directory) and put it under app-package-presto/src/main/slider/package/files/presto-server-0.110.tar.gz
 
 ## Preparing other slider specific configuration
 
-* Copy the app-package/appConfig-default.json and app-package/resources-default.json to appConfig.json and resources.json respectively. Update them with whatever configurations you want to have for Presto
+* Copy the app-package-presto/src/main/slider/appConfig-default.json and app-package-presto/src/main/slider/resources-default.json to appConfig.json and resources.json respectively. Update them with whatever configurations you want to have for Presto
 * make jdk8 the default java or add it to "java_home" in your appConfig.json
-* Prepare the slider app package by zipping the app-package/presto directory as presto.zip
+* Prepare the slider app package by zipping the app-package-presto/src/main/slider directory as presto.zip
 
 The app package presto.zip should look something like:
 
@@ -78,6 +78,13 @@ If you want to re-create the app due to some failures/re-configuration
 bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
 ```
+
+# Building the project
+
+Run ```mvn clean package``` and the presto app package will be packaged at app-package-presto/target/presto-app-1.0.0-SNAPSHOT.zip.
+
+Note that this will have the presto-server-0.110.tar.gz from Presto with no etc/ configuration directory. Till we implement auto-configuration for Presto in Slider you will still need to follow the above steps of preparing the presto.zip app package instead of using presto-app-1.0.0-SNAPSHOT.zip built using maven.
+
 
 # Links
 
