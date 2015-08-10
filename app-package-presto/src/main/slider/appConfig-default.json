@@ -3,10 +3,12 @@
   "metadata": {
   },
   "global": {
-    "application.def": ".slider/package/PRESTO/presto.zip",
-    "java_home": "/usr/lib/jvm/java",
+    "site.global.app_user": "yarn",
+    "site.global.user_group": "hadoop",
+    "site.global.data_dir": "/var/presto/data",
 
-    "site.global.pid_file": "/var/presto/data/var/run/launcher.pid"
+    "application.def": ".slider/package/PRESTO/presto-app-1.0.0-SNAPSHOT.zip",
+    "java_home": "/usr/lib/jvm/java"
   },
   "components": {
     "slider-appmaster": {

@@ -17,22 +17,3 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
-from resource_management import *
-import uuid
-
-# server configurations
-config = Script.get_config()
-
-app_root = config['configurations']['global']['app_root']
-# TODO: get rid of the version hard-coding, and integrate it with build infra
-presto_root = format("{app_root}/presto-server-0.110")
-java8_home = config['hostLevelParams']['java_home']
-
-conf_dir = format("{presto_root}/etc")
-presto_user = config['configurations']['global']['app_user']
-user_group = config['configurations']['global']['user_group']
-data_dir = config['configurations']['global']['data_dir']
-pid_dir = format("{data_dir}/var/run")
-server_pid_file = format("{pid_dir}/launcher.pid")
-node_id = uuid.uuid1()

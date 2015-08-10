@@ -19,38 +19,47 @@ limitations under the License.
 """
 
 from resource_management import *
+from configure import set_configuration
+
 
 class Prestoserver(Script):
-  def install(self, env):
-    self.install_packages(env)
-    pass
+    def install(self, env):
+        self.install_packages(env)
+        pass
 
-  def configure(self, env):
-    import params
-    env.set_params(params)
-    # TODO: Configure etc/ directory for Presto
+    def configure(self, env):
+        # TODO: set_configuration should be called for coordinator and workers
+        # (probably via a component name arg)
+        set_configuration()
 
-  def start(self, env):
-    import params
-    env.set_params(params)
-    self.configure(env)
-    process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher start")
+    def start(self, env):
+        import params
+        env.set_params(params)
+        
+        self.configure(env)
+        process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher start")
 
-    Execute(process_cmd,
-        logoutput=False,
-        wait_for_finish=False,
-        pid_file=params.pid_file,
-        poll_after = 5
-    )
+        Execute(process_cmd,
+                logoutput=False,
+                wait_for_finish=False,
+                pid_file=params.server_pid_file,
+                poll_after=5
+        )
 
-  def stop(self, env):
-    import params
-    env.set_params(params)
+    def stop(self, env):
+        import params
 
-  def status(self, env):
-    import params
-    env.set_params(params)
-    check_process_status(params.pid_file)
+        env.set_params(params)
+        # Slider doesnt yet support stopping the actual app (PrestoServer) process
+        # but only stopping the yarn application
+        # TODO: try using launcher.py stop 
+
+    def status(self, env):
+        import params
+
+        env.set_params(params)
+        check_process_status(params.server_pid_file)
+
 
 if __name__ == "__main__":
-  Prestoserver().execute()
+    Prestoserver().execute()
