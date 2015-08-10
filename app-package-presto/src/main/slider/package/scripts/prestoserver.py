@@ -34,7 +34,7 @@ class Prestoserver(Script):
     import params
     env.set_params(params)
     self.configure(env)
-    process_cmd = format("PATH= {java8_home}/bin:$PATH {presto_root}/bin/launcher start")
+    process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher start")
 
     Execute(process_cmd,
         logoutput=False,
