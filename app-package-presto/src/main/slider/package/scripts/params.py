@@ -25,8 +25,7 @@ import uuid
 config = Script.get_config()
 
 app_root = config['configurations']['global']['app_root']
-# TODO: get rid of the version hard-coding, and integrate it with build infra
-presto_root = format("{app_root}/presto-server-0.110")
+presto_root = format("{app_root}/{app_name}")
 java8_home = config['hostLevelParams']['java_home']
 
 conf_dir = format("{presto_root}/etc")

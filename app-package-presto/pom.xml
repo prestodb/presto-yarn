@@ -30,10 +30,14 @@
     <description>Presto App Package</description>
 
     <properties>
-        <app.package.name>${project.artifactId}-${pkg.version}</app.package.name>
+        <main.dir>src/main/slider</main.dir>
+
         <pkg.version>${project.version}</pkg.version>
+        <app.package.name>${project.artifactId}-${pkg.version}</app.package.name>
+        
         <dep.pkg.dir>${project.build.directory}/dep-package-tmp</dep.pkg.dir>
-        <dep.pkg.name>presto-server-${presto.version}.tar.gz</dep.pkg.name>
+        <dep.pkg.basename>presto-server-${presto.version}</dep.pkg.basename>
+        <dep.pkg.name>${dep.pkg.basename}.tar.gz</dep.pkg.name>
         <dep.pkg>${dep.pkg.dir}/${dep.pkg.name}</dep.pkg>
     </properties>
 
@@ -48,6 +52,14 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${main.dir}</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/${app.package.name}</targetPath>
+            </resource>
+        </resources>
+        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

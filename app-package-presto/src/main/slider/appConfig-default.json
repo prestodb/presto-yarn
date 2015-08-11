@@ -6,8 +6,9 @@
     "site.global.app_user": "yarn",
     "site.global.user_group": "hadoop",
     "site.global.data_dir": "/var/presto/data",
+    "site.global.app_name": "${dep.pkg.basename}",
 
-    "application.def": ".slider/package/PRESTO/presto-app-1.0.0-SNAPSHOT.zip",
+    "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"
   },
   "components": {
