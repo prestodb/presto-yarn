@@ -58,6 +58,11 @@
                 <filtering>true</filtering>
                 <targetPath>${project.build.directory}/${app.package.name}</targetPath>
             </resource>
+            <resource>
+                <directory>src/samples</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/${app.package.name}/samples</targetPath>
+            </resource>
         </resources>
         
         <plugins>

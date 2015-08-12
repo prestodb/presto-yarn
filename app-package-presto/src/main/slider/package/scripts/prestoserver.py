@@ -27,7 +27,7 @@ class Prestoserver(Script):
         self.install_packages(env)
         pass
 
-    def configure(self, env):
+    def configure(self):
         # TODO: set_configuration should be called for coordinator and workers
         # (probably via a component name arg)
         set_configuration()
@@ -36,7 +36,7 @@ class Prestoserver(Script):
         import params
         env.set_params(params)
         
-        self.configure(env)
+        self.configure()
         process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher start")
 
         Execute(process_cmd,
@@ -47,12 +47,9 @@ class Prestoserver(Script):
         )
 
     def stop(self, env):
-        import params
-
-        env.set_params(params)
         # Slider doesnt yet support stopping the actual app (PrestoServer) process
-        # but only stopping the yarn application
-        # TODO: try using launcher.py stop 
+        # but only stopping the yarn application. Slider is not wired up yet to call this function.
+        pass
 
     def status(self, env):
         import params

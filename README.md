@@ -16,7 +16,7 @@ Note that the configuration present now is for single node install.
 
 ## Preparing other slider specific configuration
 
-* Copy the app-package-presto/src/main/slider/appConfig-default.json and app-package-presto/src/main/slider/resources-default.json to appConfig.json and resources.json respectively. Update them with whatever configurations you want to have for Presto
+* Copy the app-package-presto/src/sample/appConfig-sample.json and app-package-presto/src/sample/resources-sample.json to appConfig.json and resources.json respectively. Update them with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
 * make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
@@ -27,7 +27,6 @@ The app package built should look something like:
 Archive:  ../presto-app-1.0.0-SNAPSHOT.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-      428  08-09-2015 16:03   appConfig-default.json
      1559  07-28-2015 08:56   metainfo.xml
         0  08-07-2015 12:49   package/
         0  08-10-2015 12:58   package/templates/
@@ -42,9 +41,8 @@ Archive:  ../presto-app-1.0.0-SNAPSHOT.zip
         0  07-28-2015 08:56   package/files/
 404244891  08-09-2015 14:15   package/files/presto-server-0.110.tar.gz
       948  07-28-2015 08:56   package/files/README.txt
-      301  07-28-2015 08:56   resources-default.json
 ---------                     -------
-404254547                     16 files
+404254547                     14 files
 ```
 
 # Set up Slider on your cluster
