@@ -3,6 +3,7 @@
 * A cluster with HDP 2.2 or CDH5 installed
 * JDK 1.8 
 * Zookeeper 
+* openssl >= 1.0.1e-16
 
 # Create Slider App Package for Presto (Single Node)
 
@@ -63,18 +64,35 @@ export HADOOP_CONF_DIR=/etc/hadoop/conf
 ```
 su hdfs
 $ hdfs dfs -mkdir /user/<user>
-$ hdfs dfs -chown -R /user/<user>
+$ hdfs dfs -chown <user>:<user> -R /user/<user>
+```
+
+* Configure zookeeper in conf/slider-client.xml. In case zookeper is listening on master:2181 you need to add there the following section:
+
+```
+  <property>
+      <name>slider.zookeeper.quorum</name>
+      <value>master:2181</value>
+  </property>
 ```
  
 * Now run slider as <user>
 ```
 su <user>
 cd slider-0.80.0-incubating
-bin/slider install-package --name PRESTO --package ../presto-app-1.0.0-SNAPSHOT.zip
+bin/slider package --install --name PRESTO --package ../presto-app-1.0.0-SNAPSHOT.zip
 bin/slider create presto1 --template appConfig.json --resources resources.json (using modified .json files as per your requirement)
 ```
 
 This should start your application, and you can see it under the Yarn RM webUI.
+
+# Check the status of running application
+
+If you want to check the status of running application you run the following
+
+```
+bin/slider status presto1
+```
 
 # Destroy the app and re-create
 
