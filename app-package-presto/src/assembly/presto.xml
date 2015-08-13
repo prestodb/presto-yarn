@@ -40,7 +40,7 @@
 
     <fileSets>
         <fileSet>
-            <directory>${main.dir}</directory>
+            <directory>${main.dir.filtered}</directory>
             <outputDirectory>/</outputDirectory>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>

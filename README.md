@@ -15,7 +15,7 @@ This .zip will have presto-server-0.110.tar.gz from Presto under package/files/.
 
 ## Preparing other slider specific configuration
 
-* Copy the app-package-presto/src/samples/appConfig-sample.json and app-package-presto/src/samples/resources-[singlenode|multinode]-sample.json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
+* Copy the app-package-presto/src/test/resources/appConfig.json and app-package-presto/src/test/resources/resources-[singlenode|multinode].json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
 * If site.global.singlenode property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, site.global.singlenode in appConfig.json should be set to false. The multinode resources-multinode-sample.json sample file is configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history.
 * Make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
