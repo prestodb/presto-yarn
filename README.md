@@ -20,6 +20,33 @@ This .zip will have presto-server-0.110.tar.gz from Presto under package/files/.
 * Make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
+### Using YARN label
+
+To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions. 
+
+* First assign the nodes/subset of nodes with appropriate labels. See http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html
+* Then set the components in resource.json with yarn.label.expression to have labels to be used when allocating containers for Presto.
+* Create the application using bin/slider create .. --queue <queuename>. queuename will be queue defined in step one for the appropriate label.
+
+If a label expression is specified for the slider-appmaster component then it also becomes the default label expression for all component. Sample resources.json may look like:
+
+```
+    "COORDINATOR": {
+      "yarn.role.priority": "1",
+      "yarn.component.instances": "1",
+      "yarn.component.placement.policy": "1",
+      "yarn.label.expression":"coordinator"
+    },
+    "WORKER": {
+      "yarn.role.priority": "2",
+      "yarn.component.instances": "2",
+      "yarn.component.placement.policy": "1",
+      "yarn.label.expression":"worker"
+    }
+```
+
+where coordinator and worker are the node labels created and configured with a scheduler queue in YARN
+
 The app package built should look something like:
 
 ```
