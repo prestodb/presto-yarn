@@ -20,7 +20,12 @@ limitations under the License.
 from resource_management import *
 
 
-def set_configuration():
+def set_configuration(role=None):
+    """
+    Set configuration based on the component role. The jinja2 templates are populated from params.py
+    :param role: COORDINATOR or WORKER
+    :return:
+    """
     import params
 
     Directory(params.conf_dir,
@@ -43,7 +48,7 @@ def set_configuration():
     TemplateConfig(format("{params.conf_dir}/config.properties"),
                    owner=params.presto_user,
                    group=params.user_group,
-                   template_tag=None
+                   template_tag=role
     )
 
     TemplateConfig(format("{params.conf_dir}/jvm.config"),

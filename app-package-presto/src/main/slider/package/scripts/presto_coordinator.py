@@ -18,27 +18,7 @@ limitations under the License.
 
 """
 
-from resource_management import *
-import uuid
+from prestoserver import Prestoserver
 
-# server configurations
-config = Script.get_config()
-
-java8_home = config['hostLevelParams']['java_home']
-
-app_root = config['configurations']['global']['app_root']
-app_name = config['configurations']['global']['app_name']
-presto_root = format("{app_root}/{app_name}")
-conf_dir = format("{presto_root}/etc")
-
-presto_user = config['configurations']['global']['app_user']
-user_group = config['configurations']['global']['user_group']
-
-data_dir = config['configurations']['global']['data_dir']
-pid_dir = format("{data_dir}/var/run")
-server_pid_file = format("{pid_dir}/launcher.pid")
-
-singlenode = config['configurations']['global']['singlenode']
-coordinator_host = config['configurations']['global']['coordinator_host']
-
-node_id = uuid.uuid1()
+if __name__ == "__main__":
+    Prestoserver('COORDINATOR').execute()

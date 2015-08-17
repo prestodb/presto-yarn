@@ -8,7 +8,7 @@
   "components": {
     "slider-appmaster": {
     },
-    "PRESTO": {
+    "COORDINATOR": {
       "yarn.role.priority": "1",
       "yarn.component.instances": "1",
       "yarn.memory": "256"

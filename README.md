@@ -12,12 +12,12 @@
 Run ```mvn clean package``` and the presto app package will be packaged at app-package-presto/target/presto-app-1.0.0-SNAPSHOT.zip.
 
 This .zip will have presto-server-0.110.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
-Note that the configuration present now is for single node install.
 
 ## Preparing other slider specific configuration
 
-* Copy the app-package-presto/src/samples/appConfig-sample.json and app-package-presto/src/samples/resources-sample.json to appConfig.json and resources.json respectively. Update them with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
-* make jdk8 the default java or add it to "java_home" in your appConfig.json
+* Copy the app-package-presto/src/samples/appConfig-sample.json and app-package-presto/src/samples/resources-[singlenode|multinode]-sample.json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
+* If site.global.singlenode property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, site.global.singlenode in appConfig.json should be set to false. The multinode resources-multinode-sample.json sample file is configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history.
+* Make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
 The app package built should look something like:
@@ -27,22 +27,25 @@ The app package built should look something like:
 Archive:  ../presto-app-1.0.0-SNAPSHOT.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-     1559  07-28-2015 08:56   metainfo.xml
-        0  08-07-2015 12:49   package/
-        0  08-10-2015 12:58   package/templates/
-      197  08-07-2015 13:37   package/templates/config.properties.j2
-       69  08-10-2015 12:58   package/templates/node.properties.j2
-      172  08-07-2015 13:37   package/templates/jvm.config.j2
-        0  08-10-2015 12:58   package/scripts/
-     1856  08-10-2015 11:58   package/scripts/configure.py
-     1873  08-09-2015 18:40   package/scripts/prestoserver.py
-     1466  08-10-2015 11:04   package/scripts/params.py
-      787  08-09-2015 13:27   package/scripts/__init__.py
-        0  07-28-2015 08:56   package/files/
-404244891  08-09-2015 14:15   package/files/presto-server-0.110.tar.gz
-      948  07-28-2015 08:56   package/files/README.txt
+     2020  08-14-2015 12:43   metainfo.xml
+        0  08-14-2015 12:47   package/
+        0  08-14-2015 15:40   package/templates/
+      231  08-14-2015 12:43   package/templates/config.properties-COORDINATOR.j2
+       69  08-14-2015 12:43   package/templates/node.properties.j2
+      173  08-14-2015 12:43   package/templates/jvm.config.j2
+      164  08-14-2015 15:40   package/templates/config.properties-WORKER.j2
+        0  08-14-2015 15:39   package/scripts/
+     2032  08-14-2015 12:43   package/scripts/configure.py
+     1940  08-14-2015 12:43   package/scripts/prestoserver.py
+     1575  08-14-2015 15:39   package/scripts/params.py
+      891  08-14-2015 12:43   package/scripts/presto_worker.py
+      787  08-14-2015 12:43   package/scripts/__init__.py
+      896  08-14-2015 12:43   package/scripts/presto_coordinator.py
+        0  08-14-2015 12:47   package/files/
+404244891  08-14-2015 12:47   package/files/presto-server-0.110.tar.gz
+      948  08-14-2015 12:43   package/files/README.txt
 ---------                     -------
-404254547                     14 files
+404257959                     17 files
 ```
 
 # Set up Slider on your cluster

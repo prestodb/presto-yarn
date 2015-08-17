@@ -7,7 +7,9 @@
     "site.global.user_group": "hadoop",
     "site.global.data_dir": "/var/presto/data",
     "site.global.app_name": "${dep.pkg.basename}",
-
+    "site.global.singlenode": "true",
+    "site.global.coordinator_host": "${COORDINATOR_HOST}",
+    
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"
   },

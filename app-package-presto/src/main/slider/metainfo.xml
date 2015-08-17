@@ -23,16 +23,27 @@
     <comment>Presto DB</comment>
     <version>${presto.version}</version>
 
-    <components>
-      <component>
-        <name>PRESTO</name>
-        <category>MASTER</category>
-        <commandScript>
-          <script>scripts/prestoserver.py</script>
-          <scriptType>PYTHON</scriptType>
-        </commandScript>
-      </component>
-    </components>
+      <components>
+          <component>
+              <name>COORDINATOR</name>
+              <category>MASTER</category>
+              <minInstanceCount>1</minInstanceCount>
+              <maxInstanceCount>1</maxInstanceCount>
+              <commandScript>
+                  <script>scripts/presto_coordinator.py</script>
+                  <scriptType>PYTHON</scriptType>
+              </commandScript>
+          </component>
+          <component>
+              <name>WORKER</name>
+              <category>SLAVE</category>
+              <commandScript>
+                  <script>scripts/presto_worker.py</script>
+                  <scriptType>PYTHON</scriptType>
+              </commandScript>
+          </component>
+      </components>
+
 
     <osSpecifics>
       <osSpecific>

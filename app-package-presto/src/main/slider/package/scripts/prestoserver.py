@@ -23,14 +23,15 @@ from configure import set_configuration
 
 
 class Prestoserver(Script):
+    def __init__(self, component):
+        self.component = component
+
     def install(self, env):
         self.install_packages(env)
         pass
 
     def configure(self):
-        # TODO: set_configuration should be called for coordinator and workers
-        # (probably via a component name arg)
-        set_configuration()
+        set_configuration(self.component)
 
     def start(self, env):
         import params
@@ -57,6 +58,5 @@ class Prestoserver(Script):
         env.set_params(params)
         check_process_status(params.server_pid_file)
 
-
 if __name__ == "__main__":
-    Prestoserver().execute()
+    self.fail_with_error('Component name missing')
