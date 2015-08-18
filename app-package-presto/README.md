@@ -14,6 +14,8 @@ hfab vagrant.provision && hfab vagrant cloudera.install:java_version=8
  * zookeeper configured in a way it is accessible on master:55555181 from your sandbox host (default vagrant configuration)
  * ```/var/presto``` directory created on all the nodes with ```yarn``` user as an owner
  * HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
+
+Note: vagrant cluster comes with old version of openssl library, please make sure you upgraded it before testing.
  
 
 ### Execution
