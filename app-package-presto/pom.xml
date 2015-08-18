@@ -93,7 +93,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>${maven-assembly-plugin.version}</version>
                 <configuration>
-                    <descriptor>src/assembly/presto.xml</descriptor>
+                    <descriptor>${project.basedir}/src/main/assembly/presto.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
                     <finalName>${project.artifactId}-${pkg.version}</finalName>
                 </configuration>
