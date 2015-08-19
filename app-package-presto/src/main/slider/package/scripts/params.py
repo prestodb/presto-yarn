@@ -40,5 +40,6 @@ server_pid_file = format("{pid_dir}/launcher.pid")
 
 singlenode = config['configurations']['global']['singlenode']
 coordinator_host = config['configurations']['global']['coordinator_host']
+heapsize = config['configurations']['global']['presto_jvm_heapsize']
 
 node_id = uuid.uuid1()

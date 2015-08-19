@@ -9,7 +9,8 @@
     "site.global.app_name": "${dep.pkg.basename}",
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
-    
+    "site.global.presto_jvm_heapsize": "1024m",
+
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"
   },
