@@ -15,6 +15,7 @@
 package com.teradata.presto.yarn
 
 import com.facebook.presto.jdbc.PrestoDriver
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.slider.client.SliderClient
 import org.apache.slider.funtest.framework.AgentCommandTestBase
@@ -29,14 +30,14 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource
 import static com.google.common.base.Preconditions.checkState
 import static com.google.common.collect.Iterables.getOnlyElement
 import static java.util.concurrent.TimeUnit.MINUTES
-import static org.assertj.core.api.Assertions.assertThat
 
 @Slf4j
+@CompileStatic
 class PrestoClusterIT
         extends AgentCommandTestBase
 {
-  private static CLUSTER_NAME = 'presto_cluster'
-  public static final String COORDINATOR_COMPONENT = "COORDINATOR"
+  private static final String CLUSTER_NAME = 'presto_cluster'
+  private static final String COORDINATOR_COMPONENT = "COORDINATOR"
 
   @Before
   public void setupCluster()
@@ -75,7 +76,7 @@ class PrestoClusterIT
     log.info("Connected via Client {}", sliderClient.toString())
 
     JdbcTemplate prestoJdbcTemplate = waitForPrestoServer(sliderClient)
-    assertThat(prestoJdbcTemplate.queryForObject('SELECT 1', Integer)).isEqualTo(1)
+    assertTrue(prestoJdbcTemplate.queryForObject('SELECT 1', Integer) == 1)
   }
 
   private JdbcTemplate waitForPrestoServer(SliderClient sliderClient)
@@ -83,7 +84,7 @@ class PrestoClusterIT
     waitForRoleCount(sliderClient, COORDINATOR_COMPONENT, 1, MINUTES.toMillis(2) as int)
 
 
-    Map<String, Map> coordinatorStatuses = sliderClient.clusterDescription.status['live'][COORDINATOR_COMPONENT]
+    Map<String, Map> coordinatorStatuses = sliderClient.clusterDescription.status['live'][COORDINATOR_COMPONENT] as Map<String, Map>
     checkState(coordinatorStatuses.size() == 1, "Expected only one coordinator to be up and running")
     String prestoCoordinatorHost = getOnlyElement(coordinatorStatuses.values())['host']
     JdbcTemplate jdbcTemplate = new JdbcTemplate()

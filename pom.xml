@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <groupId>com.teradata.presto-yarn</groupId>
     <artifactId>presto-yarn</artifactId>
     <version>1.0.0-SNAPSHOT</version>
@@ -39,7 +39,6 @@
         <groovy-eclipse-batch.version>2.1.3-01</groovy-eclipse-batch.version>
         <groovy.version>2.3.7</groovy.version>
         <spring.version>4.2.0.RELEASE</spring.version>
-        <assertj.version>2.0.0</assertj.version>
 
         <!--  Plugin versions    -->
         <maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
@@ -50,9 +49,7 @@
 
         <encoding>UTF-8</encoding>
         <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
-
     </properties>
-
 
 </project>
 

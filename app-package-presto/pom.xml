@@ -40,6 +40,8 @@
         <dep.pkg.basename>presto-server-${presto.version}</dep.pkg.basename>
         <dep.pkg.name>${dep.pkg.basename}.tar.gz</dep.pkg.name>
         <dep.pkg>${dep.pkg.dir}/${dep.pkg.name}</dep.pkg>
+
+        <test.cluster>vagrant</test.cluster>
     </properties>
 
     <dependencies>
@@ -157,7 +159,7 @@
                         <configuration>
                             <systemPropertyVariables>
                                 <slider.bin.dir>${project.build.directory}/slider/slider-${slider.version}</slider.bin.dir>
-                                <slider.conf.dir>${project.basedir}/src/test/resources/slider/conf</slider.conf.dir>
+                                <slider.conf.dir>${project.basedir}/src/test/resources/slider/conf/${test.cluster}</slider.conf.dir>
                                 <test.app.pkg.name>PRESTO</test.app.pkg.name>
                                 <test.app.pkg.dir>${project.build.directory}</test.app.pkg.dir>
                                 <test.app.pkg.file>${app.package.name}.zip</test.app.pkg.file>
@@ -228,11 +230,6 @@
                     <artifactId>spring-jdbc</artifactId>
                     <version>${spring.version}</version>
                     <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.assertj</groupId>
-                    <artifactId>assertj-core</artifactId>
-                    <version>${assertj.version}</version>
                 </dependency>
             </dependencies>
         </profile>

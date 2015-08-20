@@ -31,7 +31,6 @@
     <name>yarn.resourcemanager.scheduler.address</name>
     <value>master:8030</value>
   </property>
-  
   <property>
     <name>fs.defaultFS</name>
     <value>hdfs://master/</value>
