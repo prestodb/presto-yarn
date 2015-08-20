@@ -10,6 +10,8 @@
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
     "site.global.presto_jvm_heapsize": "1024m",
+    
+    "site.global.catalog": "{'hive': ['connector.name=hive-cdh4', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=hive-cdh4']}",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"

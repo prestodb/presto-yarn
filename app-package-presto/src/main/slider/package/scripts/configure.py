@@ -18,7 +18,7 @@ limitations under the License.
 
 """
 from resource_management import *
-
+import ast
 
 def set_configuration(component=None):
     """
@@ -29,6 +29,12 @@ def set_configuration(component=None):
     import params
 
     Directory(params.conf_dir,
+              owner=params.presto_user,
+              group=params.user_group,
+              recursive=True
+    )
+
+    Directory(params.catalog_dir,
               owner=params.presto_user,
               group=params.user_group,
               recursive=True
@@ -62,3 +68,10 @@ def set_configuration(component=None):
                    group=params.user_group,
                    template_tag=None
     )
+
+    catalog_props = params.config['configurations']['global']['catalog']
+    catalog_dict = ast.literal_eval(catalog_props)
+    for key, value in catalog_dict.iteritems():
+        for configuration in value:
+            with open(format("{params.catalog_dir}/{key}.properties"), 'a') as fw:
+                fw.write("%s\n" % configuration)

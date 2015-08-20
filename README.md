@@ -5,7 +5,7 @@
 * Zookeeper 
 * openssl >= 1.0.1e-16
 
-# Create Slider App Package for Presto (Single Node)
+# Create Slider App Package for Presto
 
 ## Building the project
 
@@ -19,6 +19,11 @@ This .zip will have presto-server-0.110.tar.gz from Presto under package/files/.
 * If site.global.singlenode property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, site.global.singlenode in appConfig.json should be set to false. The multinode resources-multinode-sample.json sample file is configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history.
 * Make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
+* To configure the connectors with Presto add the following property in your appConfig.json. It should be of the format {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
+
+```
+    "site.global.catalog": "{'hive': ['connector.name=hive-cdh4', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=hive-cdh4']}"
+```
 
 ### Using YARN label
 
@@ -50,11 +55,13 @@ where coordinator and worker are the node labels created and configured with a s
 ### Configuring memory and CPU
 
 ``Memory``
+
 yarn.memory in resources.json declares the amount of memory to ask for in YARN containers. It should be defined for each component, COORDINATOR and WORKER based on the expected memory consumption, measured in  MB. A YARN cluster is usually configured with a minimum container allocation, set in yarn-site.xml by the configuration parameter yarn.scheduler.minimum-allocation-mb. It will also have a maximum size set in yarn.scheduler.maximum-allocation-mb. Asking for more than this will result in the request being rejected.
 
 The presto_jvm_heapsize property defined in appConfig.json, is used by the Presto JVM itself. Slider suggests that the value of yarn.memory must be bigger than this heapsize. The value of yarn.memory MUST be bigger than the heap size allocated to any JVM and Slider suggests using atleast 50% more appears to work, though some experimentation will be needed.
 
 ``CPU``
+
 Slider also supports configuring the virtual cores to use for the process which can be defined per component. yarn.vcores declares the number of "virtual cores" to request. Ask for more vcores if your process needs more CPU time.
 
 TODO: Investigate CGroups in YARN

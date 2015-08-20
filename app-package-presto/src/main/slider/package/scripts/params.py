@@ -30,6 +30,7 @@ app_root = config['configurations']['global']['app_root']
 app_name = config['configurations']['global']['app_name']
 presto_root = format("{app_root}/{app_name}")
 conf_dir = format("{presto_root}/etc")
+catalog_dir = format("{conf_dir}/catalog")
 
 presto_user = config['configurations']['global']['app_user']
 user_group = config['configurations']['global']['user_group']
@@ -43,3 +44,5 @@ coordinator_host = config['configurations']['global']['coordinator_host']
 heapsize = config['configurations']['global']['presto_jvm_heapsize']
 
 node_id = uuid.uuid1()
+
+catalog_properties = config['configurations']['global']['catalog']
