@@ -17,27 +17,25 @@ hfab vsphere.provision && hfab vsphere cloudera.install:java_version=8
  # or
  hfab vsphere etc_hosts
 ```
- * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/${your cluster}/slider-client.xml``` file are accessible from your local machine
+ * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
  * ```/var/presto``` directory created on all the nodes with ```yarn``` user as an owner
  * HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
+```
+hadoop fs -mkdir -p /user/yarn
+hadoop fs -chown yarn:yarn /user/yarn
+```
 
 Note: vagrant cluster comes with old version of openssl library, please make sure you upgraded it before testing. To upgrade openssl run on all the nodes as root user:
 ```
-yum update openssl
+for node in master slave{1,2,3}; do ssh $node yum upgrade openssl -y; done
 ```
  
-
 ### Execution
 
 To run integration tests you need to enable maven profile ```integration``` and then all integration tests will be run during ```mvn verify``` phase.
 
 ```
-# with default cluster (vagrant)
 mvn verify -Pintegration
-# with vagrant cluster
-mvn verify -Pintegration -Dtest.cluster=vagrant
-# with vsphere cluster
-mvn verify -Pintegration -Dtest.cluster=vsphere
 ```
 
 ### Skip assembly plugin execution

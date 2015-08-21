@@ -15,7 +15,6 @@
 package com.teradata.presto.yarn
 
 import com.facebook.presto.jdbc.PrestoDriver
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.slider.client.SliderClient
 import org.apache.slider.funtest.framework.AgentCommandTestBase
@@ -32,7 +31,6 @@ import static com.google.common.collect.Iterables.getOnlyElement
 import static java.util.concurrent.TimeUnit.MINUTES
 
 @Slf4j
-@CompileStatic
 class PrestoClusterIT
         extends AgentCommandTestBase
 {
