@@ -21,66 +21,72 @@ import org.apache.slider.funtest.framework.AgentCommandTestBase
 import org.apache.slider.funtest.framework.SliderShell
 import org.junit.After
 import org.junit.Before
-import org.junit.Test
 import org.springframework.jdbc.UncategorizedSQLException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.datasource.SimpleDriverDataSource
 
 import static com.google.common.base.Preconditions.checkState
 import static com.google.common.collect.Iterables.getOnlyElement
+import static com.teradata.presto.yarn.TimeUtils.retryUntil
 import static java.util.concurrent.TimeUnit.MINUTES
 
 @Slf4j
-class PrestoClusterIT
+abstract class PrestoClusterTestBase
         extends AgentCommandTestBase
 {
-  private static final String CLUSTER_NAME = 'presto_cluster'
-  private static final String COORDINATOR_COMPONENT = "COORDINATOR"
+  protected static final String COORDINATOR_COMPONENT = "COORDINATOR"
+  protected static final String WORKER_COMPONENT = "WORKER"
+
+  static setResources(String resource)
+  {
+    System.properties.setProperty('test.app.resource', "target/test-classes/${resource}")
+  }
+
+  static setTemplate(String template)
+  {
+    System.properties.setProperty('test.app.template', "target/test-classes/${template}")
+  }
 
   @Before
   public void setupCluster()
   {
-    setupCluster(CLUSTER_NAME)
+    setupCluster(clusterName)
   }
+
+  protected abstract String getClusterName()
 
   @After
   public void cleanup()
   {
-    cleanup(CLUSTER_NAME)
+    cleanup(clusterName)
   }
 
-  @Test
-  void 'install and check if it is working'()
+  protected SliderClient createPrestoCluster()
   {
-    describe "Create a working presto cluster on $CLUSTER_NAME"
-
-    def path = buildClusterPath(CLUSTER_NAME)
+    def path = buildClusterPath(clusterName)
     assert !clusterFS.exists(path)
 
     SliderShell shell = slider(EXIT_SUCCESS,
             [
-                    ACTION_CREATE, CLUSTER_NAME,
+                    ACTION_CREATE, clusterName,
                     ARG_TEMPLATE, APP_TEMPLATE,
                     ARG_RESOURCES, APP_RESOURCE
             ])
 
     logShell(shell)
 
-    ensureApplicationIsUp(CLUSTER_NAME)
+    ensureApplicationIsUp(clusterName)
 
-    //get a slider client against the cluster
-    SliderClient sliderClient = bondToCluster(SLIDER_CONFIG, CLUSTER_NAME)
+    SliderClient sliderClient = bondToCluster(SLIDER_CONFIG, clusterName)
 
     log.info("Connected via Client {}", sliderClient.toString())
 
-    JdbcTemplate prestoJdbcTemplate = waitForPrestoServer(sliderClient)
-    assertTrue(prestoJdbcTemplate.queryForObject('SELECT 1', Integer) == 1)
+    return sliderClient
   }
 
-  private JdbcTemplate waitForPrestoServer(SliderClient sliderClient)
+  protected JdbcTemplate waitForPrestoServer(SliderClient sliderClient)
   {
     waitForRoleCount(sliderClient, COORDINATOR_COMPONENT, 1, MINUTES.toMillis(2) as int)
-
 
     Map<String, Map> coordinatorStatuses = sliderClient.clusterDescription.status['live'][COORDINATOR_COMPONENT] as Map<String, Map>
     checkState(coordinatorStatuses.size() == 1, "Expected only one coordinator to be up and running")
@@ -97,7 +103,7 @@ class PrestoClusterIT
             'password'
     )
 
-    TimeUtils.retryUntil(isPrestoAccessibleClosure(jdbcTemplate), MINUTES.toMillis(2))
+    retryUntil(isPrestoAccessibleClosure(jdbcTemplate), MINUTES.toMillis(2))
 
     return jdbcTemplate
   }
@@ -115,5 +121,11 @@ class PrestoClusterIT
         return false
       }
     }
+  }
+
+  protected void assertThatPrestoIsUpAndRunning(SliderClient sliderClient)
+  {
+    JdbcTemplate prestoJdbcTemplate = waitForPrestoServer(sliderClient)
+    assertTrue(prestoJdbcTemplate.queryForObject('SELECT 1', Integer) == 1)
   }
 }

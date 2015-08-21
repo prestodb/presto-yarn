@@ -19,6 +19,9 @@ hfab vsphere.provision && hfab vsphere cloudera.install:java_version=8
 ```
  * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
  * ```/var/presto``` directory created on all the nodes with ```yarn``` user as an owner
+```
+for node in master slave{1,2,3}; do ssh $node mkdir /var/presto; ssh $node chown yarn:yarn /var/presto; done 
+```
  * HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
 ```
 hadoop fs -mkdir -p /user/yarn
@@ -52,4 +55,12 @@ Thanks to that you can shorten development cycle of integration tests, when slid
 
 ```
 mvn verify -Pintegration -Dmaven.failsafe.debug
+```
+
+### Run single test
+
+To run single integration tests, for example MultiNodePrestoClusterIt:
+
+```
+mvn verify -Pintegration -Dit.test=Multi*
 ```

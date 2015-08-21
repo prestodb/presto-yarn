@@ -161,8 +161,8 @@
                                 <test.app.pkg.name>PRESTO</test.app.pkg.name>
                                 <test.app.pkg.dir>${project.build.directory}</test.app.pkg.dir>
                                 <test.app.pkg.file>${app.package.name}.zip</test.app.pkg.file>
-                                <test.app.resource>${project.build.testOutputDirectory}/resources-singlenode.json</test.app.resource>
-                                <test.app.template>${project.build.testOutputDirectory}/appConfig.json</test.app.template>
+                                <test.app.resource>THIS SHOULD BE SET IN THE TEST ITSELF IN BEFORE_CLASS</test.app.resource>
+                                <test.app.template>THIS SHOULD BE SET IN THE TEST ITSELF IN BEFORE_CLASS</test.app.template>
                             </systemPropertyVariables>
                             <environmentVariables>
                                 <HADOOP_USER_NAME>yarn</HADOOP_USER_NAME>
