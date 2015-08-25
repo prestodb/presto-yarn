@@ -28,50 +28,33 @@ def set_configuration(component=None):
     """
     import params
 
-    Directory(params.conf_dir,
-              owner=params.presto_user,
-              group=params.user_group,
-              recursive=True
-    )
+    _directory(params.conf_dir, params)
+    _directory(params.catalog_dir, params)
+    _directory(params.pid_dir, params)
 
-    Directory(params.catalog_dir,
-              owner=params.presto_user,
-              group=params.user_group,
-              recursive=True
-    )
+    _template_config("{params.conf_dir}/config.properties", params, component)
+    _template_config("{params.conf_dir}/jvm.config", params)
+    _template_config("{params.conf_dir}/node.properties", params)
 
-    Directory(params.pid_dir,
-              owner=params.presto_user,
-              group=params.user_group,
-              recursive=True
-    )
-
-    File(params.server_pid_file,
-         owner=params.presto_user,
-         group=params.user_group
-    )
-
-    TemplateConfig(format("{params.conf_dir}/config.properties"),
-                   owner=params.presto_user,
-                   group=params.user_group,
-                   template_tag=component
-    )
-
-    TemplateConfig(format("{params.conf_dir}/jvm.config"),
-                   owner=params.presto_user,
-                   group=params.user_group,
-                   template_tag=None
-    )
-
-    TemplateConfig(format("{params.conf_dir}/node.properties"),
-                   owner=params.presto_user,
-                   group=params.user_group,
-                   template_tag=None
-    )
-
-    catalog_props = params.config['configurations']['global']['catalog']
-    catalog_dict = ast.literal_eval(catalog_props)
+    catalog_properties = params.config['configurations']['global']['catalog']
+    catalog_dict = ast.literal_eval(catalog_properties)
     for key, value in catalog_dict.iteritems():
         for configuration in value:
             with open(format("{params.catalog_dir}/{key}.properties"), 'a') as fw:
                 fw.write("%s\n" % configuration)
+
+
+def _directory(path, params):
+    Directory(path,
+              owner=params.presto_user,
+              group=params.user_group,
+              recursive=True
+              )
+
+
+def _template_config(path, params, template_tag=None):
+    TemplateConfig(format(path),
+                   owner=params.presto_user,
+                   group=params.user_group,
+                   template_tag=template_tag
+                   )

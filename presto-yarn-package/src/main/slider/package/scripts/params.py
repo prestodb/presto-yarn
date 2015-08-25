@@ -28,6 +28,7 @@ java8_home = config['hostLevelParams']['java_home']
 
 app_root = config['configurations']['global']['app_root']
 app_name = config['configurations']['global']['app_name']
+
 presto_root = format("{app_root}/{app_name}")
 conf_dir = format("{presto_root}/etc")
 catalog_dir = format("{conf_dir}/catalog")
@@ -37,7 +38,7 @@ user_group = config['configurations']['global']['user_group']
 
 data_dir = config['configurations']['global']['data_dir']
 pid_dir = format("{data_dir}/var/run")
-server_pid_file = format("{pid_dir}/launcher.pid")
+pid_file = format("{pid_dir}/slider_launcher.pid")
 
 singlenode = config['configurations']['global']['singlenode']
 coordinator_host = config['configurations']['global']['coordinator_host']

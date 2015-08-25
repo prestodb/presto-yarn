@@ -18,7 +18,7 @@ limitations under the License.
 
 """
 
-from prestoserver import Prestoserver
+from presto_server import PrestoServer
 
 if __name__ == "__main__":
-    Prestoserver('WORKER').execute()
+    PrestoServer('WORKER').execute()

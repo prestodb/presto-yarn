@@ -22,7 +22,7 @@ from resource_management import *
 from configure import set_configuration
 
 
-class Prestoserver(Script):
+class PrestoServer(Script):
     def __init__(self, component):
         self.component = component
 
@@ -35,17 +35,18 @@ class Prestoserver(Script):
 
     def start(self, env):
         import params
+
         env.set_params(params)
-        
+
         self.configure()
-        process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher start")
+        process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher run")
 
         Execute(process_cmd,
-                logoutput=False,
+                logoutput=True,
                 wait_for_finish=False,
-                pid_file=params.server_pid_file,
-                poll_after=5
-        )
+                pid_file=params.pid_file,
+                poll_after=3
+                )
 
     def stop(self, env):
         # Slider doesnt yet support stopping the actual app (PrestoServer) process
@@ -56,7 +57,8 @@ class Prestoserver(Script):
         import params
 
         env.set_params(params)
-        check_process_status(params.server_pid_file)
+        check_process_status(params.pid_file)
+
 
 if __name__ == "__main__":
     self.fail_with_error('Component name missing')
