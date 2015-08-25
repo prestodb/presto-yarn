@@ -32,8 +32,7 @@
         <main.dir>${project.basedir}/src/main/slider</main.dir>
         <main.dir.filtered>${project.build.directory}/slider-filtered-files</main.dir.filtered>
 
-        <pkg.version>${project.version}</pkg.version>
-        <app.package.name>${project.artifactId}-${pkg.version}</app.package.name>
+        <app.package.name>${project.artifactId}-${project.version}</app.package.name>
 
         <dep.pkg.dir>${project.build.directory}/dep-package-tmp</dep.pkg.dir>
         <dep.pkg.basename>presto-server-${presto.version}</dep.pkg.basename>
@@ -94,7 +93,7 @@
                 <configuration>
                     <descriptor>${project.basedir}/src/main/assembly/presto.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>${project.artifactId}-${pkg.version}</finalName>
+                    <finalName>${project.artifactId}-${project.version}</finalName>
                 </configuration>
                 <executions>
                     <execution>
@@ -106,131 +105,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>integration</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>${maven-dependency-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>unpack</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>unpack</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.apache.slider</groupId>
-                                            <artifactId>slider-assembly</artifactId>
-                                            <version>${slider.version}</version>
-                                            <classifier>all</classifier>
-                                            <type>zip</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}/slider</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${maven-failsafe-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <slider.bin.dir>${project.build.directory}/slider/slider-${slider.version}</slider.bin.dir>
-                                <slider.conf.dir>${project.basedir}/src/test/resources/slider/conf/</slider.conf.dir>
-                                <test.app.pkg.name>PRESTO</test.app.pkg.name>
-                                <test.app.pkg.dir>${project.build.directory}</test.app.pkg.dir>
-                                <test.app.pkg.file>${app.package.name}.zip</test.app.pkg.file>
-                                <test.app.resource>THIS SHOULD BE SET IN THE TEST ITSELF IN BEFORE_CLASS</test.app.resource>
-                                <test.app.template>THIS SHOULD BE SET IN THE TEST ITSELF IN BEFORE_CLASS</test.app.template>
-                            </systemPropertyVariables>
-                            <environmentVariables>
-                                <HADOOP_USER_NAME>yarn</HADOOP_USER_NAME>
-                            </environmentVariables>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>${maven-compiler-plugin.version}</version>
-                        <configuration>
-                            <compilerId>groovy-eclipse-compiler</compilerId>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.codehaus.groovy</groupId>
-                                <artifactId>groovy-eclipse-compiler</artifactId>
-                                <version>${groovy-eclipse-compiler.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.codehaus.groovy</groupId>
-                                <artifactId>groovy-eclipse-batch</artifactId>
-                                <version>${groovy-eclipse-batch.version}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>${groovy-eclipse-compiler.version}</version>
-                        <extensions>true</extensions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.slider</groupId>
-                    <artifactId>slider-funtest</artifactId>
-                    <version>${slider.version}</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                    <version>${junit.version}</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-all</artifactId>
-                    <version>${groovy.version}</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.facebook.presto</groupId>
-                    <artifactId>presto-jdbc</artifactId>
-                    <version>${presto.version}</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-jdbc</artifactId>
-                    <version>${spring.version}</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 
 </project>
 

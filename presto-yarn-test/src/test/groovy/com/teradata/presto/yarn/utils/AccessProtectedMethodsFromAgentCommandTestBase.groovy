@@ -12,25 +12,20 @@
  * limitations under the License.
  */
 
-package com.teradata.presto.yarn
+package com.teradata.presto.yarn.utils
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
+import org.apache.slider.funtest.framework.AgentCommandTestBase
 
-public class TimeUtils
+class AccessProtectedMethodsFromAgentCommandTestBase
+        extends AgentCommandTestBase
 {
-  public static void retryUntil(Closure<Boolean> condition, long timeoutInMilliseconds)
+  public static void cleanup(AgentCommandTestBase agentCommandTestBase, String applicationName)
   {
-    long startTime = System.currentTimeMillis()
+    agentCommandTestBase.cleanup(applicationName)
+  }
 
-    while (System.currentTimeMillis() - startTime < timeoutInMilliseconds) {
-      if (condition()) {
-        return
-      }
-
-      Thread.sleep(TimeUnit.SECONDS.toMillis(1))
-    }
-
-    throw new TimeoutException('exceeded timeout')
+  public static void ensureApplicationIsUp(AgentCommandTestBase agentCommandTestBase, String application)
+  {
+    agentCommandTestBase.ensureApplicationIsUp(application)
   }
 }

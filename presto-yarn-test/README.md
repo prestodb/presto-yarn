@@ -1,17 +1,16 @@
-# Presto slider package
+# Presto slider package - product tests
 
-##Integration tests
 
-### Pre-requisites
+## Pre-requisites
 
-In order to run integration you need to have: 
+In order to run product tests you need to have: 
  * a provisioned cluster which they will be run (e.g. an hfab vagrant or vsphere cluster) with java 8 preinstalled on the cluster
 ```
 hfab vagrant.provision && hfab vagrant cloudera.install:java_version=8
 # or
 hfab vsphere.provision && hfab vsphere cloudera.install:java_version=8
 ```
- * all the nodes of cluster have to be accessible from your local machine, so you can update your /etc/hosts file with entires returned by the command
+ * all the nodes of cluster have to be accessible from your local machine, so you can update your /etc/hosts file with entities returned by the command
 ```
  hfab vagrant etc_hosts
  # or
@@ -29,38 +28,29 @@ hadoop fs -chown yarn:yarn /user/yarn
 ```
 
 Note: vagrant cluster comes with old version of openssl library, please make sure you upgraded it before testing. To upgrade openssl run on all the nodes as root user:
+
 ```
 for node in master slave{1,2,3}; do ssh $node yum upgrade openssl -y; done
 ```
+
+Note: running tests on vsphere cluster locally for development could be a bad idea as it takes a lot of time to complete (beacause of network communication). In this case vagrant is advised.
  
-### Execution
+## Execution
 
-To run integration tests you need to enable maven profile ```integration``` and then all integration tests will be run during ```mvn verify``` phase.
-
-```
-mvn verify -Pintegration
-```
-
-### Skip assembly plugin execution
-
-To skip ```maven-assembly-plugin``` during integration tests development you can:
+To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase.
 
 ```
-mvn verify -Pintegration -Dassembly.skipAssembly
+mvn test -PproductTests
 ```
 
-Thanks to that you can shorten development cycle of integration tests, when slider package does not change.
-
-### Debugging
+## Debugging
 
 ```
-mvn verify -Pintegration -Dmaven.failsafe.debug
+mvn test -PproductTests -Dmaven.surefire.debug
 ```
 
-### Run single test
-
-To run single integration tests, for example MultiNodePrestoClusterIt:
+## Running single test (single method)
 
 ```
-mvn verify -Pintegration -Dit.test=Multi*
+mvn test -PproductTests -Dtest=Presto*#mutli*
 ```

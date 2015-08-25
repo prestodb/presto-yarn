@@ -1,0 +1,20 @@
+hdfs:
+  username: hdfs
+  webhdfs:
+    host: master
+    port: 50070
+
+databases:
+  presto:
+    host: master
+    port: ${PRESTO_MASTER_PORT:-8080}
+    jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
+    jdbc_url: jdbc:presto://${databases.presto.host}:${databases.presto.port}/hive/default
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+    table_manager_type: jdbc 
+
+tests:
+  hdfs:
+    path: /product-test/presto-yarn
