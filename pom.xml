@@ -27,7 +27,7 @@
     <inceptionYear>2015</inceptionYear>
 
     <modules>
-        <module>app-package-presto</module>
+        <module>presto-yarn-package</module>
     </modules>
 
     <properties>
