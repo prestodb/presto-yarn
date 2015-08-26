@@ -9,13 +9,13 @@
 
 ## Building the project
 
-Run ```mvn clean package``` and the presto app package will be packaged at app-package-presto/target/presto-app-1.0.0-SNAPSHOT.zip.
+Run ```mvn clean package``` and the presto app package will be packaged at presto-yarn-package/target/presto-yarn-package-1.0.0-SNAPSHOT.zip.
 
 This .zip will have presto-server-0.110.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
 
 ## Preparing other slider specific configuration
 
-* Copy the app-package-presto/src/test/resources/appConfig.json and app-package-presto/src/test/resources/resources-[singlenode|multinode].json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
+* Copy the presto-yarn-package/src/test/resources/appConfig.json and presto-yarn-package/src/test/resources/resources-[singlenode|multinode].json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
 * If site.global.singlenode property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, site.global.singlenode in appConfig.json should be set to false. The multinode resources-multinode-sample.json sample file is configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history.
 * Make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
@@ -89,8 +89,8 @@ Take a look here: http://slider.incubator.apache.org/docs/configuration/resource
 The app package built should look something like:
 
 ```
- unzip -l "$@" ../presto-app-1.0.0-SNAPSHOT.zip 
-Archive:  ../presto-app-1.0.0-SNAPSHOT.zip
+ unzip -l "$@" ../presto-yarn-package-1.0.0-SNAPSHOT.zip
+Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
      2020  08-14-2015 12:43   metainfo.xml
@@ -147,7 +147,7 @@ $ hdfs dfs -chown <user>:<user> -R /user/<user>
 ```
 su <user>
 cd slider-0.80.0-incubating
-bin/slider package --install --name PRESTO --package ../presto-app-1.0.0-SNAPSHOT.zip
+bin/slider package --install --name PRESTO --package ../presto-yarn-package-1.0.0-SNAPSHOT.zip
 bin/slider create presto1 --template appConfig.json --resources resources.json (using modified .json files as per your requirement)
 ```
 
