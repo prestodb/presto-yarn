@@ -30,7 +30,7 @@ import java.nio.file.Paths
 import java.sql.Connection
 
 import static com.google.common.base.Preconditions.checkState
-import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.CLUSTER_NAME
+import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.PACKAGE_NAME
 import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
@@ -43,6 +43,7 @@ public class PrestoCluster
   public static final String COORDINATOR_COMPONENT = "COORDINATOR"
   public static final String WORKER_COMPONENT = "WORKER"
   public static final String PACKAGE_DIR = 'target/package/'
+  public static final String APP_NAME = 'presto_cluster'
 
   private final Path resource;
   private final Path template;
@@ -59,32 +60,45 @@ public class PrestoCluster
 
   public void withPrestoCluster(Closure closure)
   {
-    createPrestoCluster()
+    create()
+    boolean clousureThrownException = true
     try {
       closure()
+      clousureThrownException = false
     }
     finally {
-      cleanupPrestoCluster()
+      try {
+        cleanup()
+      }
+      catch (RuntimeException e) {
+        if (clousureThrownException) {
+          log.error('Caught exception during presto cluster cleanup', e)
+        }
+        else {
+          throw e
+        }
+      }
     }
   }
 
-  public void createPrestoCluster()
+  public void create()
   {
-    checkState(! hdfsClient.exist(".slider/cluster/${CLUSTER_NAME}", 'yarn'))
+    cleanup()
+    checkState(!hdfsClient.exist(".slider/cluster/${APP_NAME}", 'yarn'))
 
-    slider.create(CLUSTER_NAME, template, resource)
+    slider.create(APP_NAME, template, resource)
   }
 
-  public void cleanupPrestoCluster()
+  public void cleanup()
   {
-    slider.cleanupCluster(CLUSTER_NAME)
+    slider.cleanup(APP_NAME)
   }
 
   public QueryExecutor waitForPrestoServer()
   {
     waitForComponentsCount(COORDINATOR_COMPONENT, 1)
 
-    List<String> coordinatorHosts = status().getLiveComponentsHost(COORDINATOR_COMPONENT)
+    List<String> coordinatorHosts = getComponentHosts(COORDINATOR_COMPONENT)
     checkState(coordinatorHosts.size() == 1, "Expected only one coordinator to be up and running")
     String prestoCoordinatorHost = coordinatorHosts[0]
 
@@ -96,6 +110,11 @@ public class PrestoCluster
     retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
 
     return queryExecutor
+  }
+
+  public List<String> getComponentHosts(String component)
+  {
+    return status().getLiveComponentsHost(component)
   }
 
   private Connection getPrestoConnection(GString url)
@@ -132,7 +151,8 @@ public class PrestoCluster
     retryUntil({
       try {
         status().getLiveComponentsHost(component).size() == expectedCount
-      } catch (RuntimeException e) {
+      }
+      catch (RuntimeException e) {
         log.warn('Unable to retrieve status, application could be not yet running', e)
         return false
       }
@@ -141,6 +161,11 @@ public class PrestoCluster
 
   public SliderStatus status()
   {
-    slider.status(CLUSTER_NAME)
+    slider.status(APP_NAME)
+  }
+
+  public void stop()
+  {
+    slider.stop(APP_NAME)
   }
 }

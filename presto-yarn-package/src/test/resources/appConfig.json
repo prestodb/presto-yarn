@@ -9,16 +9,16 @@
     "site.global.app_name": "${dep.pkg.basename}",
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
-    "site.global.presto_jvm_heapsize": "1024m",
+    "site.global.presto_jvm_heapsize": "256M",
     
-    "site.global.catalog": "{'hive': ['connector.name=hive-cdh4', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=hive-cdh4']}",
+    "site.global.catalog": "{'hive': ['connector.name=hive-cdh4', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"
   },
   "components": {
     "slider-appmaster": {
-      "jvm.heapsize": "256M"
+      "jvm.heapsize": "128M"
     }
   }
 }

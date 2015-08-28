@@ -76,13 +76,18 @@ class Slider
     String command = Joiner.on(' ').join(args)
     log.info('Execution on {}@{}: {}', sshClient.user, sshClient.host, command)
 
-    return sshClient.execute(command)
+    return sshClient.command(command)
   }
 
-  public void installLocalPackage(Path clusterPackage, String clusterName)
+  public void installLocalPackage(Path clusterPackage, String packageName)
   {
     def remotePackage = uploadIfNeeded(clusterPackage)
-    action("package --install --name ${clusterName} --package ${remotePackage} --replacepkg")
+    action("package --install --name ${packageName} --package ${remotePackage} --replacepkg")
+  }
+
+  public void uninstallPackage(String packageName)
+  {
+    action("package --delete --name ${packageName}")
   }
 
   private Path uploadIfNeeded(Path clusterPackage)
@@ -101,28 +106,39 @@ class Slider
     return packageName
   }
 
-  public void cleanupCluster(String clusterName)
+  public void cleanup(String appName)
   {
     try {
-      action("stop ${clusterName} --force --wait 10000")
-      action("destroy ${clusterName}")
+      stop(appName, true)
     }
     catch (RuntimeException e) {
-      log.warn('Unable to cleanup cluster (is it not registered?)', e)
+      log.warn('Unable to stop cluster (is it not started?)', e)
+    }
+    try {
+      action("destroy ${appName}")
+    }
+    catch (RuntimeException e) {
+      log.warn('Unable to destroy cluster (is it not created?)', e)
     }
   }
 
-  public void create(String clusterName, Path template, Path resource)
+  public void create(String appName, Path template, Path resource)
   {
-    action("create ${clusterName} --template ${upload(template)} --resources ${upload(resource)}")
-    action("exists ${clusterName} --live")
+    action("create ${appName} --template ${upload(template)} --resources ${upload(resource)}")
+    action("exists ${appName} --live")
   }
 
-  public SliderStatus status(String clusterName)
+  public SliderStatus status(String appName)
   {
     String tempFile = 'status.' + command('date +%Y-%m-%dT%H:%M:%S')
-    action("status ${clusterName} --out ${tempFile}")
+    action("status ${appName} --out ${tempFile}")
     return new SliderStatus(command("cat ${tempFile}"))
+  }
+
+  public void stop(String clusterName, boolean force = false)
+  {
+    def forceArgument = force ? '--force' : ''
+    action("stop ${clusterName} --wait 10000 ${forceArgument}")
   }
 
   public void action(String... args)

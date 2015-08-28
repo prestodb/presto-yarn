@@ -42,8 +42,6 @@ Note: vagrant cluster comes with old version of openssl library, please make sur
 for node in master slave{1,2,3}; do ssh $node yum upgrade openssl -y; done
 ```
 
-Note: running tests on vsphere cluster locally for development could be a bad idea as it takes a lot of time to complete (beacause of network communication). In this case vagrant is advised.
- 
 ## Execution
 
 To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase. To successfully build, you should first get tempto and build it successfully. Clone https://github.com/prestodb/tempto and build it using ```./gradlew install -x signArchives```.

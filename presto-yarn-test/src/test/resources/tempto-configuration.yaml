@@ -19,7 +19,6 @@ tests:
   hdfs:
     path: /product-test/presto-yarn
 
-
 ssh:
   roles:
     yarn:

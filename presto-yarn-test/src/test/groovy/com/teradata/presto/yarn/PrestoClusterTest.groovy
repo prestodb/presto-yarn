@@ -21,7 +21,8 @@ import com.teradata.tempto.RequirementsProvider
 import com.teradata.tempto.configuration.Configuration
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.ssh.SshClient
-import groovy.transform.CompileStatic
+import com.teradata.tempto.ssh.SshClientFactory
+import groovy.util.logging.Slf4j
 import org.testng.annotations.Test
 
 import javax.inject.Named
@@ -29,8 +30,9 @@ import javax.inject.Named
 import static PrestoCluster.COORDINATOR_COMPONENT
 import static PrestoCluster.WORKER_COMPONENT
 import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
+import static org.assertj.core.api.Assertions.assertThat
 
-@CompileStatic
+@Slf4j
 class PrestoClusterTest
         extends ProductTest
         implements RequirementsProvider
@@ -45,17 +47,35 @@ class PrestoClusterTest
   @Inject
   private HdfsClient hdfsClient
 
+  @Inject
+  public SshClientFactory sshClientFactory;
+
   @Test
-  void 'single node'()
+  void 'single node - create and stop'()
   {
     PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-singlenode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
+      prestoCluster.waitForComponentsCount(COORDINATOR_COMPONENT, 1)
+
       prestoCluster.assertThatPrestoIsUpAndRunning()
+
+      List<String> coordinatorHosts = prestoCluster.getComponentHosts(COORDINATOR_COMPONENT)
+      assertThat(coordinatorHosts).hasSize(1)
+
+      coordinatorHosts.each {
+        assertThat(isPrestoProcessRunningOn(it)).isTrue()
+      }
+
+      prestoCluster.stop()
+
+      coordinatorHosts.each {
+        assertThat(isPrestoProcessRunningOn(it)).isFalse()
+      }
     }
   }
 
   @Test
-  void 'multi node'()
+  void 'multi node - create and stop'()
   {
     PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-multinode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
@@ -63,6 +83,37 @@ class PrestoClusterTest
       prestoCluster.waitForComponentsCount(WORKER_COMPONENT, 3)
 
       prestoCluster.assertThatPrestoIsUpAndRunning()
+
+      List<String> coordinatorHosts = prestoCluster.getComponentHosts(COORDINATOR_COMPONENT)
+      assertThat(coordinatorHosts).hasSize(1)
+
+      List<String> workerHosts = prestoCluster.getComponentHosts(WORKER_COMPONENT)
+      assertThat(workerHosts).hasSize(3)
+
+      Collection<String> allHosts = coordinatorHosts + workerHosts
+      allHosts.each {
+        assertThat(isPrestoProcessRunningOn(it)).isTrue()
+      }
+
+      prestoCluster.stop()
+
+      allHosts.each {
+        assertThat(isPrestoProcessRunningOn(it)).isFalse()
+      }
+    }
+  }
+
+  private boolean isPrestoProcessRunningOn(String host)
+  {
+    SshClient sshClient = sshClientFactory.create(host);
+    try {
+      def prestoProcessesCount = Integer.parseInt(sshClient.command("pgrep -f 'java.*PrestoServer.*' | wc -l").trim())
+      prestoProcessesCount -= 1 // because pgrep finds itself
+      log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
+      return prestoProcessesCount > 0
+    }
+    finally {
+      sshClient.close()
     }
   }
 

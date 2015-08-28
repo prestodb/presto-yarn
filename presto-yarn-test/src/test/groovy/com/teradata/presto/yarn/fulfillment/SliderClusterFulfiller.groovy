@@ -37,7 +37,7 @@ public class SliderClusterFulfiller
         implements RequirementFulfiller
 {
 
-  public static final String CLUSTER_NAME = 'presto_cluster'
+  public static final String PACKAGE_NAME = 'PRESTO'
 
   private static final Path SLIDER_BINARY = Paths.get('target/package/slider-assembly-0.80.0-incubating-all.zip')
   private static final Path PRESTO_PACKAGE = Paths.get('target/package/presto-yarn-package-1.0.0-SNAPSHOT.zip')
@@ -61,9 +61,7 @@ public class SliderClusterFulfiller
     if (requirements.contains(SLIDER_CLUSTER)) {
       log.info('fulfilling slider cluster')
       slider.install(SLIDER_BINARY)
-
-      slider.cleanupCluster(CLUSTER_NAME)
-      slider.installLocalPackage(PRESTO_PACKAGE, CLUSTER_NAME)
+      slider.installLocalPackage(PRESTO_PACKAGE, PACKAGE_NAME)
     }
 
     return ImmutableSet.of()
@@ -72,6 +70,6 @@ public class SliderClusterFulfiller
   @Override
   void cleanup()
   {
-    slider.cleanupCluster(CLUSTER_NAME)
+    slider.uninstallPackage(PACKAGE_NAME)
   }
 }
