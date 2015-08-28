@@ -82,7 +82,6 @@
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
-                            <stripVersion>true</stripVersion>
                             <outputDirectory>${project.build.directory}/package</outputDirectory>
                         </configuration>
                     </execution>
@@ -117,7 +116,7 @@
                         <slider.conf.dir>${project.basedir}/src/test/resources/slider/conf/</slider.conf.dir>
                         <test.app.pkg.name>PRESTO</test.app.pkg.name>
                         <test.app.pkg.dir>${package.dir}</test.app.pkg.dir>
-                        <test.app.pkg.file>presto-yarn-package.zip</test.app.pkg.file>
+                        <test.app.pkg.file>presto-yarn-package-${project.version}.zip</test.app.pkg.file>
                     </systemPropertyVariables>
                     <environmentVariables>
                         <HADOOP_USER_NAME>yarn</HADOOP_USER_NAME>
