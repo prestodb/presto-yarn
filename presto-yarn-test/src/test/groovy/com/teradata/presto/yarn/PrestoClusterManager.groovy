@@ -54,10 +54,15 @@ public class PrestoClusterManager
   {
     this.resource = "target/package/${resource}"
     this.template = "target/package/${template}"
-    System.properties.setProperty("test.app.resource", resource)
-    System.properties.setProperty("test.app.template", template)
+    setResourceAndTemplateForAgentCommandTestBase(resource, template)
     // AgentCommandTestBase can be created after system properties are set for template and resource
     this.agentCommandTestBase = new AgentCommandTestBase()
+  }
+
+  public static void setResourceAndTemplateForAgentCommandTestBase(String resource, String template)
+  {
+    System.properties.setProperty("test.app.resource", resource)
+    System.properties.setProperty("test.app.template", template)
   }
 
   public void withPrestoCluster(Closure closure)

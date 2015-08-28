@@ -23,6 +23,7 @@ import groovy.util.logging.Slf4j
 import org.apache.slider.funtest.framework.AgentCommandTestBase
 import org.apache.slider.funtest.framework.CommandTestBase
 
+import static com.teradata.presto.yarn.PrestoClusterManager.setResourceAndTemplateForAgentCommandTestBase
 import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
 
 @RequirementFulfiller.AutoSuiteLevelFulfiller
@@ -47,6 +48,10 @@ public class SliderClusterFulfiller
       CommandTestBase.setupTestBase()
       AgentCommandTestBase.setupAgent()
       CommandTestBase.setupCluster(CLUSTER_NAME)
+
+      // setupApplicationPackage does not need resource and template, though AgentCommandTestBase does
+      setResourceAndTemplateForAgentCommandTestBase('WRONG RESOURCE', 'WRONG TEMPLATE')
+      new AgentCommandTestBase().setupApplicationPackage()
     }
 
     return ImmutableSet.of()
