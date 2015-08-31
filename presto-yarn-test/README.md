@@ -26,6 +26,15 @@ for node in master slave{1,2,3}; do ssh $node mkdir /var/presto; ssh $node chown
 hadoop fs -mkdir -p /user/yarn
 hadoop fs -chown yarn:yarn /user/yarn
 ```
+ * set a password for yarn user on master node. Create a ```src/test/resources/tempto-configuration-local.yaml``` yarn@master password and a private key to connect any cluster node as root user, example settings:
+
+```
+ssh:
+  identity: /home/kogut/teradata/hfab/hfab/util/pkg_data/insecure_key.pem
+  roles:
+    yarn:
+      password: yarn
+```
 
 Note: vagrant cluster comes with old version of openssl library, please make sure you upgraded it before testing. To upgrade openssl run on all the nodes as root user:
 

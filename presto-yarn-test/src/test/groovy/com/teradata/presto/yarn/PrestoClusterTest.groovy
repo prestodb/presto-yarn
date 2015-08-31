@@ -14,17 +14,21 @@
 
 package com.teradata.presto.yarn
 
+import com.google.inject.Inject
 import com.teradata.tempto.ProductTest
 import com.teradata.tempto.Requirement
 import com.teradata.tempto.RequirementsProvider
 import com.teradata.tempto.configuration.Configuration
+import com.teradata.tempto.hadoop.hdfs.HdfsClient
+import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import org.testng.annotations.Test
 
-import static com.teradata.presto.yarn.PrestoClusterManager.COORDINATOR_COMPONENT
-import static com.teradata.presto.yarn.PrestoClusterManager.WORKER_COMPONENT
+import javax.inject.Named
+
+import static PrestoCluster.COORDINATOR_COMPONENT
+import static PrestoCluster.WORKER_COMPONENT
 import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
-import static org.assertj.core.api.Assertions.assertThat
 
 @CompileStatic
 class PrestoClusterTest
@@ -34,33 +38,31 @@ class PrestoClusterTest
 
   public static final String TEMPLATE = 'appConfig.json'
 
+  @Inject
+  @Named('yarn')
+  private SshClient yarnSshClient
+
+  @Inject
+  private HdfsClient hdfsClient
+
   @Test
   void 'single node'()
   {
-    PrestoClusterManager prestoClusterManager = new PrestoClusterManager('resources-singlenode.json', TEMPLATE)
-    prestoClusterManager.withPrestoCluster {
-      prestoClusterManager.assertThatPrestoIsUpAndRunning()
+    PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-singlenode.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning()
     }
   }
 
   @Test
   void 'multi node'()
   {
-    PrestoClusterManager prestoClusterManager = new PrestoClusterManager('resources-multinode.json', TEMPLATE)
-    prestoClusterManager.withPrestoCluster {
-      prestoClusterManager.assertThatPrestoIsUpAndRunning()
+    PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-multinode.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.waitForComponentsCount(COORDINATOR_COMPONENT, 1)
+      prestoCluster.waitForComponentsCount(WORKER_COMPONENT, 3)
 
-      prestoClusterManager.waitForComponentsCount(COORDINATOR_COMPONENT, 1)
-      prestoClusterManager.waitForComponentsCount(WORKER_COMPONENT, 3)
-
-      def liveClusterStatus = prestoClusterManager.sliderClient.clusterDescription.status['live']
-
-      Map<String, Map> coordinatorStatuses = liveClusterStatus[COORDINATOR_COMPONENT] as Map<String, Map>
-      assertThat(coordinatorStatuses).hasSize(1)
-
-      Map<String, Map> workerStatuses = liveClusterStatus[WORKER_COMPONENT] as Map<String, Map>
-      assertThat(workerStatuses).hasSize(3)
-
+      prestoCluster.assertThatPrestoIsUpAndRunning()
     }
   }
 

@@ -7,3 +7,6 @@ out/
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
 *~
+
+# tempto local configuration
+tempto-configuration-local.yaml

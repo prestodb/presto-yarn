@@ -15,15 +15,19 @@
 package com.teradata.presto.yarn.fulfillment
 
 import com.facebook.presto.jdbc.internal.guava.collect.ImmutableSet
+import com.google.inject.Inject
+import com.teradata.presto.yarn.slider.Slider
 import com.teradata.tempto.Requirement
 import com.teradata.tempto.context.State
 import com.teradata.tempto.fulfillment.RequirementFulfiller
+import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.slider.funtest.framework.AgentCommandTestBase
-import org.apache.slider.funtest.framework.CommandTestBase
 
-import static com.teradata.presto.yarn.PrestoClusterManager.setResourceAndTemplateForAgentCommandTestBase
+import javax.inject.Named
+import java.nio.file.Path
+import java.nio.file.Paths
+
 import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
 
 @RequirementFulfiller.AutoSuiteLevelFulfiller
@@ -35,9 +39,20 @@ public class SliderClusterFulfiller
 
   public static final String CLUSTER_NAME = 'presto_cluster'
 
+  private static final Path SLIDER_BINARY = Paths.get('target/package/slider-assembly-0.80.0-incubating-all.zip')
+  private static final Path PRESTO_PACKAGE = Paths.get('target/package/presto-yarn-package-1.0.0-SNAPSHOT.zip')
+
   public static enum SliderClusterRequirement
           implements Requirement {
     SLIDER_CLUSTER;
+  }
+
+  private final Slider slider
+
+  @Inject
+  public SliderClusterFulfiller(@Named('yarn') SshClient yarnSshClient)
+  {
+    this.slider = new Slider(yarnSshClient)
   }
 
   @Override
@@ -45,13 +60,10 @@ public class SliderClusterFulfiller
   {
     if (requirements.contains(SLIDER_CLUSTER)) {
       log.info('fulfilling slider cluster')
-      CommandTestBase.setupTestBase()
-      AgentCommandTestBase.setupAgent()
-      CommandTestBase.setupCluster(CLUSTER_NAME)
+      slider.install(SLIDER_BINARY)
 
-      // setupApplicationPackage does not need resource and template, though AgentCommandTestBase does
-      setResourceAndTemplateForAgentCommandTestBase('WRONG RESOURCE', 'WRONG TEMPLATE')
-      new AgentCommandTestBase().setupApplicationPackage()
+      slider.cleanupCluster(CLUSTER_NAME)
+      slider.installLocalPackage(PRESTO_PACKAGE, CLUSTER_NAME)
     }
 
     return ImmutableSet.of()
@@ -60,5 +72,6 @@ public class SliderClusterFulfiller
   @Override
   void cleanup()
   {
+    slider.cleanupCluster(CLUSTER_NAME)
   }
 }

@@ -15,25 +15,22 @@
 package com.teradata.presto.yarn
 
 import com.facebook.presto.jdbc.PrestoDriver
+import com.teradata.presto.yarn.slider.Slider
+import com.teradata.presto.yarn.slider.SliderStatus
+import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.JdbcQueryExecutor
 import com.teradata.tempto.query.QueryExecutionException
 import com.teradata.tempto.query.QueryExecutor
+import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.slider.client.SliderClient
-import org.apache.slider.common.params.Arguments
-import org.apache.slider.common.params.SliderActions
-import org.apache.slider.core.main.LauncherExitCodes
-import org.apache.slider.funtest.framework.AgentCommandTestBase
-import org.apache.slider.funtest.framework.SliderShell
 
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.sql.Connection
 
 import static com.google.common.base.Preconditions.checkState
-import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.CLUSTER_NAME
-import static com.teradata.presto.yarn.utils.AccessProtectedMethodsFromAgentCommandTestBase.cleanup
-import static com.teradata.presto.yarn.utils.AccessProtectedMethodsFromAgentCommandTestBase.ensureApplicationIsUp
 import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
@@ -41,28 +38,23 @@ import static java.util.concurrent.TimeUnit.MINUTES
 
 @CompileStatic
 @Slf4j
-public class PrestoClusterManager
+public class PrestoCluster
 {
   public static final String COORDINATOR_COMPONENT = "COORDINATOR"
   public static final String WORKER_COMPONENT = "WORKER"
+  public static final String PACKAGE_DIR = 'target/package/'
 
-  private final String resource;
-  private final String template;
-  private final AgentCommandTestBase agentCommandTestBase
+  private final Path resource;
+  private final Path template;
+  private final Slider slider
+  private HdfsClient hdfsClient
 
-  public PrestoClusterManager(String resource, String template)
+  public PrestoCluster(SshClient sshClient, HdfsClient hdfsClient, String resource, String template)
   {
-    this.resource = "target/package/${resource}"
-    this.template = "target/package/${template}"
-    setResourceAndTemplateForAgentCommandTestBase(resource, template)
-    // AgentCommandTestBase can be created after system properties are set for template and resource
-    this.agentCommandTestBase = new AgentCommandTestBase()
-  }
-
-  public static void setResourceAndTemplateForAgentCommandTestBase(String resource, String template)
-  {
-    System.properties.setProperty("test.app.resource", resource)
-    System.properties.setProperty("test.app.template", template)
+    this.hdfsClient = hdfsClient
+    this.slider = new Slider(sshClient)
+    this.resource = Paths.get(PACKAGE_DIR, resource)
+    this.template = Paths.get(PACKAGE_DIR, template)
   }
 
   public void withPrestoCluster(Closure closure)
@@ -78,42 +70,30 @@ public class PrestoClusterManager
 
   public void createPrestoCluster()
   {
-    def path = agentCommandTestBase.buildClusterPath(CLUSTER_NAME)
-    assert !agentCommandTestBase.clusterFS.exists(path)
+    checkState(! hdfsClient.exist(".slider/cluster/${CLUSTER_NAME}", 'yarn'))
 
-    slider(SliderActions.ACTION_CREATE, CLUSTER_NAME,
-            Arguments.ARG_TEMPLATE, template,
-            Arguments.ARG_RESOURCES, resource
-    )
-
-    ensureApplicationIsUp(agentCommandTestBase, CLUSTER_NAME)
-  }
-
-  private void slider(String... args)
-  {
-    SliderShell shell = agentCommandTestBase.slider(LauncherExitCodes.EXIT_SUCCESS, args as List<String>)
-    agentCommandTestBase.logShell(shell)
+    slider.create(CLUSTER_NAME, template, resource)
   }
 
   public void cleanupPrestoCluster()
   {
-    cleanup(agentCommandTestBase, CLUSTER_NAME)
+    slider.cleanupCluster(CLUSTER_NAME)
   }
 
   public QueryExecutor waitForPrestoServer()
   {
     waitForComponentsCount(COORDINATOR_COMPONENT, 1)
 
-    Map<String, Map> coordinatorStatuses = sliderClient.clusterDescription.status['live'][COORDINATOR_COMPONENT] as Map<String, Map>
-    checkState(coordinatorStatuses.size() == 1, "Expected only one coordinator to be up and running")
-    String prestoCoordinatorHost = getOnlyElement(coordinatorStatuses.values())['host']
+    List<String> coordinatorHosts = status().getLiveComponentsHost(COORDINATOR_COMPONENT)
+    checkState(coordinatorHosts.size() == 1, "Expected only one coordinator to be up and running")
+    String prestoCoordinatorHost = coordinatorHosts[0]
 
     def url = "jdbc:presto://${prestoCoordinatorHost}:8080"
     log.info("Presto connection url: ${url}")
 
     JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(getPrestoConnection(url), url)
 
-    retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(3))
+    retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
 
     return queryExecutor
   }
@@ -126,15 +106,6 @@ public class PrestoClusterManager
     properties.setProperty('password', 'password')
 
     return prestoDriver.connect(url, properties)
-  }
-
-  public SliderClient getSliderClient()
-  {
-    SliderClient sliderClient = agentCommandTestBase.bondToCluster(AgentCommandTestBase.SLIDER_CONFIG, CLUSTER_NAME)
-
-    log.info("Connected via Client {}", sliderClient.toString())
-
-    return sliderClient
   }
 
   private boolean isPrestoAccessible(QueryExecutor queryExecutor)
@@ -158,7 +129,18 @@ public class PrestoClusterManager
 
   public void waitForComponentsCount(String component, int expectedCount)
   {
-    agentCommandTestBase.waitForRoleCount(sliderClient, component, expectedCount, MINUTES.toMillis(2) as int)
+    retryUntil({
+      try {
+        status().getLiveComponentsHost(component).size() == expectedCount
+      } catch (RuntimeException e) {
+        log.warn('Unable to retrieve status, application could be not yet running', e)
+        return false
+      }
+    }, MINUTES.toMillis(2))
+  }
 
+  public SliderStatus status()
+  {
+    slider.status(CLUSTER_NAME)
   }
 }

@@ -52,7 +52,7 @@
                         <id>unpack slider</id>
                         <phase>process-test-resources</phase>
                         <goals>
-                            <goal>unpack</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
                             <artifactItems>
@@ -111,15 +111,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <systemPropertyVariables>
-                        <slider.bin.dir>${package.dir}/slider-${slider.version}</slider.bin.dir>
-                        <slider.conf.dir>${project.basedir}/src/test/resources/slider/conf/</slider.conf.dir>
-                        <test.app.pkg.name>PRESTO</test.app.pkg.name>
-                        <test.app.pkg.dir>${package.dir}</test.app.pkg.dir>
-                        <test.app.pkg.file>presto-yarn-package-${project.version}.zip</test.app.pkg.file>
-                    </systemPropertyVariables>
                     <environmentVariables>
-                        <HADOOP_USER_NAME>yarn</HADOOP_USER_NAME>
                         <PRESTO_PRODUCT_TESTS_ROOT>${project.basedir}/</PRESTO_PRODUCT_TESTS_ROOT>
                     </environmentVariables>
                     <skipTests>${skip.product.tests}</skipTests>
@@ -161,12 +153,6 @@
             <version>${tempto.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.slider</groupId>
-            <artifactId>slider-funtest</artifactId>
-            <version>${slider.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>${groovy.version}</version>
@@ -177,6 +163,11 @@
             <artifactId>presto-jdbc</artifactId>
             <version>${presto.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
     </dependencies>
 

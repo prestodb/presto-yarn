@@ -18,3 +18,12 @@ databases:
 tests:
   hdfs:
     path: /product-test/presto-yarn
+
+
+ssh:
+  roles:
+    yarn:
+      host: master
+      port: 22
+      user: yarn
+      password: ${YARN_PASSWORD}
