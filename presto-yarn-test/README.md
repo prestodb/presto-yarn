@@ -46,7 +46,7 @@ Note: running tests on vsphere cluster locally for development could be a bad id
  
 ## Execution
 
-To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase.
+To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase. To successfully build, you should first get tempto and build it successfully. Clone https://github.com/prestodb/tempto and build it using ```./gradlew install -x signArchives```.
 
 ```
 mvn test -PproductTests

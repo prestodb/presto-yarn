@@ -76,7 +76,7 @@ class Slider
     String command = Joiner.on(' ').join(args)
     log.info('Execution on {}@{}: {}', sshClient.user, sshClient.host, command)
 
-    return sshClient.command(command)
+    return sshClient.execute(command)
   }
 
   public void installLocalPackage(Path clusterPackage, String clusterName)
