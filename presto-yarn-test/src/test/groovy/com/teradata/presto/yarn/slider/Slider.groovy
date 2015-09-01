@@ -22,6 +22,8 @@ import groovy.util.logging.Slf4j
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import static com.teradata.presto.yarn.utils.FileDigesters.md5sum
+
 @CompileStatic
 @Slf4j
 class Slider
@@ -79,7 +81,24 @@ class Slider
 
   public void installLocalPackage(Path clusterPackage, String clusterName)
   {
-    action("package --install --name ${clusterName} --package ${upload(clusterPackage)} --replacepkg")
+    def remotePackage = uploadIfNeeded(clusterPackage)
+    action("package --install --name ${clusterName} --package ${remotePackage} --replacepkg")
+  }
+
+  private Path uploadIfNeeded(Path clusterPackage)
+  {
+    String localMd5sum = md5sum(clusterPackage)
+
+    def packageName = clusterPackage.fileName
+    String remoteMd5sum = command("md5sum ${packageName} || echo 0").split(' ')[0]
+
+    if (localMd5sum == remoteMd5sum) {
+      log.info("Package ${packageName} is already uploaded. Md5sum checksums match.")
+    }
+    else {
+      upload(clusterPackage)
+    }
+    return packageName
   }
 
   public void cleanupCluster(String clusterName)
@@ -99,7 +118,8 @@ class Slider
     action("exists ${clusterName} --live")
   }
 
-  public SliderStatus status(String clusterName) {
+  public SliderStatus status(String clusterName)
+  {
     String tempFile = 'status.' + command('date +%Y-%m-%dT%H:%M:%S')
     action("status ${clusterName} --out ${tempFile}")
     return new SliderStatus(command("cat ${tempFile}"))
