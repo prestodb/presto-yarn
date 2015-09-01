@@ -39,6 +39,7 @@ user_group = config['configurations']['global']['user_group']
 data_dir = config['configurations']['global']['data_dir']
 pid_dir = format("{data_dir}/var/run")
 pid_file = format("{pid_dir}/slider_launcher.pid")
+log_file = format("{data_dir}/var/log/server.log")
 
 singlenode = config['configurations']['global']['singlenode']
 coordinator_host = config['configurations']['global']['coordinator_host']
