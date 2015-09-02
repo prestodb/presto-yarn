@@ -63,13 +63,13 @@ class PrestoClusterTest
       assertThat(coordinatorHosts).hasSize(1)
 
       coordinatorHosts.each {
-        assertThat(isPrestoProcessRunningOn(it)).isTrue()
+        assertThat(countOfPrestoProcesses(it)).isEqualTo(1)
       }
 
       prestoCluster.stop()
 
       coordinatorHosts.each {
-        assertThat(isPrestoProcessRunningOn(it)).isFalse()
+        assertThat(countOfPrestoProcesses(it)).isEqualTo(0)
       }
     }
   }
@@ -92,25 +92,25 @@ class PrestoClusterTest
 
       Collection<String> allHosts = coordinatorHosts + workerHosts
       allHosts.each {
-        assertThat(isPrestoProcessRunningOn(it)).isTrue()
+        assertThat(countOfPrestoProcesses(it)).isEqualTo(1)
       }
 
       prestoCluster.stop()
 
       allHosts.each {
-        assertThat(isPrestoProcessRunningOn(it)).isFalse()
+        assertThat(countOfPrestoProcesses(it)).isEqualTo(0)
       }
     }
   }
 
-  private boolean isPrestoProcessRunningOn(String host)
+  private int countOfPrestoProcesses(String host)
   {
     SshClient sshClient = sshClientFactory.create(host);
     try {
       def prestoProcessesCount = Integer.parseInt(sshClient.command("pgrep -f 'java.*PrestoServer.*' | wc -l").trim())
       prestoProcessesCount -= 1 // because pgrep finds itself
       log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
-      return prestoProcessesCount > 0
+      return prestoProcessesCount
     }
     finally {
       sshClient.close()
