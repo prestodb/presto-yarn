@@ -31,6 +31,7 @@ def set_configuration(component=None):
     _directory(params.conf_dir, params)
     _directory(params.catalog_dir, params)
     _directory(params.pid_dir, params)
+    _directory(params.log_dir, params)
 
     _template_config("{params.conf_dir}/config.properties", params, component)
     _template_config("{params.conf_dir}/jvm.config", params)
