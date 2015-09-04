@@ -15,11 +15,15 @@
 package com.teradata.presto.yarn
 
 import com.google.inject.Inject
+import com.teradata.presto.yarn.fulfillment.ImmutableNationTable
 import com.teradata.tempto.ProductTest
 import com.teradata.tempto.Requirement
 import com.teradata.tempto.RequirementsProvider
+import com.teradata.tempto.Requires
+import com.teradata.tempto.assertions.QueryAssert
 import com.teradata.tempto.configuration.Configuration
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
+import com.teradata.tempto.query.QueryResult
 import com.teradata.tempto.ssh.SshClient
 import com.teradata.tempto.ssh.SshClientFactory
 import groovy.util.logging.Slf4j
@@ -30,6 +34,8 @@ import javax.inject.Named
 import static PrestoCluster.COORDINATOR_COMPONENT
 import static PrestoCluster.WORKER_COMPONENT
 import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
+import static com.teradata.tempto.assertions.QueryAssert.Row.row
+import static java.sql.JDBCType.BIGINT
 import static org.assertj.core.api.Assertions.assertThat
 
 @Slf4j
@@ -75,6 +81,7 @@ class PrestoClusterTest
   }
 
   @Test
+  @Requires(ImmutableNationTable.class)
   void 'multi node - create and stop'()
   {
     PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-multinode.json', TEMPLATE)
@@ -94,6 +101,17 @@ class PrestoClusterTest
       allHosts.each {
         assertThat(countOfPrestoProcesses(it)).isEqualTo(1)
       }
+      QueryResult tpchResult = prestoCluster.runPrestoQuery('select count(*) from tpch.tiny.nation')
+
+      QueryAssert.assertThat(tpchResult)
+              .hasColumns(BIGINT)
+              .containsExactly(
+              row(25))
+      QueryResult hiveResult = prestoCluster.runPrestoQuery("select count(*) from hive.default.nation")
+      QueryAssert.assertThat(hiveResult)
+              .hasColumns(BIGINT)
+              .containsExactly(
+              row(25))
 
       prestoCluster.stop()
 

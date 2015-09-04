@@ -12,13 +12,13 @@
       "yarn.role.priority": "1",
       "yarn.component.instances": "1",
       "yarn.component.placement.policy": "1",
-      "yarn.memory": "256"
+      "yarn.memory": "1500"
     },
     "WORKER": {
       "yarn.role.priority": "2",
       "yarn.component.instances": "3",
       "yarn.component.placement.policy": "1",
-      "yarn.memory": "256"
+      "yarn.memory": "1500"
     }
   }
 }

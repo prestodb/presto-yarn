@@ -21,6 +21,7 @@ import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.JdbcQueryExecutor
 import com.teradata.tempto.query.QueryExecutionException
 import com.teradata.tempto.query.QueryExecutor
+import com.teradata.tempto.query.QueryResult
 import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -96,6 +97,14 @@ public class PrestoCluster
 
   public QueryExecutor waitForPrestoServer()
   {
+    JdbcQueryExecutor queryExecutor = getJdbcQueryExecutor()
+
+    retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
+
+    return queryExecutor
+  }
+
+  private JdbcQueryExecutor getJdbcQueryExecutor() {
     waitForComponentsCount(COORDINATOR_COMPONENT, 1)
 
     List<String> coordinatorHosts = getComponentHosts(COORDINATOR_COMPONENT)
@@ -106,9 +115,6 @@ public class PrestoCluster
     log.info("Presto connection url: ${url}")
 
     JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(getPrestoConnection(url), url)
-
-    retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
-
     return queryExecutor
   }
 
@@ -125,6 +131,16 @@ public class PrestoCluster
     properties.setProperty('password', 'password')
 
     return prestoDriver.connect(url, properties)
+  }
+
+  public QueryResult runPrestoQuery(String query)
+  {
+    JdbcQueryExecutor queryExecutor = getJdbcQueryExecutor()
+    
+    log.info("Trying to query presto...")
+    QueryResult result = queryExecutor.executeQuery(query)
+    log.info("Executed query " + query)
+    return result
   }
 
   private boolean isPrestoAccessible(QueryExecutor queryExecutor)

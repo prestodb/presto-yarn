@@ -13,13 +13,23 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
-    table_manager_type: jdbc 
+    table_manager_type: jdbc
+  hive:
+    host: master
+    jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
+    jdbc_url: jdbc:hive2://${databases.hive.host}:10000
+    jdbc_jar: ${PRESTO_YARN_ROOT}/presto-yarn/presto-yarn-test/libs/test-framework-hive-jdbc-all.jar
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+    table_manager_type: hive
 
 tests:
   hdfs:
     path: /product-test/presto-yarn
 
 ssh:
+  identity: ${IDENTITY_FILE}
   roles:
     yarn:
       host: master
