@@ -16,24 +16,18 @@ package com.teradata.presto.yarn
 
 import com.google.inject.Inject
 import com.teradata.presto.yarn.fulfillment.ImmutableNationTable
+import com.teradata.presto.yarn.slider.Slider
+import com.teradata.presto.yarn.utils.NodeSshUtils
 import com.teradata.tempto.ProductTest
-import com.teradata.tempto.Requirement
-import com.teradata.tempto.RequirementsProvider
 import com.teradata.tempto.Requires
 import com.teradata.tempto.assertions.QueryAssert
-import com.teradata.tempto.configuration.Configuration
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.QueryResult
-import com.teradata.tempto.ssh.SshClient
-import com.teradata.tempto.ssh.SshClientFactory
 import groovy.util.logging.Slf4j
 import org.testng.annotations.Test
 
-import javax.inject.Named
-
 import static PrestoCluster.COORDINATOR_COMPONENT
 import static PrestoCluster.WORKER_COMPONENT
-import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static java.sql.JDBCType.BIGINT
 import static org.assertj.core.api.Assertions.assertThat
@@ -41,42 +35,26 @@ import static org.assertj.core.api.Assertions.assertThat
 @Slf4j
 class PrestoClusterTest
         extends ProductTest
-        implements RequirementsProvider
 {
 
-  public static final String TEMPLATE = 'appConfig.json'
-
-  @Inject
-  @Named('yarn')
-  private SshClient yarnSshClient
+  private static final String TEMPLATE = 'appConfig.json'
 
   @Inject
   private HdfsClient hdfsClient
 
   @Inject
-  public SshClientFactory sshClientFactory;
+  private Slider slider
+
+  @Inject
+  private NodeSshUtils nodeSshUtils
 
   @Test
-  void 'single node - create and stop'()
+  void 'single node with stop'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-singlenode.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
-      prestoCluster.waitForComponentsCount(COORDINATOR_COMPONENT, 1)
-
-      prestoCluster.assertThatPrestoIsUpAndRunning()
-
-      List<String> coordinatorHosts = prestoCluster.getComponentHosts(COORDINATOR_COMPONENT)
-      assertThat(coordinatorHosts).hasSize(1)
-
-      coordinatorHosts.each {
-        assertThat(countOfPrestoProcesses(it)).isEqualTo(1)
-      }
-
-      prestoCluster.stop()
-
-      coordinatorHosts.each {
-        assertThat(countOfPrestoProcesses(it)).isEqualTo(0)
-      }
+      prestoCluster.assertThatPrestoIsUpAndRunning(0)
+      assertThatApplicationIsStoppable(prestoCluster, 0)
     }
   }
 
@@ -84,60 +62,63 @@ class PrestoClusterTest
   @Requires(ImmutableNationTable.class)
   void 'multi node - create and stop'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(yarnSshClient, hdfsClient, 'resources-multinode.json', TEMPLATE)
+
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
-      prestoCluster.waitForComponentsCount(COORDINATOR_COMPONENT, 1)
-      prestoCluster.waitForComponentsCount(WORKER_COMPONENT, 3)
+      prestoCluster.assertThatPrestoIsUpAndRunning(3)
 
-      prestoCluster.assertThatPrestoIsUpAndRunning()
-
-      List<String> coordinatorHosts = prestoCluster.getComponentHosts(COORDINATOR_COMPONENT)
-      assertThat(coordinatorHosts).hasSize(1)
-
-      List<String> workerHosts = prestoCluster.getComponentHosts(WORKER_COMPONENT)
-      assertThat(workerHosts).hasSize(3)
-
-      Collection<String> allHosts = coordinatorHosts + workerHosts
-      allHosts.each {
-        assertThat(countOfPrestoProcesses(it)).isEqualTo(1)
-      }
-      QueryResult tpchResult = prestoCluster.runPrestoQuery('select count(*) from tpch.tiny.nation')
-
-      QueryAssert.assertThat(tpchResult)
-              .hasColumns(BIGINT)
-              .containsExactly(
-              row(25))
-      QueryResult hiveResult = prestoCluster.runPrestoQuery("select count(*) from hive.default.nation")
-      QueryAssert.assertThat(hiveResult)
-              .hasColumns(BIGINT)
-              .containsExactly(
-              row(25))
-
-      prestoCluster.stop()
-
-      allHosts.each {
-        assertThat(countOfPrestoProcesses(it)).isEqualTo(0)
-      }
+      assertThatApplicationIsStoppable(prestoCluster, 3)
     }
   }
 
-  private int countOfPrestoProcesses(String host)
+  @Test
+  void 'multi node with placement'()
   {
-    SshClient sshClient = sshClientFactory.create(host);
-    try {
-      def prestoProcessesCount = Integer.parseInt(sshClient.command("pgrep -f 'java.*PrestoServer.*' | wc -l").trim())
-      prestoProcessesCount -= 1 // because pgrep finds itself
-      log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
-      return prestoProcessesCount
-    }
-    finally {
-      sshClient.close()
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-placement.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(3)
+
+      prestoCluster.getComponentHosts(COORDINATOR_COMPONENT).each { host ->
+        assertThat(host).contains('master')
+      }
+      prestoCluster.getComponentHosts(WORKER_COMPONENT).each { host ->
+        assertThat(host).contains('slave')
+      }
+
+      assertThatCountFromNationWorks(prestoCluster, 'tpch.tiny.nation')
+      assertThatCountFromNationWorks(prestoCluster, 'hive.default.nation')
+
+      assertThatApplicationIsStoppable(prestoCluster, 3)
     }
   }
 
-  @Override
-  Requirement getRequirements(Configuration configuration)
+  private void assertThatCountFromNationWorks(PrestoCluster prestoCluster, String nationTable)
   {
-    return SLIDER_CLUSTER;
+    QueryResult queryResult = prestoCluster.runPrestoQuery("select count(*) from ${nationTable}")
+
+    QueryAssert.assertThat(queryResult)
+            .hasColumns(BIGINT)
+            .containsExactly(
+            row(25))
+  }
+
+  private void assertThatApplicationIsStoppable(PrestoCluster prestoCluster, int workersCount)
+  {
+    List<String> coordinatorHosts = prestoCluster.getComponentHosts(COORDINATOR_COMPONENT)
+    assertThat(coordinatorHosts).hasSize(1)
+
+    List<String> workerHosts = prestoCluster.getComponentHosts(WORKER_COMPONENT)
+    assertThat(workerHosts).hasSize(workersCount)
+
+    Collection<String> allHosts = coordinatorHosts + workerHosts
+    allHosts.each {
+      assertThat(nodeSshUtils.countOfPrestoProcesses(it)).isEqualTo(1)
+    }
+
+    prestoCluster.stop()
+
+    allHosts.each {
+      assertThat(nodeSshUtils.countOfPrestoProcesses(it)).isEqualTo(0)
+    }
   }
 }

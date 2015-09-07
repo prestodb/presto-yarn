@@ -31,7 +31,7 @@ import java.nio.file.Paths
 import java.sql.Connection
 
 import static com.google.common.base.Preconditions.checkState
-import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.PACKAGE_NAME
+import static com.teradata.presto.yarn.utils.Closures.withMethodHelper
 import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
@@ -51,35 +51,17 @@ public class PrestoCluster
   private final Slider slider
   private HdfsClient hdfsClient
 
-  public PrestoCluster(SshClient sshClient, HdfsClient hdfsClient, String resource, String template)
+  public PrestoCluster(Slider slider, HdfsClient hdfsClient, String resource, String template)
   {
     this.hdfsClient = hdfsClient
-    this.slider = new Slider(sshClient)
+    this.slider = slider
     this.resource = Paths.get(PACKAGE_DIR, resource)
     this.template = Paths.get(PACKAGE_DIR, template)
   }
 
   public void withPrestoCluster(Closure closure)
   {
-    create()
-    boolean clousureThrownException = true
-    try {
-      closure()
-      clousureThrownException = false
-    }
-    finally {
-      try {
-        cleanup()
-      }
-      catch (RuntimeException e) {
-        if (clousureThrownException) {
-          log.error('Caught exception during presto cluster cleanup', e)
-        }
-        else {
-          throw e
-        }
-      }
-    }
+    withMethodHelper(this.&create, closure, this.&cleanup)
   }
 
   public void create()
@@ -156,8 +138,11 @@ public class PrestoCluster
     }
   }
 
-  public void assertThatPrestoIsUpAndRunning()
+  public void assertThatPrestoIsUpAndRunning(int workersCount)
   {
+    waitForComponentsCount(COORDINATOR_COMPONENT, 1)
+    waitForComponentsCount(WORKER_COMPONENT, workersCount)
+
     QueryExecutor queryExecutor = waitForPrestoServer()
     assertThat(queryExecutor.executeQuery('SELECT 1')).containsExactly(row(1))
   }

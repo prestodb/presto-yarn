@@ -15,6 +15,7 @@
 package com.teradata.presto.yarn.slider
 
 import com.google.common.base.Joiner
+import com.teradata.tempto.context.State
 import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -27,9 +28,10 @@ import static com.teradata.presto.yarn.utils.FileDigesters.md5sum
 @CompileStatic
 @Slf4j
 class Slider
+        implements State
 {
   private static final String SLIDER_REMOTE_CONF_DIR = 'slider-0.80.0-incubating/conf/'
-  private static final String SLIDER_LOCAL_CONF_DIR = 'target/test-classes/slider/conf/'
+  public static final String LOCAL_CONF_DIR = 'target/test-classes/conf'
 
   private final SshClient sshClient
 
@@ -47,9 +49,9 @@ class Slider
 
     command("unzip ${upload(sliderBinary)}")
 
-    sshClient.upload(Paths.get(SLIDER_LOCAL_CONF_DIR, 'log4j.properties'), SLIDER_REMOTE_CONF_DIR)
-    sshClient.upload(Paths.get(SLIDER_LOCAL_CONF_DIR, 'slider-client.xml'), SLIDER_REMOTE_CONF_DIR)
-    sshClient.upload(Paths.get(SLIDER_LOCAL_CONF_DIR, 'slider-env.sh'), SLIDER_REMOTE_CONF_DIR)
+    sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'slider', 'log4j.properties'), SLIDER_REMOTE_CONF_DIR)
+    sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'slider', 'slider-client.xml'), SLIDER_REMOTE_CONF_DIR)
+    sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'slider', 'slider-env.sh'), SLIDER_REMOTE_CONF_DIR)
   }
 
   private Path upload(Path path)
@@ -144,5 +146,10 @@ class Slider
   public void action(String... args)
   {
     command('slider-0.80.0-incubating/bin/slider ' + Joiner.on(' ').join(args))
+  }
+
+  @Override
+  public Optional<String> getName() {
+    return Optional.empty();
   }
 }

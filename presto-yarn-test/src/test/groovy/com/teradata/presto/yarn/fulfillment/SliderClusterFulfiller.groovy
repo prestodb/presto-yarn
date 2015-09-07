@@ -28,8 +28,6 @@ import javax.inject.Named
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import static com.teradata.presto.yarn.fulfillment.SliderClusterFulfiller.SliderClusterRequirement.SLIDER_CLUSTER
-
 @RequirementFulfiller.AutoSuiteLevelFulfiller
 @CompileStatic
 @Slf4j
@@ -42,11 +40,6 @@ public class SliderClusterFulfiller
   private static final Path SLIDER_BINARY = Paths.get('target/package/slider-assembly-0.80.0-incubating-all.zip')
   private static final Path PRESTO_PACKAGE = Paths.get('target/package/presto-yarn-package-1.0.0-SNAPSHOT.zip')
 
-  public static enum SliderClusterRequirement
-          implements Requirement {
-    SLIDER_CLUSTER;
-  }
-
   private final Slider slider
 
   @Inject
@@ -58,13 +51,11 @@ public class SliderClusterFulfiller
   @Override
   Set<State> fulfill(Set<Requirement> requirements)
   {
-    if (requirements.contains(SLIDER_CLUSTER)) {
-      log.info('fulfilling slider cluster')
-      slider.install(SLIDER_BINARY)
-      slider.installLocalPackage(PRESTO_PACKAGE, PACKAGE_NAME)
-    }
+    log.info('fulfilling slider cluster')
+    slider.install(SLIDER_BINARY)
+    slider.installLocalPackage(PRESTO_PACKAGE, PACKAGE_NAME)
 
-    return ImmutableSet.of()
+    return ImmutableSet.of(slider)
   }
 
   @Override
