@@ -38,12 +38,17 @@ public class NodeSshUtils
   public int countOfPrestoProcesses(String host)
   {
     return withSshClient(host, { sshClient ->
-      def prestoProcessesCountRaw = sshClient.command("pgrep -f 'java.*PrestoServer.*' | wc -l").trim()
+      def prestoProcessesCountRaw = runCommand(sshClient, "pgrep -f 'java.*PrestoServer.*' | wc -l")
       def prestoProcessesCount = Integer.parseInt(prestoProcessesCountRaw)
       prestoProcessesCount -= 1 // because pgrep finds itself
       log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
       return prestoProcessesCount
     })
+  }
+
+  public void killPrestoProcesses(String host)
+  {
+    runOnNode(host, ["pkill -9 -f 'java.*PrestoServer.*'"])
   }
 
   public Map<String, String> labelNodes(Map<String, String> labels)
@@ -85,7 +90,7 @@ public class NodeSshUtils
   private String runCommand(SshClient sshClient, String command)
   {
     log.info('Execution on {}@{}: {}', sshClient.user, sshClient.host, command)
-    return sshClient.command(command)
+    return sshClient.command(command).trim()
   }
 
   public <T> T withSshClient(String host, Closure<T> closure)
