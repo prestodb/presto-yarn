@@ -60,18 +60,6 @@ class PrestoClusterTest
 
   @Test
   @Requires(ImmutableNationTable.class)
-  void 'multi node - create and stop'()
-  {
-
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
-    prestoCluster.withPrestoCluster {
-      prestoCluster.assertThatPrestoIsUpAndRunning(3)
-
-      assertThatApplicationIsStoppable(prestoCluster, 3)
-    }
-  }
-
-  @Test
   void 'multi node with placement'()
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-placement.json', TEMPLATE)

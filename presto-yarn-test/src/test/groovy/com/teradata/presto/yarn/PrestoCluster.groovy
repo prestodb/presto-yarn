@@ -22,7 +22,6 @@ import com.teradata.tempto.query.JdbcQueryExecutor
 import com.teradata.tempto.query.QueryExecutionException
 import com.teradata.tempto.query.QueryExecutor
 import com.teradata.tempto.query.QueryResult
-import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
