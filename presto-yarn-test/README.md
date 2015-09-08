@@ -52,3 +52,14 @@ mvn test -PproductTests -Dmaven.surefire.debug
 ```
 mvn test -PproductTests -Dtest=Presto*#mutli*
 ```
+
+## Troubleshooting 
+
+ * In case you run a lot tests in row it is possible that hdfs usercache is getting so large causing yarn node go into state UNHEALTHY, to fix that run:
+
+```
+for node in master slave{1,2,3}; do
+ ssh $node 'rm -rf  /mnt/hadoop-hdfs/nm-local-dir/*cache*'
+ ssh $node /etc/init.d/hadoop-yarn-nodemanager restart
+done
+```

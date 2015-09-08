@@ -16,6 +16,7 @@ package com.teradata.presto.yarn.slider
 
 import com.google.common.base.Joiner
 import com.teradata.tempto.context.State
+import com.teradata.tempto.process.CommandExecutionException
 import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -47,7 +48,7 @@ class Slider
       return
     }
 
-    command("unzip ${upload(sliderBinary)}")
+    sshClient.command("unzip ${upload(sliderBinary)}")
 
     sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'slider', 'log4j.properties'), SLIDER_REMOTE_CONF_DIR)
     sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'slider', 'slider-client.xml'), SLIDER_REMOTE_CONF_DIR)
@@ -56,7 +57,6 @@ class Slider
 
   private Path upload(Path path)
   {
-    log.info("Uploading ${path}")
     sshClient.upload(path, '.')
     return path.fileName
   }
@@ -67,18 +67,10 @@ class Slider
       action('help')
       return true
     }
-    catch (RuntimeException e) {
+    catch (CommandExecutionException e) {
       log.debug('Checking if slider is installed', e)
       return false
     }
-  }
-
-  private String command(String... args)
-  {
-    String command = Joiner.on(' ').join(args)
-    log.info('Execution on {}@{}: {}', sshClient.user, sshClient.host, command)
-
-    return sshClient.command(command)
   }
 
   public void installLocalPackage(Path clusterPackage, String packageName)
@@ -97,7 +89,7 @@ class Slider
     String localMd5sum = md5sum(clusterPackage)
 
     def packageName = clusterPackage.fileName
-    String remoteMd5sum = command("md5sum ${packageName} || echo 0").split(' ')[0]
+    String remoteMd5sum = sshClient.command("md5sum ${packageName} || echo 0").split(' ')[0]
 
     if (localMd5sum == remoteMd5sum) {
       log.info("Package ${packageName} is already uploaded. Md5sum checksums match.")
@@ -113,13 +105,18 @@ class Slider
     try {
       stop(appName, true)
     }
-    catch (RuntimeException e) {
-      log.warn('Unable to stop cluster (is it not started?)', e)
+    catch (CommandExecutionException e) {
+      if (e.exitStatus == 69) {
+        log.warn('Unable to stop cluster (it is not started)')
+      }
+      else {
+        throw e
+      }
     }
     try {
       action("destroy ${appName}")
     }
-    catch (RuntimeException e) {
+    catch (CommandExecutionException e) {
       log.warn('Unable to destroy cluster (is it not created?)', e)
     }
   }
@@ -130,11 +127,21 @@ class Slider
     action("exists ${appName} --live")
   }
 
-  public SliderStatus status(String appName)
+  public Optional<SliderStatus> status(String appName)
   {
-    String tempFile = 'status.' + command('date +%Y-%m-%dT%H:%M:%S')
-    action("status ${appName} --out ${tempFile}")
-    return new SliderStatus(command("cat ${tempFile}"))
+    try {
+      action("status ${appName} --out status_file")
+    }
+    catch (CommandExecutionException e) {
+      if (e.exitStatus == 70) {
+        log.warn('Unable to retrieve status, application is not yet running')
+        return Optional.empty()
+      }
+      else {
+        throw e
+      }
+    }
+    return Optional.of(new SliderStatus(sshClient.command("cat status_file")))
   }
 
   public void stop(String clusterName, boolean force = false)
@@ -145,11 +152,12 @@ class Slider
 
   public void action(String... args)
   {
-    command('slider-0.80.0-incubating/bin/slider ' + Joiner.on(' ').join(args))
+    sshClient.command('slider-0.80.0-incubating/bin/slider ' + Joiner.on(' ').join(args))
   }
 
   @Override
-  public Optional<String> getName() {
+  public Optional<String> getName()
+  {
     return Optional.empty();
   }
 }

@@ -28,7 +28,7 @@ public class TimeUtils
         return
       }
 
-      Thread.sleep(TimeUnit.SECONDS.toMillis(1))
+      Thread.sleep(TimeUnit.SECONDS.toMillis(2))
     }
 
     throw new TimeoutException('exceeded timeout')

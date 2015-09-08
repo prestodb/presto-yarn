@@ -15,6 +15,7 @@
 package com.teradata.presto.yarn
 
 import com.facebook.presto.jdbc.PrestoDriver
+import com.google.common.collect.ImmutableList
 import com.teradata.presto.yarn.slider.Slider
 import com.teradata.presto.yarn.slider.SliderStatus
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
@@ -48,7 +49,7 @@ public class PrestoCluster
   private final Path resource;
   private final Path template;
   private final Slider slider
-  private HdfsClient hdfsClient
+  private final HdfsClient hdfsClient
 
   public PrestoCluster(Slider slider, HdfsClient hdfsClient, String resource, String template)
   {
@@ -76,67 +77,6 @@ public class PrestoCluster
     slider.cleanup(APP_NAME)
   }
 
-  public QueryExecutor waitForPrestoServer()
-  {
-    JdbcQueryExecutor queryExecutor = getJdbcQueryExecutor()
-
-    retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
-
-    return queryExecutor
-  }
-
-  private JdbcQueryExecutor getJdbcQueryExecutor() {
-    waitForComponentsCount(COORDINATOR_COMPONENT, 1)
-
-    List<String> coordinatorHosts = getComponentHosts(COORDINATOR_COMPONENT)
-    checkState(coordinatorHosts.size() == 1, "Expected only one coordinator to be up and running")
-    String prestoCoordinatorHost = coordinatorHosts[0]
-
-    def url = "jdbc:presto://${prestoCoordinatorHost}:8080"
-    log.info("Presto connection url: ${url}")
-
-    JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(getPrestoConnection(url), url)
-    return queryExecutor
-  }
-
-  public List<String> getComponentHosts(String component)
-  {
-    return status().getLiveComponentsHost(component)
-  }
-
-  private Connection getPrestoConnection(GString url)
-  {
-    PrestoDriver prestoDriver = new PrestoDriver()
-    Properties properties = new Properties()
-    properties.setProperty('user', 'user')
-    properties.setProperty('password', 'password')
-
-    return prestoDriver.connect(url, properties)
-  }
-
-  public QueryResult runPrestoQuery(String query)
-  {
-    JdbcQueryExecutor queryExecutor = getJdbcQueryExecutor()
-    
-    log.info("Trying to query presto...")
-    QueryResult result = queryExecutor.executeQuery(query)
-    log.info("Executed query " + query)
-    return result
-  }
-
-  private boolean isPrestoAccessible(QueryExecutor queryExecutor)
-  {
-    try {
-      log.info("Trying to connect presto...")
-      queryExecutor.executeQuery('SELECT 1')
-      log.info("Connected")
-      return true
-    }
-    catch (QueryExecutionException ex) {
-      return false
-    }
-  }
-
   public void assertThatPrestoIsUpAndRunning(int workersCount)
   {
     waitForComponentsCount(COORDINATOR_COMPONENT, 1)
@@ -146,20 +86,74 @@ public class PrestoCluster
     assertThat(queryExecutor.executeQuery('SELECT 1')).containsExactly(row(1))
   }
 
-  public void waitForComponentsCount(String component, int expectedCount)
+  private void waitForComponentsCount(String component, int expectedCount)
   {
     retryUntil({
-      try {
-        status().getLiveComponentsHost(component).size() == expectedCount
-      }
-      catch (RuntimeException e) {
-        log.warn('Unable to retrieve status, application could be not yet running', e)
-        return false
-      }
+      getComponentHosts(component).size() == expectedCount
     }, MINUTES.toMillis(2))
   }
 
-  public SliderStatus status()
+  public List<String> getComponentHosts(String component)
+  {
+    Optional<SliderStatus> status = status()
+    if (status.isPresent()) {
+      return status.get().getLiveComponentsHost(component)
+    }
+    else {
+      return ImmutableList.of()
+    }
+  }
+
+  public QueryResult runPrestoQuery(String query)
+  {
+    JdbcQueryExecutor queryExecutor = getJdbcQueryExecutor()
+
+    log.info("Trying to query presto...")
+    QueryResult result = queryExecutor.executeQuery(query)
+    log.info("Executed query " + query)
+    return result
+  }
+
+  private QueryExecutor waitForPrestoServer()
+  {
+    JdbcQueryExecutor queryExecutor = jdbcQueryExecutor
+
+    retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
+
+    return queryExecutor
+  }
+
+  private JdbcQueryExecutor getJdbcQueryExecutor() {
+    def url = "jdbc:presto://${coordinatorHost}:8080"
+    log.info("Waiting for Presto at connection url: ${url}...")
+
+    return new JdbcQueryExecutor(getPrestoConnection(url), url)
+  }
+
+  private Connection getPrestoConnection(String url)
+  {
+    PrestoDriver prestoDriver = new PrestoDriver()
+    Properties properties = new Properties()
+    properties.setProperty('user', 'user')
+    properties.setProperty('password', 'password')
+
+    return prestoDriver.connect(url, properties)
+  }
+
+  private boolean isPrestoAccessible(QueryExecutor queryExecutor)
+  {
+    try {
+      log.debug("Trying to connect presto...")
+      queryExecutor.executeQuery('SELECT 1')
+      log.debug("Connected")
+      return true
+    }
+    catch (QueryExecutionException ex) {
+      return false
+    }
+  }
+
+  public Optional<SliderStatus> status()
   {
     slider.status(APP_NAME)
   }
@@ -167,5 +161,22 @@ public class PrestoCluster
   public void stop()
   {
     slider.stop(APP_NAME)
+  }
+
+  public Collection<String> getAllNodes()
+  {
+    return workerHosts + coordinatorHost
+  }
+
+  public List<String> getWorkerHosts()
+  {
+    getComponentHosts(WORKER_COMPONENT)
+  }
+
+  public String getCoordinatorHost()
+  {
+    List<String> coordinatorHosts = getComponentHosts(COORDINATOR_COMPONENT)
+    checkState(coordinatorHosts.size() == 1, "Expected only one coordinator to be up and running (got: %s)", coordinatorHosts)
+    return coordinatorHosts[0]
   }
 }

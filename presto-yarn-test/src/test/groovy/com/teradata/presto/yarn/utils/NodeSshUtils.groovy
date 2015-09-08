@@ -38,9 +38,8 @@ public class NodeSshUtils
   public int countOfPrestoProcesses(String host)
   {
     return withSshClient(host, { sshClient ->
-      def prestoProcessesCountRaw = runCommand(sshClient, "pgrep -f 'java.*PrestoServer.*' | wc -l")
-      def prestoProcessesCount = Integer.parseInt(prestoProcessesCountRaw)
-      prestoProcessesCount -= 1 // because pgrep finds itself
+      def prestoProcessesCountRaw = sshClient.command("ps aux | grep PrestoServer | grep -v grep").trim()
+      def prestoProcessesCount = prestoProcessesCountRaw.split('\n').size()
       log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
       return prestoProcessesCount
     })
@@ -51,7 +50,7 @@ public class NodeSshUtils
     runOnNode(host, ["pkill -9 -f 'java.*PrestoServer.*'"])
   }
 
-  public Map<String, String> labelNodes(Map<String, String> labels)
+  public void labelNodes(Map<String, String> labels)
   {
     List<String> nodeIds = commandOnYarn('yarn node -list')
             .split('\n')
@@ -64,33 +63,21 @@ public class NodeSshUtils
       return "${nodeId},${label}"
     }).join(' ')
     commandOnYarn("yarn rmadmin -replaceLabelsOnNode '${replaceLabelsArgument}'")
-
-    // just for debugging, to see (in logs) that label has ben set correctly
     commandOnYarn('yarn rmadmin -refreshQueues')
-    commandOnYarn('yarn cluster -lnl')
-    nodeIds.forEach({
-      commandOnYarn("yarn node -status ${it}")
-    })
   }
 
   public String commandOnYarn(String command)
   {
-    return runCommand(yarnSshClient, command)
+    return yarnSshClient.command(command).trim()
   }
 
   public void runOnNode(String node, List<String> commands)
   {
     withSshClient(node, { SshClient sshClient ->
       commands.each { command ->
-        runCommand(sshClient, command)
+        sshClient.command(command).trim()
       }
     })
-  }
-
-  private String runCommand(SshClient sshClient, String command)
-  {
-    log.info('Execution on {}@{}: {}', sshClient.user, sshClient.host, command)
-    return sshClient.command(command).trim()
   }
 
   public <T> T withSshClient(String host, Closure<T> closure)
