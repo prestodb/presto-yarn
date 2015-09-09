@@ -10,7 +10,6 @@
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
     "site.global.presto_jvm_heapsize": "1024M",
-    "site.global.presto_task_max_memory": "1GB",
     "site.global.presto_query_max_memory": "5GB",
     "site.global.presto_query_max_memory_per_node": "600MB",
 
