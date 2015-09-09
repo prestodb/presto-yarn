@@ -11,7 +11,9 @@
     "COORDINATOR": {
       "yarn.role.priority": "1",
       "yarn.component.instances": "1",
-      "yarn.memory": "256"
+      "yarn.component.placement.policy": "1",
+      "yarn.memory": "1500",
+      "yarn.label.expression": "coordinator"
     }
   }
 }

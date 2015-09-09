@@ -123,6 +123,19 @@ class PrestoClusterTest
     }
   }
 
+  @Test
+  void 'multi node with placement - labeling subset of nodes - single cordinatoor@master'()
+  {
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-single-coordinator@master.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(0)
+
+      // check placement policy
+      assertThat(prestoCluster.coordinatorHost).contains('master')
+      assertThat(prestoCluster.workerHosts).isEmpty()
+    }
+  }
+
   private void assertThatMemorySettingsAreCorrect(PrestoCluster prestoCluster)
   {
     String coordinatorHost = prestoCluster.coordinatorHost
