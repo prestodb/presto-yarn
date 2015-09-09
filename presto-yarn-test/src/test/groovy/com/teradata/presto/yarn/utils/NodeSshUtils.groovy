@@ -38,7 +38,7 @@ public class NodeSshUtils
   public int countOfPrestoProcesses(String host)
   {
     return withSshClient(host, { sshClient ->
-      def prestoProcessesCountRaw = sshClient.command("ps aux | grep PrestoServer | grep -v grep").trim()
+      def prestoProcessesCountRaw = sshClient.command("ps aux | grep PrestoServer | grep -v grep || true").trim()
       def prestoProcessesCount = prestoProcessesCountRaw.split('\n').size()
       log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
       return prestoProcessesCount
