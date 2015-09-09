@@ -28,8 +28,7 @@ ssh:
 
 ## Execution
 
-To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase. To successfully build, you should first get tempto and build it successfully. Clone https://github.com/prestodb/tempto and build it using ```./gradlew install -x signArchives```.
-
+To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase.
 ```
 mvn test -PproductTests
 ```
