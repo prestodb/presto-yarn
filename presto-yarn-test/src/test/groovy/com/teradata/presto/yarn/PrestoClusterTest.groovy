@@ -38,6 +38,7 @@ class PrestoClusterTest
 {
 
   private static final String TEMPLATE = 'appConfig.json'
+  private static final String JVM_HEAPSIZE = "1024.0MB"
 
   @Inject
   private HdfsClient hdfsClient
@@ -56,6 +57,8 @@ class PrestoClusterTest
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
       assertThatAllProcessesAreRunning(prestoCluster)
+      
+      assertThatMemorySettingsAreCorrect(prestoCluster)
 
       assertThatKilledProcessesRespawn(prestoCluster)
 
@@ -87,6 +90,14 @@ class PrestoClusterTest
 
       assertThatApplicationIsStoppable(prestoCluster, 3)
     }
+  }
+
+  private void assertThatMemorySettingsAreCorrect(PrestoCluster prestoCluster)
+  {
+    String coordinatorHost = prestoCluster.coordinatorHost
+    def prestoJvmMemory = nodeSshUtils.getPrestoJvmMemory(coordinatorHost)
+
+    assertThat(prestoJvmMemory).isEqualTo(JVM_HEAPSIZE)
   }
 
   private void assertThatAllProcessesAreRunning(PrestoCluster prestoCluster)

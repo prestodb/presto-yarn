@@ -39,9 +39,9 @@ public class NodeSshUtils
   public int countOfPrestoProcesses(String host)
   {
     return withSshClient(host, { sshClient ->
-      def prestoProcessesCountRaw = sshClient.command("ps aux | grep PrestoServer | grep -v grep || true").trim()
-      def prestoProcessesCount = prestoProcessesCountRaw.split('\n').size()
-      if (StringUtils.isEmpty(prestoProcessesCountRaw)) {
+      def prestoProcessesCountRow = sshClient.command("ps aux | grep PrestoServer | grep -v grep || true").trim()
+      def prestoProcessesCount = prestoProcessesCountRow.split('\n').size()
+      if (StringUtils.isEmpty(prestoProcessesCountRow)) {
         prestoProcessesCount = 0
       }
       log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
@@ -52,6 +52,17 @@ public class NodeSshUtils
   public void killPrestoProcesses(String host)
   {
     runOnNode(host, ["pkill -9 -f 'java.*PrestoServer.*'"])
+  }
+
+  public String getPrestoJvmMemory(String host)
+  {
+    return withSshClient(host, { sshClient ->
+      def prestoServerPid = sshClient.command("pgrep -f PrestoServer").trim()
+      def prestoProcessJvm = sshClient.command("jmap -heap ${prestoServerPid} | grep capacity | " +
+              "awk 'NR == 1' | awk '{print \$4}' | cut -d '(' -f 2 | cut -d ')' -f 1").trim()
+      log.info("Presto jvm memory ${host}: ${prestoProcessJvm}")
+      return prestoProcessJvm
+    })
   }
 
   public void labelNodes(Map<String, String> labels)
