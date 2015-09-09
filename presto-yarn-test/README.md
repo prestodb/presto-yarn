@@ -5,21 +5,11 @@
 
 In order to run product tests you need to have: 
 
- * a provisioned cluster which they will be run (e.g. an hfab vagrant or vsphere cluster) with java 8 preinstalled on the cluster
- 
-```
-hfab vagrant.provision && hfab vagrant hortonworks.install:java_version=8,version=2.2
-# or
-hfab vsphere.provision && hfab vsphere hortonworks.install:java_version=8,version=2.2
-```
+ * a provisioned cluster with java 8 pre-installed. The cluster also needs HDP 2.2 and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster.
 
- * all the nodes of cluster have to be accessible from your local machine, so you can update your /etc/hosts file with entities returned by the command
+ * the appConfig.json and resources*.json used by the tests (available under src/test/resources/) are designed for a 4 node cluster (1 master and 3 slaves). If you have a different cluster configuration please update the .json accordingly and run ```mvn install``` prior to running product tests
 
-```
- hfab vagrant etc_hosts
- # or
- hfab vsphere etc_hosts
-```
+ * all the nodes of cluster have to be accessible from your local machine, so you can update your /etc/hosts file with ip-hostname mappings for all nodes in the cluster
 
  * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
 
@@ -27,11 +17,14 @@ hfab vsphere.provision && hfab vsphere hortonworks.install:java_version=8,versio
 
 ```
 ssh:
-  identity: /home/kogut/teradata/hfab/hfab/util/pkg_data/insecure_key.pem
+  identity: path_to_your_key/insecure_key.pem
   roles:
     yarn:
+      ...
       password: yarn
 ```
+
+ * also replace ${PRESTO_YARN_ROOT} under hive:jdbc_url to point to your ```presto-yarn``` workspace in the ```src/test/resources/tempto-configuration-local.yaml``` file created
 
 ## Execution
 
@@ -50,12 +43,12 @@ mvn test -PproductTests -Dmaven.surefire.debug
 ## Running single test (single method)
 
 ```
-mvn test -PproductTests -Dtest=Presto*#mutli*
+mvn test -PproductTests -Dtest=Presto*#mutli* (Use -DfailIfNoTests=false flag if necessary)
 ```
 
-## Troubleshooting 
+## Troubleshooting
 
- * In case you run a lot tests in row it is possible that hdfs usercache is getting so large causing yarn node go into state UNHEALTHY, to fix that run:
+ * In case you run a lot tests in row it is possible that hdfs usercache is getting so large causing yarn node go into state UNHEALTHY, to fix that run (replace the paths, if needed, as per your hadoop configuration):
 
 ```
 for node in master slave{1,2,3}; do

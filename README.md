@@ -11,7 +11,7 @@
 
 Run ```mvn clean package``` and the presto app package will be packaged at presto-yarn-package/target/presto-yarn-package-1.0.0-SNAPSHOT.zip.
 
-This .zip will have presto-server-0.110.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
+This .zip will have presto-server-<version>.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
 
 ## Preparing other slider specific configuration
 
@@ -22,12 +22,12 @@ This .zip will have presto-server-0.110.tar.gz from Presto under package/files/.
 * To configure the connectors with Presto add the following property in your appConfig.json. It should be of the format {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
 
 ```
-    "site.global.catalog": "{'hive': ['connector.name=hive-cdh4', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=hive-cdh4']}"
+    "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 ```
 
 ### Using YARN label
 
-To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions. 
+To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions.
 
 * First assign the nodes/subset of nodes with appropriate labels. See http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html
 * Then set the components in resource.json with yarn.label.expression to have labels to be used when allocating containers for Presto.
@@ -60,6 +60,8 @@ yarn.memory in resources.json declares the amount of memory to ask for in YARN c
 
 The presto_jvm_heapsize property defined in appConfig.json, is used by the Presto JVM itself. Slider suggests that the value of yarn.memory must be bigger than this heapsize. The value of yarn.memory MUST be bigger than the heap size allocated to any JVM and Slider suggests using atleast 50% more appears to work, though some experimentation will be needed.
 
+In addition, set other memory specific properties ```presto_query_max_memory``` and ```presto_query_max_memory_per_node``` in appConfig.json as you would set the properties ```query.max-memory``` and ```query.max-memory-per-node``` in Presto's config.properties.
+
 ``CPU``
 
 Slider also supports configuring the virtual cores to use for the process which can be defined per component. yarn.vcores declares the number of "virtual cores" to request. Ask for more vcores if your process needs more CPU time.
@@ -70,7 +72,7 @@ See http://slider.incubator.apache.org/docs/configuration/resources.html#core fo
 
 ### Failure policy
 
-Yarn containers hosting Presto may fail due to some misconfiguration in Presto or some other conflicts. The number of times the component may fail within a failure window is defined in resources.json. 
+Yarn containers hosting Presto may fail due to some misconfiguration in Presto or some other conflicts. The number of times the component may fail within a failure window is defined in resources.json.
 
 The related properties are:
 
@@ -79,7 +81,7 @@ The related properties are:
 
 These failure thresholds are all heuristics. When initially configuring an application instance, low thresholds reduce the disruption caused by components which are frequently failing due to configuration problems. In a production application, large failure thresholds and/or shorter windows ensures that the application is resilient to transient failures of the underlying YARN cluster and hardware.
 
-Based on the placement policy there are two more failure related properties you can set. 
+Based on the placement policy there are two more failure related properties you can set.
 
 * The configuration property yarn.node.failure.threshold defines how "unreliable" a node must be before it is skipped for placement requests.  This is only used for the default yarn.component.placement.policy where unreliable nodes are avoided.
 * yarn.placement.escalate.seconds is the timeout after which slider will escalate the request of pending containers to be launched on other nodes. For strict placement policy where the requested components are deployed on all nodes, this property is irrelevant. For other placement policies this property is relevant and the higher the cost of migrating a component instance from one host to another, the longer value of escalation timeout is recommended. Thus slider will wait longer before the component instance is escalated to be started on other nodes. During restart, for cases where redeploying the component instances on the same node as before is beneficial (due to locality of data or similar reasons), a higher escalation timeout is recommended.
@@ -108,7 +110,7 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
       787  08-14-2015 12:43   package/scripts/__init__.py
       896  08-14-2015 12:43   package/scripts/presto_coordinator.py
         0  08-14-2015 12:47   package/files/
-404244891  08-14-2015 12:47   package/files/presto-server-0.110.tar.gz
+404244891  08-14-2015 12:47   package/files/presto-server-<version>.tar.gz
       948  08-14-2015 12:43   package/files/README.txt
 ---------                     -------
 404257959                     17 files
