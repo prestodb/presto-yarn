@@ -32,7 +32,7 @@
     </modules>
 
     <properties>
-        <presto.version>0.110</presto.version>
+        <presto.version>0.117</presto.version>
         <slider.version>0.80.0-incubating</slider.version>
         <junit.version>4.11</junit.version>
         <tempto.version>1.0.37-SNAPSHOT</tempto.version>
