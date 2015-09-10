@@ -25,6 +25,13 @@ This .zip will have presto-server-<version>.tar.gz from Presto under package/fil
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 ```
 
+* HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
+  
+  ```
+    hadoop fs -mkdir -p /user/yarn
+    hadoop fs -chown yarn:yarn /user/yarn
+  ```
+
 ### Using YARN label
 
 To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions.
