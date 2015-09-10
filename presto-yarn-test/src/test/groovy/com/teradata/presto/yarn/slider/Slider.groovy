@@ -95,6 +95,7 @@ class Slider
       log.info("Package ${packageName} is already uploaded. Md5sum checksums match.")
     }
     else {
+      log.debug("md5sum checksums mismatch: ${localMd5sum}, ${remoteMd5sum}")
       upload(clusterPackage)
     }
     return packageName

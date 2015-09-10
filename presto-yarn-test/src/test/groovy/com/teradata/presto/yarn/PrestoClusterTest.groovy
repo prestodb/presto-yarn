@@ -40,6 +40,8 @@ class PrestoClusterTest
   private static final String TEMPLATE = 'appConfig.json'
   private static final String JVM_HEAPSIZE = "1024.0MB"
 
+  private static final long TIMEOUT = MINUTES.toMillis(2)
+
   @Inject
   private HdfsClient hdfsClient
 
@@ -63,6 +65,35 @@ class PrestoClusterTest
       assertThatKilledProcessesRespawn(prestoCluster)
 
       assertThatApplicationIsStoppable(prestoCluster)
+    }
+  }
+
+  @Test
+  void 'limit single node failures'()
+  {
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(0)
+
+      String coordinatorHost = prestoCluster.coordinatorHost
+
+      5.times {
+        assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isEqualTo(1)
+        nodeSshUtils.killPrestoProcesses(coordinatorHost)
+        assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isZero()
+
+        retryUntil({
+          nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == 1
+        }, TIMEOUT)
+
+        assertThat(prestoCluster.status().isPresent()).isTrue()
+      }
+
+      // presto cluster should fail after 5 failures in a row
+      nodeSshUtils.killPrestoProcesses(coordinatorHost)
+      retryUntil({
+        !prestoCluster.status().isPresent()
+      }, TIMEOUT)
     }
   }
 
@@ -122,7 +153,7 @@ class PrestoClusterTest
 
     retryUntil({
       nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == processesCount
-    }, MINUTES.toMillis(2))
+    }, TIMEOUT)
   }
 
   private void assertThatCountFromNationWorks(PrestoCluster prestoCluster, String nationTable)
