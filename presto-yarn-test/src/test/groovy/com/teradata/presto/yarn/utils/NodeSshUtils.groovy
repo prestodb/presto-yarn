@@ -18,6 +18,7 @@ import com.teradata.tempto.context.State
 import com.teradata.tempto.ssh.SshClient
 import com.teradata.tempto.ssh.SshClientFactory
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 
 import static com.google.common.collect.Sets.newHashSet
 
@@ -40,6 +41,9 @@ public class NodeSshUtils
     return withSshClient(host, { sshClient ->
       def prestoProcessesCountRaw = sshClient.command("ps aux | grep PrestoServer | grep -v grep || true").trim()
       def prestoProcessesCount = prestoProcessesCountRaw.split('\n').size()
+      if (StringUtils.isEmpty(prestoProcessesCountRaw)) {
+        prestoProcessesCount = 0
+      }
       log.info("Presto processes count on ${host}: ${prestoProcessesCount}")
       return prestoProcessesCount
     })
