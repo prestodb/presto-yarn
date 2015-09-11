@@ -45,7 +45,9 @@ public class PrerequisitesClusterFulfiller
           slave2: WORKER_COMPONENT.toLowerCase(),
           slave3: WORKER_COMPONENT.toLowerCase()
   ]
-  public static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
+
+  private static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
+  private static final String RESTART_RM_CMD = '/etc/init.d/hadoop-yarn-resourcemanager restart'
 
   private final SshClientFactory sshClientFactory
   private final NodeSshUtils nodeSshUtils;
@@ -60,27 +62,49 @@ public class PrerequisitesClusterFulfiller
   @Override
   Set<State> fulfill(Set<Requirement> requirements)
   {
-    nodeSshUtils.withSshClient('master', { SshClient sshClient ->
-      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'yarn-site.xml'), REMOTE_HADOOP_CONF_DIR)
-      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'capacity-scheduler.xml'), REMOTE_HADOOP_CONF_DIR)
-    })
+    setupYarnResourceManager()
 
-    runOnMaster([
-            '/etc/init.d/hadoop-yarn-resourcemanager restart',
-            "su - hdfs -c 'hadoop fs -mkdir -p /user/yarn'",
-            "su - hdfs -c 'hadoop fs -chown yarn:yarn /user/yarn'",
-    ])
+    restartResourceManager()
+
+    nodeSshUtils.createLabels(NODE_LABELS)
+
+    useLabelsForSchedulerQueues()
+
+    restartResourceManager()
+
+    nodeSshUtils.labelNodes(NODE_LABELS)
 
     runOnAll([
-            'yum upgrade openssl -y',
             'mkdir -p /var/presto',
             'chown yarn:yarn /var/presto',
             '/etc/init.d/hadoop-yarn-nodemanager start || true'
     ])
 
-    nodeSshUtils.labelNodes(NODE_LABELS)
-
     return ImmutableSet.of(nodeSshUtils)
+  }
+
+  private void setupYarnResourceManager()
+  {
+    nodeSshUtils.withSshClient('master', { SshClient sshClient ->
+      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'yarn-site.xml'), REMOTE_HADOOP_CONF_DIR)
+    })
+
+    runOnMaster([
+            "su - hdfs -c 'hadoop fs -mkdir -p /user/yarn'",
+            "su - hdfs -c 'hadoop fs -chown yarn:yarn /user/yarn'",
+    ])
+  }
+
+  private void useLabelsForSchedulerQueues()
+  {
+    nodeSshUtils.withSshClient('master', { SshClient sshClient ->
+      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'capacity-scheduler.xml'), REMOTE_HADOOP_CONF_DIR)
+    })
+  }
+
+  private void restartResourceManager()
+  {
+    runOnMaster([RESTART_RM_CMD])
   }
 
   private void runOnMaster(List<String> commands)

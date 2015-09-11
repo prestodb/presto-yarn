@@ -20,7 +20,10 @@ import com.teradata.tempto.ssh.SshClientFactory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 
+import static com.google.common.base.Preconditions.checkState
 import static com.google.common.collect.Sets.newHashSet
+import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
+import static java.util.concurrent.TimeUnit.MINUTES
 
 @Slf4j
 public class NodeSshUtils
@@ -65,20 +68,56 @@ public class NodeSshUtils
     })
   }
 
+  public String createLabels(Map<String, String> labels)
+  {
+    commandOnYarn("yarn rmadmin -addToClusterNodeLabels ${newHashSet(labels.values()).join(',')}")
+  }
+
   public void labelNodes(Map<String, String> labels)
   {
-    List<String> nodeIds = commandOnYarn('yarn node -list')
-            .split('\n')
-            .findAll { it.contains('RUNNING') }
-            .collect { it.split(' ')[0].trim() }
+    waitForNodeManagers()
+    List<String> nodeIds = getNodeIds()
 
-    commandOnYarn("yarn rmadmin -addToClusterNodeLabels ${newHashSet(labels.values()).join(',')}")
+    Map<String, String> nodeToNodeIds =  labels.keySet().collectEntries({ node ->
+      [(node): nodeIds.find {
+        it.contains(node)
+      }]
+    })
+
     String replaceLabelsArgument = labels.collect({ node, label ->
-      String nodeId = nodeIds.find { it.contains(node) }
-      return "${nodeId},${label}"
+      return "${nodeToNodeIds[node]},${label}"
     }).join(' ')
     commandOnYarn("yarn rmadmin -replaceLabelsOnNode '${replaceLabelsArgument}'")
     commandOnYarn('yarn rmadmin -refreshQueues')
+
+    checkThatLabelsAreSetCorrectly(labels, nodeToNodeIds)
+  }
+
+  private void checkThatLabelsAreSetCorrectly(Map<String, String> labels, Map<String, String> nodeToNodeIds)
+  {
+    def clusterNodeLabels = commandOnYarn("yarn cluster -lnl | grep 'Node Labels'")
+    labels.values().each {
+      checkState(clusterNodeLabels.contains(it), "Cluster node labels '{}', does not contain label '{}'", clusterNodeLabels, it)
+    }
+    labels.each { node, label ->
+      def nodeLabels = commandOnYarn("yarn node -status ${nodeToNodeIds[node]} | grep 'Node-Labels'")
+      checkState(nodeLabels.contains(label), "Node labels '{}' on node '{}' does not contain label '{}'", nodeLabels, node, label)
+    }
+  }
+
+  private waitForNodeManagers()
+  {
+    retryUntil({
+      getNodeIds().size() == 4
+    }, MINUTES.toMillis(2))
+  }
+
+  private List<String> getNodeIds()
+  {
+    return commandOnYarn('yarn node -list')
+            .split('\n')
+            .findAll { it.contains('RUNNING') }
+            .collect { it.split(' ')[0].trim() }
   }
 
   public String commandOnYarn(String command)
