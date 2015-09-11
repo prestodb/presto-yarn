@@ -14,7 +14,6 @@
 
 package com.teradata.presto.yarn.slider
 
-import com.google.common.base.Joiner
 import com.teradata.tempto.context.State
 import com.teradata.tempto.process.CommandExecutionException
 import com.teradata.tempto.ssh.SshClient
@@ -24,6 +23,7 @@ import groovy.util.logging.Slf4j
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import static com.google.common.base.Preconditions.checkState
 import static com.teradata.presto.yarn.utils.FileDigesters.md5sum
 
 @CompileStatic
@@ -86,19 +86,26 @@ class Slider
 
   private Path uploadIfNeeded(Path clusterPackage)
   {
+    def packageName = clusterPackage.fileName
+    if (checkMd5OfUploadedFile(clusterPackage)) {
+      log.info("Package ${packageName} is already uploaded. Md5sum checksums match.")
+    }
+    else {
+      upload(clusterPackage)
+      checkState(checkMd5OfUploadedFile(clusterPackage), "Uploaded file is corrupted, please try again")
+    }
+    return packageName
+  }
+
+  private boolean checkMd5OfUploadedFile(Path clusterPackage)
+  {
     String localMd5sum = md5sum(clusterPackage)
 
     def packageName = clusterPackage.fileName
     String remoteMd5sum = sshClient.command("md5sum ${packageName} || echo 0").split(' ')[0]
+    log.debug("md5sum checksums: ${localMd5sum} (local), ${remoteMd5sum} (remote)")
 
-    if (localMd5sum == remoteMd5sum) {
-      log.info("Package ${packageName} is already uploaded. Md5sum checksums match.")
-    }
-    else {
-      log.debug("md5sum checksums mismatch: ${localMd5sum}, ${remoteMd5sum}")
-      upload(clusterPackage)
-    }
-    return packageName
+    return localMd5sum == remoteMd5sum
   }
 
   public void cleanup(String appName)
@@ -151,9 +158,9 @@ class Slider
     action("stop ${clusterName} --wait 10000 ${forceArgument}")
   }
 
-  public void action(String... args)
+  public void action(String arg)
   {
-    sshClient.command('slider-0.80.0-incubating/bin/slider ' + Joiner.on(' ').join(args))
+    sshClient.command("slider-0.80.0-incubating/bin/slider ${arg}")
   }
 
   @Override

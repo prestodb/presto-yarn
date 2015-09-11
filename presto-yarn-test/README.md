@@ -42,7 +42,7 @@ mvn test -PproductTests -Dmaven.surefire.debug
 ## Running single test (single method)
 
 ```
-mvn test -PproductTests -Dtest=Presto*#mutli* (Use -DfailIfNoTests=false flag if necessary)
+mvn test -PproductTests -Dtest=Presto*#multi* (Use -DfailIfNoTests=false flag if necessary)
 ```
 
 ## Troubleshooting
