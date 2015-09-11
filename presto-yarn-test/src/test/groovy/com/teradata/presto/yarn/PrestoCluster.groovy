@@ -22,7 +22,6 @@ import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.JdbcQueryExecutor
 import com.teradata.tempto.query.QueryExecutionException
 import com.teradata.tempto.query.QueryExecutor
-import com.teradata.tempto.query.QueryResult
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
@@ -104,26 +103,16 @@ public class PrestoCluster
     }
   }
 
-  public QueryResult runPrestoQuery(String query)
+  public QueryExecutor waitForPrestoServer()
   {
-    JdbcQueryExecutor queryExecutor = getJdbcQueryExecutor()
-
-    log.info("Trying to query presto...")
-    QueryResult result = queryExecutor.executeQuery(query)
-    log.info("Executed query " + query)
-    return result
-  }
-
-  private QueryExecutor waitForPrestoServer()
-  {
-    JdbcQueryExecutor queryExecutor = jdbcQueryExecutor
+    QueryExecutor queryExecutor = queryExecutor
 
     retryUntil({ isPrestoAccessible(queryExecutor) }, MINUTES.toMillis(5))
 
     return queryExecutor
   }
 
-  private JdbcQueryExecutor getJdbcQueryExecutor() {
+  public QueryExecutor getQueryExecutor() {
     def url = "jdbc:presto://${coordinatorHost}:8080"
     log.info("Waiting for Presto at connection url: ${url}...")
 

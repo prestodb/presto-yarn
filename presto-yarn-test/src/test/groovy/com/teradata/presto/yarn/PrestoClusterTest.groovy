@@ -22,6 +22,7 @@ import com.teradata.tempto.ProductTest
 import com.teradata.tempto.Requires
 import com.teradata.tempto.assertions.QueryAssert
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
+import com.teradata.tempto.query.QueryExecutor
 import com.teradata.tempto.query.QueryResult
 import groovy.util.logging.Slf4j
 import org.testng.annotations.Test
@@ -98,8 +99,7 @@ class PrestoClusterTest
   }
 
   @Test
-  @Requires(ImmutableNationTable.class)
-  void 'multi node with placement'()
+  void 'multi node with placement lifecycle'()
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
@@ -108,10 +108,6 @@ class PrestoClusterTest
       assertThatAllProcessesAreRunning(prestoCluster)
 
       assertThatKilledProcessesRespawn(prestoCluster)
-
-      // check connector settings
-      assertThatCountFromNationWorks(prestoCluster, 'tpch.tiny.nation')
-      assertThatCountFromNationWorks(prestoCluster, 'hive.default.nation')
 
       // check placement policy
       assertThat(prestoCluster.coordinatorHost).contains('master')
@@ -124,7 +120,41 @@ class PrestoClusterTest
   }
 
   @Test
-  void 'multi node with placement - labeling subset of nodes - single cordinatoor@master'()
+  @Requires(ImmutableNationTable.class)
+  void 'multi node with placement - checking connectors'()
+  {
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(3)
+
+      def queryExecutor = prestoCluster.queryExecutor
+      waitForPrestoConnectors(queryExecutor, ['hive', 'tpch'])
+      assertThatCountFromNationWorks(queryExecutor, 'tpch.tiny.nation')
+      assertThatCountFromNationWorks(queryExecutor, 'hive.default.nation')
+    }
+  }
+
+  def waitForPrestoConnectors(QueryExecutor queryExecutor, List<String> connectors)
+  {
+    def connectorRows = connectors.collect({
+      [it]
+    })
+    retryUntil({
+      def result = queryExecutor.executeQuery('select connector_id from system.metadata.catalogs')
+      log.debug("Current presto connectors: ${result.rows()}")
+      return result.rows().containsAll(connectorRows)
+    }, TIMEOUT)
+  }
+
+  private void assertThatCountFromNationWorks(QueryExecutor queryExecutor, String nationTable)
+  {
+    QueryAssert.assertThat(queryExecutor.executeQuery("select count(*) from ${nationTable}"))
+            .hasColumns(BIGINT)
+            .containsExactly(row(25))
+  }
+
+  @Test
+  void 'labeling subset of nodes - single cordinatoor@master'()
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-single-coordinator@master.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
@@ -167,16 +197,6 @@ class PrestoClusterTest
     retryUntil({
       nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == processesCount
     }, TIMEOUT)
-  }
-
-  private void assertThatCountFromNationWorks(PrestoCluster prestoCluster, String nationTable)
-  {
-    QueryResult queryResult = prestoCluster.runPrestoQuery("select count(*) from ${nationTable}")
-
-    QueryAssert.assertThat(queryResult)
-            .hasColumns(BIGINT)
-            .containsExactly(
-            row(25))
   }
 
   private void assertThatApplicationIsStoppable(PrestoCluster prestoCluster)
