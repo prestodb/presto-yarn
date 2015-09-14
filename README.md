@@ -181,6 +181,4 @@ bin/slider create presto1 --template appConfig.json --resources resources.json
 
 # Links
 
-https://bdch-wiki.td.teradata.com:8443/display/SWARM/Slider+Installation+and+Configuration+Tips
-https://bdch-wiki.td.teradata.com:8443/display/SWARM/Sample+Slider+configuration+for+Presto (See header 'Presto over Slider (Prototype Testing in vsphere)' for the tested version of app-package).
-http://slider.incubator.apache.org/docs/getting_started.html
+ * http://slider.incubator.apache.org/docs/getting_started.html
