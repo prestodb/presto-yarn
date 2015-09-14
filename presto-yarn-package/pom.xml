@@ -31,7 +31,8 @@
     <properties>
         <main.dir>${project.basedir}/src/main/slider</main.dir>
         <main.dir.filtered>${project.build.directory}/slider-filtered-files</main.dir.filtered>
-
+        <main.resources.dir>${project.basedir}/src/main/resources</main.resources.dir>
+        
         <app.package.name>${project.artifactId}-${project.version}</app.package.name>
 
         <dep.pkg.dir>${project.build.directory}/dep-package-tmp</dep.pkg.dir>
@@ -57,7 +58,7 @@
                 <targetPath>${main.dir.filtered}</targetPath>
             </resource>
             <resource>
-                <directory>${project.basedir}/src/test/resources</directory>
+                <directory>${main.resources.dir}</directory>
                 <filtering>true</filtering>
                 <targetPath>${project.build.directory}/test-classes</targetPath>
             </resource>

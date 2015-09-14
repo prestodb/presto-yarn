@@ -36,6 +36,18 @@
             <filtered>false</filtered>
             <fileMode>0755</fileMode>
         </file>
+        <file>
+            <source>${main.resources.dir}/appConfig.json</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+            <destName>appConfig-default.json</destName>
+        </file>
+        <file>
+            <source>${main.resources.dir}/resources-multinode.json</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+            <destName>resources-default.json</destName>
+        </file>
     </files>
 
     <fileSets>

@@ -37,7 +37,7 @@
     <build>
         <resources>
             <resource>
-                <directory>${project.basedir}/src/test/resources</directory>
+                <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <targetPath>${project.build.directory}/test-classes</targetPath>
             </resource>

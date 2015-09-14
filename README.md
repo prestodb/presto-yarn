@@ -102,25 +102,27 @@ The app package built should look something like:
 Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-     2020  08-14-2015 12:43   metainfo.xml
-        0  08-14-2015 12:47   package/
-        0  08-14-2015 15:40   package/templates/
-      231  08-14-2015 12:43   package/templates/config.properties-COORDINATOR.j2
-       69  08-14-2015 12:43   package/templates/node.properties.j2
-      173  08-14-2015 12:43   package/templates/jvm.config.j2
-      164  08-14-2015 15:40   package/templates/config.properties-WORKER.j2
-        0  08-14-2015 15:39   package/scripts/
-     2032  08-14-2015 12:43   package/scripts/configure.py
-     1940  08-14-2015 12:43   package/scripts/prestoserver.py
-     1575  08-14-2015 15:39   package/scripts/params.py
-      891  08-14-2015 12:43   package/scripts/presto_worker.py
-      787  08-14-2015 12:43   package/scripts/__init__.py
-      896  08-14-2015 12:43   package/scripts/presto_coordinator.py
-        0  08-14-2015 12:47   package/files/
-404244891  08-14-2015 12:47   package/files/presto-server-<version>.tar.gz
-      948  08-14-2015 12:43   package/files/README.txt
+        0  2015-09-14 12:09   package/
+        0  2015-09-14 12:09   package/files/
+402847868  2015-09-14 12:09   package/files/presto-server-0.117.tar.gz
+      889  2015-09-14 12:09   appConfig-default.json
+      606  2015-09-14 12:09   resources-default.json
+        0  2015-09-14 12:09   package/scripts/
+        0  2015-09-14 12:09   package/templates/
+      897  2015-09-14 12:09   package/scripts/presto_coordinator.py
+      892  2015-09-14 12:09   package/scripts/presto_worker.py
+     2205  2015-09-14 12:09   package/scripts/configure.py
+      787  2015-09-14 12:09   package/scripts/__init__.py
+     2033  2015-09-14 12:09   package/scripts/params.py
+     1944  2015-09-14 12:09   package/scripts/presto_server.py
+      948  2015-09-14 12:09   package/files/README.txt
+      200  2015-09-14 12:09   package/templates/config.properties-WORKER.j2
+       69  2015-09-14 12:09   package/templates/node.properties.j2
+      268  2015-09-14 12:09   package/templates/config.properties-COORDINATOR.j2
+      186  2015-09-14 12:09   package/templates/jvm.config.j2
+     2020  2015-09-14 12:09   metainfo.xml
 ---------                     -------
-404257959                     17 files
+402861812                     19 files
 ```
 
 # Set up Slider on your cluster
@@ -178,6 +180,10 @@ If you want to re-create the app due to some failures/re-configuration
 bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
 ```
+
+### Ambari Integration
+
+TODO:
 
 # Links
 
