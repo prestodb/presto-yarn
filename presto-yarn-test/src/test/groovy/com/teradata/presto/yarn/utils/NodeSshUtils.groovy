@@ -95,7 +95,7 @@ public class NodeSshUtils
 
   private void checkThatLabelsAreSetCorrectly(Map<String, String> labels, Map<String, String> nodeToNodeIds)
   {
-    def clusterNodeLabels = commandOnYarn("yarn cluster -lnl | grep 'Node Labels'")
+    def clusterNodeLabels = commandOnYarn("yarn queue -status default | grep 'Accessible Node Labels'")
     labels.values().each {
       checkState(clusterNodeLabels.contains(it), "Cluster node labels '{}', does not contain label '{}'", clusterNodeLabels, it)
     }

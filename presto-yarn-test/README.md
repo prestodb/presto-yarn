@@ -5,9 +5,7 @@
 
 In order to run product tests you need to have: 
 
- * a provisioned cluster with java 8 pre-installed. The cluster also needs HDP 2.2 and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster.
-
- * the appConfig.json and resources*.json used by the tests (available under src/test/resources/) are designed for a 4 node cluster (1 master and 3 slaves). If you have a different cluster configuration please update the .json accordingly and run ```mvn install``` prior to running product tests
+ * a provisioned cluster with java 8 pre-installed. The cluster also needs HDP 2.2 or CDH 5.4.3 and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster. The product tests assume that you have a 4 nodes cluster, with Yarn nodemanagers and any other pre-requisite service like zookeeper running on all four nodes.
 
  * all the nodes of cluster have to be accessible from your local machine, so you can update your /etc/hosts file with ip-hostname mappings for all nodes in the cluster
 
