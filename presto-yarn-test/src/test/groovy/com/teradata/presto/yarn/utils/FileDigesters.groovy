@@ -32,6 +32,6 @@ class FileDigesters
         messageDigest.update(buffer, 0, read)
       }
     }
-    return new BigInteger(1, messageDigest.digest()).toString(16)
+    return String.format("%032x",new BigInteger(1, messageDigest.digest()));
   }
 }
