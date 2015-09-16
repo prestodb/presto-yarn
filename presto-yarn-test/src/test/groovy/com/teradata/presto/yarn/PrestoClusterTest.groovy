@@ -115,7 +115,7 @@ class PrestoClusterTest
         assertThat(host).contains('slave')
       }
 
-      assertThatApplicationIsStoppable(prestoCluster, 3)
+      assertThatApplicationIsStoppable(prestoCluster)
     }
   }
 
