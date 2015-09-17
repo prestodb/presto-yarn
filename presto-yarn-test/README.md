@@ -5,13 +5,17 @@
 
 In order to run product tests you need to have: 
 
- * a provisioned cluster with java 8 pre-installed. The cluster also needs HDP 2.2 or CDH 5.4.3 and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster. The product tests assume that you have a 4 nodes cluster, with Yarn nodemanagers and any other pre-requisite service like zookeeper running on all four nodes.
+ * a provisioned cluster with java 8 pre-installed. The cluster also needs HDP 2.2 or CDH 5.4.3 and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster.
 
- * all the nodes of cluster have to be accessible from your local machine, so you can update your /etc/hosts file with ip-hostname mappings for all nodes in the cluster
+ * create a new file ```src/test/resources/tempto-configuration-local.yaml``` copying the sample at ```src/test/resources/tempto-configuration.yaml```. Set the ```master``` (coordinator for Presto) and comma delimited ```slaves``` (workers for Presto) hostnames under ```cluster```.
+
+ * Yarn nodemanagers and any other pre-requisite service like Zookeeper should be running on all configured nodes.
+
+ * the appConfig.json and resources*.json used by the tests (available under src/main/resources/) are designed for a 4 node cluster (1 master and 3 slaves). If you have a different cluster configuration defined under ```cluster``` in your tempto-configuration-local.yaml, update the .json accordingly and run ```mvn install``` prior to running product tests
 
  * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
 
- * set a password for yarn user on master node. Create a ```src/test/resources/tempto-configuration-local.yaml``` yarn@master password and a private key to connect any cluster node as root user, example settings:
+ * set a password for yarn user on master node. In your ```src/test/resources/tempto-configuration-local.yaml``` yarn@master password and a private key to connect any cluster node as root user, example settings:
 
 ```
 ssh:

@@ -39,18 +39,19 @@ public class PrerequisitesClusterFulfiller
         implements RequirementFulfiller
 {
 
-  private static Map<String, String> NODE_LABELS = [
-          master: COORDINATOR_COMPONENT.toLowerCase(),
-          slave1: WORKER_COMPONENT.toLowerCase(),
-          slave2: WORKER_COMPONENT.toLowerCase(),
-          slave3: WORKER_COMPONENT.toLowerCase()
-  ]
+  @Inject
+  @Named("cluster.master")
+  private String master
+
+  @Inject
+  @Named("cluster.slaves")
+  private String slaves
 
   private static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
   private static final String RESTART_RM_CMD = '/etc/init.d/hadoop-yarn-resourcemanager restart'
 
   private final SshClientFactory sshClientFactory
-  private final NodeSshUtils nodeSshUtils;
+  private final NodeSshUtils nodeSshUtils
 
   @Inject
   public PrerequisitesClusterFulfiller(SshClientFactory sshClientFactory, @Named('yarn') SshClient yarnSshClient)
@@ -66,13 +67,15 @@ public class PrerequisitesClusterFulfiller
 
     restartResourceManager()
 
-    nodeSshUtils.createLabels(NODE_LABELS)
+    Map<String, String> node_labels = getNodeLabels()
+    
+    nodeSshUtils.createLabels(node_labels)
 
     useLabelsForSchedulerQueues()
 
     restartResourceManager()
 
-    nodeSshUtils.labelNodes(NODE_LABELS)
+    nodeSshUtils.labelNodes(node_labels)
 
     runOnAll([
             'mkdir -p /var/presto',
@@ -83,9 +86,20 @@ public class PrerequisitesClusterFulfiller
     return ImmutableSet.of(nodeSshUtils)
   }
 
+  private Map<String, String> getNodeLabels() {
+    Map<String, String> node_labels = new HashMap<String, String>()
+    
+    node_labels.put(master, COORDINATOR_COMPONENT.toLowerCase())
+    String[] workerNodes = slaves.split(",")
+    workerNodes.each { String worker ->
+      node_labels.put(worker, WORKER_COMPONENT.toLowerCase())
+    }
+    return node_labels
+  }
+
   private void setupYarnResourceManager()
   {
-    nodeSshUtils.withSshClient('master', { SshClient sshClient ->
+    nodeSshUtils.withSshClient(master, { SshClient sshClient ->
       sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'yarn-site.xml'), REMOTE_HADOOP_CONF_DIR)
     })
 
@@ -97,7 +111,7 @@ public class PrerequisitesClusterFulfiller
 
   private void useLabelsForSchedulerQueues()
   {
-    nodeSshUtils.withSshClient('master', { SshClient sshClient ->
+    nodeSshUtils.withSshClient(master, { SshClient sshClient ->
       sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'capacity-scheduler.xml'), REMOTE_HADOOP_CONF_DIR)
     })
   }
@@ -109,12 +123,15 @@ public class PrerequisitesClusterFulfiller
 
   private void runOnMaster(List<String> commands)
   {
-    nodeSshUtils.runOnNode('master', commands)
+    nodeSshUtils.runOnNode(master, commands)
   }
 
   private void runOnAll(List<String> commands)
   {
-    NODE_LABELS.keySet().each { String node ->
+    runOnMaster(commands)
+
+    String[] slaveNodes = slaves.split(",")
+    slaveNodes.each { String node ->
       nodeSshUtils.runOnNode(node, commands)
     }
   }

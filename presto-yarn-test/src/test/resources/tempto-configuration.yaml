@@ -1,3 +1,7 @@
+cluster:
+  master: master
+  slaves: slave1,slave2,slave3
+
 hdfs:
   username: hdfs
   webhdfs:

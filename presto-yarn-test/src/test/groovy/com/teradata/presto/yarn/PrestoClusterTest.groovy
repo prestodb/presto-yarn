@@ -23,9 +23,10 @@ import com.teradata.tempto.Requires
 import com.teradata.tempto.assertions.QueryAssert
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.QueryExecutor
-import com.teradata.tempto.query.QueryResult
 import groovy.util.logging.Slf4j
 import org.testng.annotations.Test
+
+import javax.inject.Named
 
 import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
@@ -51,6 +52,14 @@ class PrestoClusterTest
 
   @Inject
   private NodeSshUtils nodeSshUtils
+
+  @Inject
+  @Named("cluster.master")
+  private String master
+  
+  @Inject
+  @Named("cluster.slaves")
+  private String workers;
 
   @Test
   void 'single node presto app lifecycle'()
@@ -103,20 +112,23 @@ class PrestoClusterTest
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
-      prestoCluster.assertThatPrestoIsUpAndRunning(3)
+      prestoCluster.assertThatPrestoIsUpAndRunning(workersCount())
 
       assertThatAllProcessesAreRunning(prestoCluster)
 
       assertThatKilledProcessesRespawn(prestoCluster)
 
       // check placement policy
-      assertThat(prestoCluster.coordinatorHost).contains('master')
-      prestoCluster.workerHosts.each { host ->
-        assertThat(host).contains('slave')
-      }
+      assertThat(prestoCluster.coordinatorHost).contains(master)
+      List<String> actualSlaves = Arrays.asList(workers.split(','))
+      assertThat(prestoCluster.workerHosts, is(actualSlaves))
 
       assertThatApplicationIsStoppable(prestoCluster)
     }
+  }
+
+  private int workersCount() {
+    return workers.split(",").length
   }
 
   @Test
@@ -125,7 +137,7 @@ class PrestoClusterTest
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
-      prestoCluster.assertThatPrestoIsUpAndRunning(3)
+      prestoCluster.assertThatPrestoIsUpAndRunning(workersCount())
 
       def queryExecutor = prestoCluster.queryExecutor
       waitForPrestoConnectors(queryExecutor, ['hive', 'tpch'])
@@ -161,7 +173,7 @@ class PrestoClusterTest
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
       // check placement policy
-      assertThat(prestoCluster.coordinatorHost).contains('master')
+      assertThat(prestoCluster.coordinatorHost).contains(master)
       assertThat(prestoCluster.workerHosts).isEmpty()
     }
   }

@@ -75,7 +75,7 @@ public class NodeSshUtils
 
   public void labelNodes(Map<String, String> labels)
   {
-    waitForNodeManagers()
+    waitForNodeManagers(labels.size())
     List<String> nodeIds = getNodeIds()
 
     Map<String, String> nodeToNodeIds =  labels.keySet().collectEntries({ node ->
@@ -105,10 +105,11 @@ public class NodeSshUtils
     }
   }
 
-  private waitForNodeManagers()
+  private waitForNodeManagers(int numberOfNodes)
   {
+    log.info("Waiting for NodeManagers...")
     retryUntil({
-      getNodeIds().size() == 4
+      getNodeIds().size() == numberOfNodes
     }, MINUTES.toMillis(2))
   }
 
