@@ -25,6 +25,8 @@ This .zip will have presto-server-<version>.tar.gz from Presto under package/fil
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 ```
 
+* If you want to use a port other than 8080 for Presto server, configure it via site.global.presto_server_port in appConfig.json
+
 * HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
   
   ```
