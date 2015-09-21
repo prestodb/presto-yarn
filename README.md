@@ -183,10 +183,42 @@ bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
 ```
 
-### Ambari Integration
+# Ambari Integration
 
-TODO:
+
+You can also deploy Presto in Yarn via Ambari. Ambari provides Slider integration and also supports deploying any Slider application package using Slider 'views'. Slider View for Ambari delivers an integrated experience for deploying and managing Slider apps from Ambari Web.
+
+The steps for deploying Presto on Yarn via Slider views in Ambari are:
+
+* Install Ambari server. You may refer: http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html.
+
+* Copy the app package ```presto-yarn-package-1.0.0-SNAPSHOT.zip``` to ```/var/lib/resources/ambari-server/apps/``` directory on your Ambari server node. Restart ambari-server.
+
+* Prepare hdfs for Slider
+  
+  ```
+su hdfs
+hdfs dfs -mkdir /user/yarn
+hdfs dfs -chown yarn:hdfs /user/yarn
+```
+
+* Now Log In to Apache Ambari, ```http://ambariserver_ip:8080``` #username-admin password-admin
+   
+* Name your cluster, provide the configuration of the cluster and follow the steps on the WebUI.
+
+* Customize/configure the services and install them. A minimum of HDFS, YARN, Zookeeper is required for Slider to work. You must also also select Slider to be installed.
+
+* Once you have all the services up and running on the cluster, you can configure Slider in Ambari to manage your application by going to "Views" at http://ambariserver_ip:8080/views/ADMIN_VIEW/2.0.0/INSTANCE/#/. There, create a Slider View by populating all the necessary fields with a preferred instance name (eg: Slider).
+
+* Select the "Views" control icon in the upper right, select the instance you created in the previous step, eg: "Slider".
+
+* Provide details of the Presto service. By default the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-1.0.0-SNAPSHOT.zip```.
+
+* Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
+
+* You can manage the application lifecycle (e.g. start, stop, flex, destroy) from the View UI.
 
 # Links
 
  * http://slider.incubator.apache.org/docs/getting_started.html
+ * http://docs.hortonworks.com/HDPDocuments/Ambari-2.0.1.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html
