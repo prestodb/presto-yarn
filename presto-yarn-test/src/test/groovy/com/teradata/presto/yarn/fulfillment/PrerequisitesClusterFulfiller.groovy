@@ -45,7 +45,7 @@ public class PrerequisitesClusterFulfiller
 
   @Inject
   @Named("cluster.slaves")
-  private String slaves
+  private List<String> slaves
 
   private static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
   private static final String RESTART_RM_CMD = '/etc/init.d/hadoop-yarn-resourcemanager restart'
@@ -90,8 +90,7 @@ public class PrerequisitesClusterFulfiller
     Map<String, String> node_labels = new HashMap<String, String>()
     
     node_labels.put(master, COORDINATOR_COMPONENT.toLowerCase())
-    String[] workerNodes = slaves.split(",")
-    workerNodes.each { String worker ->
+    slaves.each { String worker ->
       node_labels.put(worker, WORKER_COMPONENT.toLowerCase())
     }
     return node_labels
@@ -130,8 +129,7 @@ public class PrerequisitesClusterFulfiller
   {
     runOnMaster(commands)
 
-    String[] slaveNodes = slaves.split(",")
-    slaveNodes.each { String node ->
+    slaves.each { String node ->
       nodeSshUtils.runOnNode(node, commands)
     }
   }

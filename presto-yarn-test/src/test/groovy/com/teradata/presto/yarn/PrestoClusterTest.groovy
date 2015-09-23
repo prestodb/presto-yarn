@@ -59,7 +59,7 @@ class PrestoClusterTest
   
   @Inject
   @Named("cluster.slaves")
-  private String workers;
+  private List<String> workers;
 
   @Test
   void 'single node presto app lifecycle'()
@@ -120,15 +120,14 @@ class PrestoClusterTest
 
       // check placement policy
       assertThat(prestoCluster.coordinatorHost).contains(master)
-      List<String> actualSlaves = Arrays.asList(workers.split(','))
-      assertThat(prestoCluster.workerHosts, is(actualSlaves))
+      assertThat(prestoCluster.workerHosts, is(workers))
 
       assertThatApplicationIsStoppable(prestoCluster)
     }
   }
 
   private int workersCount() {
-    return workers.split(",").length
+    return workers.size()
   }
 
   @Test
