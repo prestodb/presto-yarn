@@ -8,12 +8,12 @@ cluster:
 hdfs:
   username: hdfs
   webhdfs:
-    host: master
+    host: ${cluster.master}
     port: 50070
 
 databases:
   presto:
-    host: master
+    host: ${cluster.master}
     port: ${PRESTO_MASTER_PORT:-8080}
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
     jdbc_url: jdbc:presto://${databases.presto.host}:${databases.presto.port}/hive/default
@@ -22,7 +22,7 @@ databases:
     jdbc_pooling: false
     table_manager_type: jdbc
   hive:
-    host: master
+    host: ${cluster.master}
     jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
     jdbc_url: jdbc:hive2://${databases.hive.host}:10000
     jdbc_jar: ${PRESTO_YARN_ROOT}/presto-yarn/presto-yarn-test/libs/test-framework-hive-jdbc-all.jar
@@ -39,7 +39,7 @@ ssh:
   identity: ${IDENTITY_FILE}
   roles:
     yarn:
-      host: master
+      host: ${cluster.master}
       port: 22
       user: yarn
       password: ${YARN_PASSWORD}
