@@ -216,9 +216,12 @@ class PrestoClusterTest
     def allNodes = prestoCluster.allNodes
 
     prestoCluster.stop()
-
+    
+    log.debug("Checking if presto process is stopped")
     allNodes.each {
-      assertThat(nodeSshUtils.countOfPrestoProcesses(it)).isEqualTo(0)
+      retryUntil({
+        nodeSshUtils.countOfPrestoProcesses(it) == 0
+      }, TIMEOUT)
     }
   }
 }

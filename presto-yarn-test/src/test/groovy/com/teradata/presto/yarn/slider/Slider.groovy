@@ -155,7 +155,7 @@ class Slider
   public void stop(String clusterName, boolean force = false)
   {
     def forceArgument = force ? '--force' : ''
-    action("stop ${clusterName} --wait 15000 ${forceArgument}")
+    action("stop ${clusterName} ${forceArgument}")
   }
 
   public void action(String arg)
