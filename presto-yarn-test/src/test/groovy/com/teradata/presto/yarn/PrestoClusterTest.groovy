@@ -42,8 +42,7 @@ class PrestoClusterTest
   private static final String TEMPLATE = 'appConfig.json'
   private static final String JVM_HEAPSIZE = "1024.0MB"
 
-  private static final long TIMEOUT = MINUTES.toMillis(2)
-  private static final long RESPAWN_TIMEOUT = MINUTES.toMillis(4)
+  private static final long TIMEOUT = MINUTES.toMillis(4)
 
   @Inject
   private HdfsClient hdfsClient
@@ -208,7 +207,7 @@ class PrestoClusterTest
 
     retryUntil({
       nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == processesCount
-    }, RESPAWN_TIMEOUT)
+    }, TIMEOUT)
   }
 
   private void assertThatApplicationIsStoppable(PrestoCluster prestoCluster)
