@@ -218,9 +218,9 @@ class PrestoClusterTest
     prestoCluster.stop()
     
     log.debug("Checking if presto process is stopped")
-    allNodes.each {
+    allNodes.each { host ->
       retryUntil({
-        nodeSshUtils.countOfPrestoProcesses(it) == 0
+        nodeSshUtils.countOfPrestoProcesses(host) == 0
       }, TIMEOUT)
     }
   }
