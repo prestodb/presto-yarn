@@ -36,7 +36,7 @@ This .zip will have presto-server-<version>.tar.gz from Presto under package/fil
 
 ### Using YARN label
 
-To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions.
+This is an optional feature and is not required to run Presto in YARN. To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions.
 
 * First assign the nodes/subset of nodes with appropriate labels. See http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html
 * Then set the components in resource.json with yarn.label.expression to have labels to be used when allocating containers for Presto.
