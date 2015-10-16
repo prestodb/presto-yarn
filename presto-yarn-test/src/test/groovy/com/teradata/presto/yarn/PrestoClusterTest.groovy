@@ -140,9 +140,19 @@ class PrestoClusterTest
 
       def queryExecutor = prestoCluster.queryExecutor
       waitForPrestoConnectors(queryExecutor, ['hive', 'tpch'])
+      waitForNodesToBeActive(queryExecutor, prestoCluster)
       assertThatCountFromNationWorks(queryExecutor, 'tpch.tiny.nation')
       assertThatCountFromNationWorks(queryExecutor, 'hive.default.nation')
     }
+  }
+
+  def waitForNodesToBeActive(QueryExecutor queryExecutor, PrestoCluster prestoCluster) {
+    retryUntil({
+      def result = queryExecutor.executeQuery('select count(*) from system.runtime.nodes where active = true')
+      log.debug("Number of active nodes: ${result.rows()}")
+      return result.rows() == [[prestoCluster.allNodes.size()]]
+    }, TIMEOUT)
+
   }
 
   def waitForPrestoConnectors(QueryExecutor queryExecutor, List<String> connectors)
