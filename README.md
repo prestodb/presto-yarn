@@ -1,6 +1,6 @@
 # Pre-requisities
 
-* A cluster with HDP 2.2 or CDH5 installed
+* A cluster with HDP 2.2+ or CDH5.4+ installed
 * JDK 1.8 
 * Zookeeper 
 * openssl >= 1.0.1e-16
