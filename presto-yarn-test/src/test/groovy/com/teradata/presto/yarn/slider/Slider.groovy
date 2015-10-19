@@ -158,6 +158,11 @@ class Slider
     action("stop ${clusterName} ${forceArgument}")
   }
 
+  public void flex(String clusterName, String component_name, int component_count)
+  {
+    action("flex ${clusterName} --component ${component_name} ${component_count}")
+  }
+
   public void action(String arg)
   {
     sshClient.command("slider-0.80.0-incubating/bin/slider ${arg}")

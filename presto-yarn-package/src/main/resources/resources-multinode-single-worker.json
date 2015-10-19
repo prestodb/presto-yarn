@@ -1,0 +1,26 @@
+{
+  "schema": "http://example.org/specification/v2.0.0",
+  "metadata": {
+  },
+  "global": {
+    "yarn.vcores": "1"
+  },
+  "components": {
+    "slider-appmaster": {
+    },
+    "COORDINATOR": {
+      "yarn.role.priority": "1",
+      "yarn.component.instances": "1",
+      "yarn.component.placement.policy": "1",
+      "yarn.memory": "1500",
+      "yarn.label.expression": "coordinator"
+    },
+    "WORKER": {
+      "yarn.role.priority": "2",
+      "yarn.component.instances": "1",
+      "yarn.component.placement.policy": "1",
+      "yarn.memory": "1500",
+      "yarn.label.expression": "worker"
+    }
+  }
+}

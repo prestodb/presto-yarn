@@ -204,6 +204,20 @@ bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
 ```
 
+# 'Flex'ible app
+
+Flex the number of Presto workers to the new value. If greater than before, new copies of the  worker will be requested. If less, component instances will be destroyed.
+
+Changes are not immediate and depend on the availability of resources in the YARN cluster. Make sure while flex that there is an extra free node(if adding) with YARN nodemanagers running are available. Also make sure these nodes do not have existing presto component. Otherwise Slider will add Presto workers to the existing node where Presto might already be running and deploying the newly 'flex'ed worker component will fail.
+
+eg: Asumme there are 2 nodes (with YARN nodemanagers running) in the cluster and you initially deployed only one of the nodes with Presto via Slider. If you want to deploy and start Presto WORKER component on the second node (assuming it meets all resource requirements) and thus have the total number of WORKERS to be 2, then run:
+
+```
+bin/slider flex presto1 --component WORKER 2
+```
+
+Please note that if your cluster already had 3 WORKER nodes running, the above command will destroy one of them and retain 2 WORKERs.
+
 # Ambari Integration
 
 

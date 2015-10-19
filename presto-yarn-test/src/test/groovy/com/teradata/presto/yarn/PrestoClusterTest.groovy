@@ -28,6 +28,8 @@ import org.testng.annotations.Test
 
 import javax.inject.Named
 
+import static com.google.common.base.Preconditions.checkState
+import static com.teradata.presto.yarn.PrestoCluster.WORKER_COMPONENT
 import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static java.sql.JDBCType.BIGINT
@@ -185,6 +187,35 @@ class PrestoClusterTest
       assertThat(prestoCluster.coordinatorHost).contains(master)
       assertThat(prestoCluster.workerHosts).isEmpty()
     }
+  }
+
+  @Test
+  void 'flex set of workers - multinode-flex-worker'()
+  {
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(1)
+      assertThatAllProcessesAreRunning(prestoCluster)
+      def queryExecutor = prestoCluster.queryExecutor
+      waitForNodesToBeActive(queryExecutor, prestoCluster)
+
+      checkState(workers.size() >= 2, "Number of slaves set in the test yaml configuration should be atleast 3")
+      flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster, queryExecutor)
+      
+      flexWorkersAndAssertThatComponentsAreRunning(1, prestoCluster, queryExecutor)
+
+      assertThatApplicationIsStoppable(prestoCluster)
+    }
+  }
+
+  private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster,
+                                                     QueryExecutor queryExecutor) 
+  {
+    prestoCluster.flex(WORKER_COMPONENT, workersCount)
+    waitForNodesToBeActive(queryExecutor, prestoCluster)
+
+    prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
+    assertThatAllProcessesAreRunning(prestoCluster)
   }
 
   private void assertThatMemorySettingsAreCorrect(PrestoCluster prestoCluster)

@@ -152,6 +152,11 @@ public class PrestoCluster
     slider.stop(APP_NAME)
   }
 
+  public void flex(String component_name, int component_count)
+  {
+    slider.flex(APP_NAME, component_name, component_count)
+  }
+
   public Collection<String> getAllNodes()
   {
     return workerHosts + coordinatorHost
