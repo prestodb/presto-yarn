@@ -13,6 +13,36 @@ Run ```mvn clean package``` and the presto app package will be packaged at prest
 
 This .zip will have presto-server-<version>.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
 
+The app package built should look something like:
+
+```
+ unzip -l "$@" ../presto-yarn-package-1.0.0-SNAPSHOT.zip
+Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+        0  2015-09-14 12:09   package/
+        0  2015-09-14 12:09   package/files/
+402847868  2015-09-14 12:09   package/files/presto-server-<version>.tar.gz
+      889  2015-09-14 12:09   appConfig-default.json
+      606  2015-09-14 12:09   resources-default.json
+        0  2015-09-14 12:09   package/scripts/
+        0  2015-09-14 12:09   package/templates/
+      897  2015-09-14 12:09   package/scripts/presto_coordinator.py
+      892  2015-09-14 12:09   package/scripts/presto_worker.py
+     2205  2015-09-14 12:09   package/scripts/configure.py
+      787  2015-09-14 12:09   package/scripts/__init__.py
+     2033  2015-09-14 12:09   package/scripts/params.py
+     1944  2015-09-14 12:09   package/scripts/presto_server.py
+      948  2015-09-14 12:09   package/files/README.txt
+      200  2015-09-14 12:09   package/templates/config.properties-WORKER.j2
+       69  2015-09-14 12:09   package/templates/node.properties.j2
+      268  2015-09-14 12:09   package/templates/config.properties-COORDINATOR.j2
+      186  2015-09-14 12:09   package/templates/jvm.config.j2
+     2020  2015-09-14 12:09   metainfo.xml
+---------                     -------
+402861812                     19 files
+```
+
 ## Preparing other slider specific configuration
 
 * Copy the presto-yarn-package/src/main/resources/appConfig.json and presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
@@ -34,34 +64,9 @@ This .zip will have presto-server-<version>.tar.gz from Presto under package/fil
     hadoop fs -chown yarn:yarn /user/yarn
   ```
 
-### Using YARN label
-
-This is an optional feature and is not required to run Presto in YARN. To guarantee that a certain set of nodes are reserved for deploying Presto we can make use of YARN label expressions.
-
-* First assign the nodes/subset of nodes with appropriate labels. See http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html
-* Then set the components in resource.json with yarn.label.expression to have labels to be used when allocating containers for Presto.
-* Create the application using bin/slider create .. --queue <queuename>. queuename will be queue defined in step one for the appropriate label.
-
-If a label expression is specified for the slider-appmaster component then it also becomes the default label expression for all component. Sample resources.json may look like:
-
-```
-    "COORDINATOR": {
-      "yarn.role.priority": "1",
-      "yarn.component.instances": "1",
-      "yarn.component.placement.policy": "1",
-      "yarn.label.expression":"coordinator"
-    },
-    "WORKER": {
-      "yarn.role.priority": "2",
-      "yarn.component.instances": "2",
-      "yarn.component.placement.policy": "1",
-      "yarn.label.expression":"worker"
-    }
-```
-
-where coordinator and worker are the node labels created and configured with a scheduler queue in YARN
-
 ### Configuring memory and CPU
+
+Memory and CPU related configuration properties must be modified as per your cluster configuration and requirements.
 
 ``Memory``
 
@@ -99,7 +104,7 @@ Slider can also define YARN queues to submit the application creation request to
 
 ### Failure policy
 
-Yarn containers hosting Presto may fail due to some misconfiguration in Presto or some other conflicts. The number of times the component may fail within a failure window is defined in resources.json.
+Follow this section if you want to change the default Slider failure policy. Yarn containers hosting Presto may fail due to some misconfiguration in Presto or some other conflicts. The number of times the component may fail within a failure window is defined in resources.json.
 
 The related properties are:
 
@@ -115,35 +120,33 @@ Based on the placement policy there are two more failure related properties you 
 
 Take a look here: http://slider.incubator.apache.org/docs/configuration/resources.html#failurepolicy for more details on failure policy.
 
-The app package built should look something like:
+
+### Using YARN label
+
+This is an optional feature and is not required to run Presto in YARN. To guarantee that a certain set of nodes are reserved for deploying Presto or to configure a particular node for a component type we can make use of YARN label expressions.
+
+* First assign the nodes/subset of nodes with appropriate labels. See http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html
+* Then set the components in resource.json with yarn.label.expression to have labels to be used when allocating containers for Presto.
+* Create the application using bin/slider create .. --queue <queuename>. queuename will be queue defined in step one for the appropriate label.
+
+If a label expression is specified for the slider-appmaster component then it also becomes the default label expression for all component. Sample resources.json may look like:
 
 ```
- unzip -l "$@" ../presto-yarn-package-1.0.0-SNAPSHOT.zip
-Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
-  Length      Date    Time    Name
----------  ---------- -----   ----
-        0  2015-09-14 12:09   package/
-        0  2015-09-14 12:09   package/files/
-402847868  2015-09-14 12:09   package/files/presto-server-0.117.tar.gz
-      889  2015-09-14 12:09   appConfig-default.json
-      606  2015-09-14 12:09   resources-default.json
-        0  2015-09-14 12:09   package/scripts/
-        0  2015-09-14 12:09   package/templates/
-      897  2015-09-14 12:09   package/scripts/presto_coordinator.py
-      892  2015-09-14 12:09   package/scripts/presto_worker.py
-     2205  2015-09-14 12:09   package/scripts/configure.py
-      787  2015-09-14 12:09   package/scripts/__init__.py
-     2033  2015-09-14 12:09   package/scripts/params.py
-     1944  2015-09-14 12:09   package/scripts/presto_server.py
-      948  2015-09-14 12:09   package/files/README.txt
-      200  2015-09-14 12:09   package/templates/config.properties-WORKER.j2
-       69  2015-09-14 12:09   package/templates/node.properties.j2
-      268  2015-09-14 12:09   package/templates/config.properties-COORDINATOR.j2
-      186  2015-09-14 12:09   package/templates/jvm.config.j2
-     2020  2015-09-14 12:09   metainfo.xml
----------                     -------
-402861812                     19 files
+    "COORDINATOR": {
+      "yarn.role.priority": "1",
+      "yarn.component.instances": "1",
+      "yarn.component.placement.policy": "1",
+      "yarn.label.expression":"coordinator"
+    },
+    "WORKER": {
+      "yarn.role.priority": "2",
+      "yarn.component.instances": "2",
+      "yarn.component.placement.policy": "1",
+      "yarn.label.expression":"worker"
+    }
 ```
+
+where coordinator and worker are the node labels created and configured with a scheduler queue in YARN
 
 # Set up Slider on your cluster
 

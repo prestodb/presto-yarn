@@ -11,7 +11,7 @@ In order to run product tests you need to have:
 
  * Yarn nodemanagers and any other pre-requisite service like Zookeeper should be running on all configured nodes.
 
- * the appConfig.json and resources*.json used by the tests (available under src/main/resources/) are designed for a 4 node cluster (1 master and 3 slaves). If you have a different cluster configuration defined under ```cluster``` in your tempto-configuration-local.yaml, update the .json accordingly and run ```mvn install``` prior to running product tests
+ * the appConfig.json and resources-multinode.json used by the tests (available under src/main/resources/) are designed for a 4 node cluster (1 master and 3 slaves). If you have a different cluster configuration defined under ```cluster``` in your tempto-configuration-local.yaml, update the .json accordingly and run ```mvn install``` prior to running product tests
 
  * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
 
