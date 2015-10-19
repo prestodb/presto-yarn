@@ -73,11 +73,29 @@ In addition, set other memory specific properties ```presto_query_max_memory``` 
 
 ``CPU``
 
-Slider also supports configuring the virtual cores to use for the process which can be defined per component. yarn.vcores declares the number of "virtual cores" to request. Ask for more vcores if your process needs more CPU time.
-
-TODO: Investigate CGroups in YARN
+Slider also supports configuring the YARN virtual cores to use for the process which can be defined per component. yarn.vcores declares the number of "virtual cores" to request. Ask for more vcores if your process needs more CPU time.
 
 See http://slider.incubator.apache.org/docs/configuration/resources.html#core for more details.
+
+``CGroups in YARN``
+
+If you are using CPU scheduling (using the DominantResourceCalculator), you should also use CGroups to constrain and manage CPU processes. CGroups compliments CPU scheduling by providing CPU resource isolation. With CGroups strict enforcement turned on, each CPU process gets only the resources it asks for. This way, we can guarantee that containers hosting Presto services is assigned with a percentage of CPU. If you have another process that needs to run on a node that also requires CPU resources, you can lower the percentage of CPU allocated to YARN to free up resources for the other process.
+
+See Hadoop documentation on how to configure CGroups in YARN: https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/NodeManagerCgroups.html. Once you have CGroups configured, Presto on YARN containers will be configured in the CGroups hierarchy like any other YARN application containers.
+
+Slider can also define YARN queues to submit the application creation request to, which can set the priority, resource limits and other values of the application. But this configuration is global to Slider and defined in conf/slider-client.xml. You can define the queue name and also the priority within the queue. All containers created in the Slider cluster will share this same queue.
+
+```
+    <property>
+      <name>slider.yarn.queue</name>
+      <value>default</value>
+    </property>
+
+    <property>
+      <name>slider.yarn.queue.priority</name>
+      <value>1</value>
+    </property>
+```
 
 ### Failure policy
 
