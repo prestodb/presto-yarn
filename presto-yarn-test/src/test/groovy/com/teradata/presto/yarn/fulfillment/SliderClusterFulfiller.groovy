@@ -38,7 +38,9 @@ public class SliderClusterFulfiller
   public static final String PACKAGE_NAME = 'PRESTO'
 
   private static final Path SLIDER_BINARY = Paths.get('target/package/slider-assembly-0.80.0-incubating-all.zip')
-  private static final Path PRESTO_PACKAGE = Paths.get('target/package/presto-yarn-package-1.0.0-SNAPSHOT.zip')
+  @Inject
+  @Named("tests.app_package.path")
+  private String presto_package_path
 
   private final Slider slider
 
@@ -53,7 +55,10 @@ public class SliderClusterFulfiller
   {
     log.info('fulfilling slider cluster')
     slider.install(SLIDER_BINARY)
-    slider.installLocalPackage(PRESTO_PACKAGE, PACKAGE_NAME)
+    
+    Path presto_app_package = Paths.get(presto_package_path)
+    log.info("Using Presto package from: " + presto_app_package)
+    slider.installLocalPackage(presto_app_package, PACKAGE_NAME)
 
     return ImmutableSet.of(slider)
   }

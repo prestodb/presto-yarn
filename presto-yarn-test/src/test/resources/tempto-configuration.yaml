@@ -34,6 +34,8 @@ databases:
 tests:
   hdfs:
     path: /product-test/presto-yarn
+  app_package:
+    path: target/package/presto-yarn-package-1.0.0-SNAPSHOT.zip
 
 ssh:
   identity: ${IDENTITY_FILE}
