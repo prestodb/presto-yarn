@@ -218,6 +218,22 @@ bin/slider flex presto1 --component WORKER 2
 
 Please note that if your cluster already had 3 WORKER nodes running, the above command will destroy one of them and retain 2 WORKERs.
 
+# Debugging and Logging
+
+It is recommended that log aggregation of YARN application log files be enabled in YARN, using yarn.log-aggregation-enable property in your yarn-site.xml. Then slider logs created during the launch of Presto-YARN will be available locally on your nodemanager nodes under contanier logs directory eg: /var/log/hadoop-yarn/application_<id>/container_<id>/. For any retries attempted by Slider to launch Presto a new container will be launched and hence you will find a new container_<id> directory.  You can look for any errors under errors_*.txt there, and also there is a slider-agent.log file which will give you Slider application lifetime details.
+
+Subsequently every Slider application owner has the flexibility to set the include and exclude patterns of file names that they intend to aggregate, by adding the following properties in their resources.json. For example, using
+```
+ "global": {
+    "yarn.log.include.patterns": "*",
+    "yarn.log.exclude.patterns": "*.*out"
+  }
+```
+
+See http://slider.incubator.apache.org/docs/configuration/resources.html#logagg for details.
+
+Presto logs will be available under the standard Presto data directory location. By default it is /var/presto/data/var/log directory where /var/presto/data is the default data directory configured in Slider appConfig.json. You can find both server.log and http-request.log files here. Please note that log rotation of these Presto log files will have to be manually enabled (for eg: using http://linuxcommand.org/man_pages/logrotate8.html)
+
 # Ambari Integration
 
 
