@@ -195,10 +195,11 @@ class PrestoClusterTest
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(1)
+      waitForAllNodes(2, prestoCluster)
+
       assertThatAllProcessesAreRunning(prestoCluster)
       def queryExecutor = prestoCluster.queryExecutor
       waitForNodesToBeActive(queryExecutor, prestoCluster)
-      waitForAllNodes(2, prestoCluster)
 
       checkState(workers.size() >= 2, "Number of slaves set in the test yaml configuration should be atleast 3")
       flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster, queryExecutor)
