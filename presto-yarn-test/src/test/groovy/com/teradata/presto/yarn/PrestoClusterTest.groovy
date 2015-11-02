@@ -194,35 +194,43 @@ class PrestoClusterTest
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
+      waitForOnePrestoProcessPerNode(prestoCluster)
+      
       prestoCluster.assertThatPrestoIsUpAndRunning(1)
-      waitForAllNodes(2, prestoCluster)
-
       assertThatAllProcessesAreRunning(prestoCluster)
-      def queryExecutor = prestoCluster.queryExecutor
-      waitForNodesToBeActive(queryExecutor, prestoCluster)
 
       checkState(workers.size() >= 2, "Number of slaves set in the test yaml configuration should be atleast 3")
-      flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster, queryExecutor)
-      
-      flexWorkersAndAssertThatComponentsAreRunning(1, prestoCluster, queryExecutor)
+      flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster)      
+      flexWorkersAndAssertThatComponentsAreRunning(1, prestoCluster)
 
       assertThatApplicationIsStoppable(prestoCluster)
     }
   }
 
-  def waitForAllNodes(int nodeCount, PrestoCluster prestoCluster) 
+  def waitForOnePrestoProcessPerNode(PrestoCluster prestoCluster)
+  {
+    def allNodes = prestoCluster.allNodes
+    log.info("Number of nodes after 'flex'ing: " + allNodes.size())
+    allNodes.each { host ->
+      retryUntil({
+        nodeSshUtils.countOfPrestoProcesses(host) == 1
+      }, TIMEOUT)
+    }
+  }
+
+  def waitForAllNodes(int nodeCount, PrestoCluster prestoCluster)
   {
     retryUntil({
       prestoCluster.allNodes.size() == nodeCount
     }, TIMEOUT)
   }
 
-  private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster,
-                                                     QueryExecutor queryExecutor) 
+
+  private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster) 
   {
     prestoCluster.flex(WORKER_COMPONENT, workersCount)
-    waitForNodesToBeActive(queryExecutor, prestoCluster)
     waitForAllNodes(workersCount + 1, prestoCluster)
+    waitForOnePrestoProcessPerNode(prestoCluster)
     
     prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
     assertThatAllProcessesAreRunning(prestoCluster)
