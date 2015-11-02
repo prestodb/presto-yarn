@@ -194,6 +194,7 @@ class PrestoClusterTest
   {
     PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
+      waitForAllNodes(2, prestoCluster)
       waitForOnePrestoProcessPerNode(prestoCluster)
       
       prestoCluster.assertThatPrestoIsUpAndRunning(1)
