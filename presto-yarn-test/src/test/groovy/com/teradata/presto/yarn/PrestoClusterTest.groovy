@@ -198,6 +198,7 @@ class PrestoClusterTest
       assertThatAllProcessesAreRunning(prestoCluster)
       def queryExecutor = prestoCluster.queryExecutor
       waitForNodesToBeActive(queryExecutor, prestoCluster)
+      waitForAllNodes(2, prestoCluster)
 
       checkState(workers.size() >= 2, "Number of slaves set in the test yaml configuration should be atleast 3")
       flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster, queryExecutor)
@@ -208,12 +209,20 @@ class PrestoClusterTest
     }
   }
 
+  def waitForAllNodes(int nodeCount, PrestoCluster prestoCluster) 
+  {
+    retryUntil({
+      prestoCluster.allNodes.size() == nodeCount
+    }, TIMEOUT)
+  }
+
   private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster,
                                                      QueryExecutor queryExecutor) 
   {
     prestoCluster.flex(WORKER_COMPONENT, workersCount)
     waitForNodesToBeActive(queryExecutor, prestoCluster)
-
+    waitForAllNodes(workersCount + 1, prestoCluster)
+    
     prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
     assertThatAllProcessesAreRunning(prestoCluster)
   }
