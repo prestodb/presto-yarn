@@ -46,6 +46,8 @@ class PrestoClusterTest
 
   private static final long TIMEOUT = MINUTES.toMillis(4)
 
+  private static final long FLEX_RETRY_TIMEOUT = MINUTES.toMillis(10)
+  
   @Inject
   private HdfsClient hdfsClient
 
@@ -211,7 +213,7 @@ class PrestoClusterTest
       def uniqueNodes = prestoCluster.allNodes.unique()
       log.info("Number of nodes after 'flex'ing: " + uniqueNodes.size())
       uniqueNodes.size() == nodeCount
-    }, TIMEOUT)
+    }, FLEX_RETRY_TIMEOUT)
   }
 
 
