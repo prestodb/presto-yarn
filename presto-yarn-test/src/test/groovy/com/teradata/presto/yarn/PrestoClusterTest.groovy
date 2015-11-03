@@ -205,21 +205,12 @@ class PrestoClusterTest
     }
   }
 
-  def waitForOnePrestoProcessPerNode(PrestoCluster prestoCluster)
-  {
-    def allNodes = prestoCluster.allNodes
-    log.info("Number of nodes after 'flex'ing: " + allNodes.size())
-    allNodes.each { host ->
-      retryUntil({
-        nodeSshUtils.countOfPrestoProcesses(host) == 1
-      }, TIMEOUT)
-    }
-  }
-
   def waitForAllNodes(int nodeCount, PrestoCluster prestoCluster)
   {
     retryUntil({
-      prestoCluster.allNodes.size() == nodeCount
+      def uniqueNodes = prestoCluster.allNodes.unique()
+      log.info("Number of nodes after 'flex'ing: " + uniqueNodes.size())
+      uniqueNodes.size() == nodeCount
     }, TIMEOUT)
   }
 
@@ -228,7 +219,6 @@ class PrestoClusterTest
   {
     prestoCluster.flex(WORKER_COMPONENT, workersCount)
     waitForAllNodes(workersCount + 1, prestoCluster)
-    waitForOnePrestoProcessPerNode(prestoCluster)
     
     prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
     assertThatAllProcessesAreRunning(prestoCluster)
