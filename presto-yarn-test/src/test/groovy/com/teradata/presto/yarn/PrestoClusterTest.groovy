@@ -85,7 +85,7 @@ class PrestoClusterTest
   @Test
   void 'limit single node failures'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode-label.json', TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 

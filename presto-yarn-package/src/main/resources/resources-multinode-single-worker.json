@@ -3,7 +3,8 @@
   "metadata": {
   },
   "global": {
-    "yarn.vcores": "1"
+    "yarn.vcores": "1",
+    "yarn.container.failure.threshold": "0"
   },
   "components": {
     "slider-appmaster": {
