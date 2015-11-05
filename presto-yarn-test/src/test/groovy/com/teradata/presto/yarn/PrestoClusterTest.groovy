@@ -14,6 +14,7 @@
 
 package com.teradata.presto.yarn
 
+import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
 import com.teradata.presto.yarn.fulfillment.ImmutableNationTable
 import com.teradata.presto.yarn.slider.Slider
@@ -210,7 +211,8 @@ class PrestoClusterTest
   def waitForWorkers(int nodeCount, String component, PrestoCluster prestoCluster)
   {
     retryUntil({
-      def uniqueNodes = prestoCluster.getComponentHosts(component).unique()
+      List<String> workers = prestoCluster.getComponentHosts(component)
+      List<String> uniqueNodes = workers.isEmpty() ? ImmutableList.of() : workers.unique()
       log.info("Number of workers after 'flex'ing: " + uniqueNodes.size())
       uniqueNodes.size() == nodeCount
     }, FLEX_RETRY_TIMEOUT)
