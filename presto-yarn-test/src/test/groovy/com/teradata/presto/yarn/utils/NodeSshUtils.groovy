@@ -113,7 +113,7 @@ public class NodeSshUtils
     }, MINUTES.toMillis(2))
   }
 
-  private List<String> getNodeIds()
+  public List<String> getNodeIds()
   {
     return commandOnYarn('yarn node -list')
             .split('\n')

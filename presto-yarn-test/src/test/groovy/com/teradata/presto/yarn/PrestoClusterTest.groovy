@@ -19,6 +19,7 @@ import com.google.inject.Inject
 import com.teradata.presto.yarn.fulfillment.ImmutableNationTable
 import com.teradata.presto.yarn.slider.Slider
 import com.teradata.presto.yarn.utils.NodeSshUtils
+import com.teradata.tempto.BeforeTestWithContext
 import com.teradata.tempto.ProductTest
 import com.teradata.tempto.Requires
 import com.teradata.tempto.assertions.QueryAssert
@@ -65,6 +66,31 @@ class PrestoClusterTest
   @Inject
   @Named("cluster.slaves")
   private List<String> workers;
+
+  @BeforeTestWithContext
+  public void setUp()
+  {
+    def nodesCount = workers.size() + 1
+    if(nodeSshUtils.getNodeIds().size() == nodesCount) {
+      log.info("All nodemanagers are running..Skip restart")
+    } else {
+      restartNodeManagers()
+      retryUntil({
+        nodeSshUtils.getNodeIds().size() == nodesCount
+      }, MINUTES.toMillis(2))
+    }
+  }
+
+  def void restartNodeManagers ()
+  {
+    List<String> command = ['/etc/init.d/hadoop-yarn-nodemanager restart || true']
+    nodeSshUtils.runOnNode(master, command)
+    workers.each { String node ->
+      nodeSshUtils.runOnNode(node, command)
+    }
+    command = ['/etc/init.d/hadoop-yarn-resourcemanager restart || true']
+    nodeSshUtils.runOnNode(master, command)
+  }
 
   @Test
   void 'single node presto app lifecycle'()
