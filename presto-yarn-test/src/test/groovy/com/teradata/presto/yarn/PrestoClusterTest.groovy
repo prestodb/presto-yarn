@@ -200,27 +200,27 @@ class PrestoClusterTest
       assertThatAllProcessesAreRunning(prestoCluster)
 
       checkState(workers.size() >= 2, "Number of slaves set in the test yaml configuration should be atleast 3")
-      flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster)      
+      flexWorkersAndAssertThatComponentsAreRunning(2, prestoCluster)
       flexWorkersAndAssertThatComponentsAreRunning(1, prestoCluster)
 
       assertThatApplicationIsStoppable(prestoCluster)
     }
   }
 
-  def waitForAllNodes(int nodeCount, PrestoCluster prestoCluster)
+  def waitForWorkers(int nodeCount, String component, PrestoCluster prestoCluster)
   {
     retryUntil({
-      def uniqueNodes = prestoCluster.allNodes.unique()
-      log.info("Number of nodes after 'flex'ing: " + uniqueNodes.size())
+      def uniqueNodes = prestoCluster.getComponentHosts(component).unique()
+      log.info("Number of workers after 'flex'ing: " + uniqueNodes.size())
       uniqueNodes.size() == nodeCount
     }, FLEX_RETRY_TIMEOUT)
   }
 
 
-  private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster) 
+  private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster)
   {
     prestoCluster.flex(WORKER_COMPONENT, workersCount)
-    waitForAllNodes(workersCount + 1, prestoCluster)
+    waitForWorkers(workersCount, WORKER_COMPONENT, prestoCluster)
     
     prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
     assertThatAllProcessesAreRunning(prestoCluster)
