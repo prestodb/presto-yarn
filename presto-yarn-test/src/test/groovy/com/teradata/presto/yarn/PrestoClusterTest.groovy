@@ -240,6 +240,9 @@ class PrestoClusterTest
       List<String> workers = prestoCluster.getComponentHosts(component)
       List<String> uniqueNodes = workers.isEmpty() ? ImmutableList.of() : workers.unique()
       log.info("Number of workers after 'flex'ing: " + uniqueNodes.size())
+      if (uniqueNodes.size() == 0) {
+        prestoCluster.flex(WORKER_COMPONENT, nodeCount)
+      }
       uniqueNodes.size() == nodeCount
     }, FLEX_RETRY_TIMEOUT)
   }
