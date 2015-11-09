@@ -103,6 +103,17 @@ public class PrestoCluster
     }
   }
 
+  public Integer getLiveContainers(String component)
+  {
+    Optional<SliderStatus> status = status()
+    if (status.isPresent()) {
+      return status.get().getLiveContainers(component)
+    }
+    else {
+      return 0
+    }
+  }
+
   public QueryExecutor waitForPrestoServer()
   {
     QueryExecutor queryExecutor = queryExecutor

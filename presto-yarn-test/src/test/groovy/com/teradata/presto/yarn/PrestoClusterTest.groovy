@@ -237,13 +237,9 @@ class PrestoClusterTest
   def waitForWorkers(int nodeCount, String component, PrestoCluster prestoCluster)
   {
     retryUntil({
-      List<String> workers = prestoCluster.getComponentHosts(component)
-      List<String> uniqueNodes = workers.isEmpty() ? ImmutableList.of() : workers.unique()
-      log.info("Number of workers after 'flex'ing: " + uniqueNodes.size())
-      if (uniqueNodes.size() == 0) {
-        prestoCluster.flex(WORKER_COMPONENT, nodeCount)
-      }
-      uniqueNodes.size() == nodeCount
+      int liveContainers = prestoCluster.getLiveContainers(component)
+      log.info("Number of live containers after 'flex'ing: " + liveContainers)
+      liveContainers == nodeCount
     }, FLEX_RETRY_TIMEOUT)
   }
 
@@ -254,7 +250,6 @@ class PrestoClusterTest
     waitForWorkers(workersCount, WORKER_COMPONENT, prestoCluster)
     
     prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
-    assertThatAllProcessesAreRunning(prestoCluster)
   }
 
   private void assertThatMemorySettingsAreCorrect(PrestoCluster prestoCluster)

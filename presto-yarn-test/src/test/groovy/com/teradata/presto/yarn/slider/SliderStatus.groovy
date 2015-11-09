@@ -48,4 +48,24 @@ public class SliderStatus
   {
     return (status.status as Map<String, Object>).live as Map<String, Map<String, Object>>
   }
+
+  public int getLiveContainers(String component)
+  {
+    Map<String, Object> liveComponents = getLiveContainer(component)
+    return (int)liveComponents.get("containers.live")
+  }
+
+  public Map<String, Object> getLiveContainer(String component)
+  {
+    if (statistics.containsKey(component)) {
+      return statistics[component] as Map<String, Object>
+    } else {
+      return ImmutableMap.of();
+    }
+  }
+
+  public Map<String, Object> getStatistics()
+  {
+    return (status.statistics as Map<String, Object>)
+  }
 }
