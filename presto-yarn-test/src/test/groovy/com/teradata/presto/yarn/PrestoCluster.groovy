@@ -184,8 +184,11 @@ public class PrestoCluster
 
   public String getCoordinatorHost()
   {
-    List<String> coordinatorHosts = getComponentHosts(COORDINATOR_COMPONENT)
-    checkState(coordinatorHosts.size() == 1, "Expected only one coordinator to be up and running (got: %s)", coordinatorHosts)
+    List<String> coordinatorHosts = []
+    retryUntil({
+      coordinatorHosts = getComponentHosts(COORDINATOR_COMPONENT)
+      coordinatorHosts.size() == 1
+    }, MINUTES.toMillis(2))
     return coordinatorHosts[0]
   }
 }
