@@ -78,11 +78,15 @@ public class PrestoCluster
 
   public void assertThatPrestoIsUpAndRunning(int workersCount)
   {
-    waitForComponentsCount(COORDINATOR_COMPONENT, 1)
-    waitForComponentsCount(WORKER_COMPONENT, workersCount)
+    waitForComponents(workersCount)
 
     QueryExecutor queryExecutor = waitForPrestoServer()
     assertThat(queryExecutor.executeQuery('SELECT 1')).containsExactly(row(1))
+  }
+
+  public void waitForComponents(int workersCount) {
+    waitForComponentsCount(COORDINATOR_COMPONENT, 1)
+    waitForComponentsCount(WORKER_COMPONENT, workersCount)
   }
 
   private void waitForComponentsCount(String component, int expectedCount)

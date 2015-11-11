@@ -249,7 +249,7 @@ class PrestoClusterTest
     prestoCluster.flex(WORKER_COMPONENT, workersCount)
     waitForWorkers(workersCount, WORKER_COMPONENT, prestoCluster)
     
-    prestoCluster.assertThatPrestoIsUpAndRunning(workersCount)
+    prestoCluster.waitForComponents(workersCount)
   }
 
   private void assertThatMemorySettingsAreCorrect(PrestoCluster prestoCluster)
