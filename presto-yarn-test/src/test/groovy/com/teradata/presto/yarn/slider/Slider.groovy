@@ -138,7 +138,7 @@ class Slider
   public Optional<SliderStatus> status(String appName)
   {
     int count = 0;
-    int maxRetries = 3;
+    int maxRetries = 10;
     while(true) {
       try {
         action("status ${appName} --out status_file")
