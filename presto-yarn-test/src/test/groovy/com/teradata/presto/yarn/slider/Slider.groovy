@@ -142,13 +142,13 @@ class Slider
     while(true) {
       try {
         action("status ${appName} --out status_file")
+        return Optional.of(new SliderStatus(sshClient.command("cat status_file")))
       }
       catch (CommandExecutionException e) {
         if (e.exitStatus == 70) {
           log.warn('Unable to retrieve status, application is not yet running')
           return Optional.empty()
         } else if (e.exitStatus == 56) {
-          sshClient.command("touch status_file")
           log.warn('Unable to retrieve status,  node is unreachable temporarily. Retrying..')
           if(++count == maxRetries) {
             throw e            
@@ -157,7 +157,6 @@ class Slider
           throw e
         }
       }
-      return Optional.of(new SliderStatus(sshClient.command("cat status_file")))
     }
   }
 
