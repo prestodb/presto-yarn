@@ -148,6 +148,7 @@ class Slider
           log.warn('Unable to retrieve status, application is not yet running')
           return Optional.empty()
         } else if (e.exitStatus == 56) {
+          sshClient.command("touch status_file")
           log.warn('Unable to retrieve status,  node is unreachable temporarily. Retrying..')
           if(++count == maxRetries) {
             throw e            
