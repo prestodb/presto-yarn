@@ -7,6 +7,7 @@
     "site.global.user_group": "hadoop",
     "site.global.data_dir": "/var/presto/data",
     "site.global.app_name": "${dep.pkg.basename}",
+    "site.global.app_pkg_plugin": "${AGENT_WORK_ROOT}/app/definition/package/plugins/",
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
     "site.global.presto_query_max_memory": "5GB",

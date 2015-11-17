@@ -21,27 +21,28 @@ The app package built should look something like:
 Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
-        0  2015-09-14 12:09   package/
-        0  2015-09-14 12:09   package/files/
-402847868  2015-09-14 12:09   package/files/presto-server-<version>.tar.gz
-      889  2015-09-14 12:09   appConfig-default.json
-      606  2015-09-14 12:09   resources-default.json
-        0  2015-09-14 12:09   package/scripts/
-        0  2015-09-14 12:09   package/templates/
-      897  2015-09-14 12:09   package/scripts/presto_coordinator.py
-      892  2015-09-14 12:09   package/scripts/presto_worker.py
-     2205  2015-09-14 12:09   package/scripts/configure.py
-      787  2015-09-14 12:09   package/scripts/__init__.py
-     2033  2015-09-14 12:09   package/scripts/params.py
-     1944  2015-09-14 12:09   package/scripts/presto_server.py
-      948  2015-09-14 12:09   package/files/README.txt
-      200  2015-09-14 12:09   package/templates/config.properties-WORKER.j2
-       69  2015-09-14 12:09   package/templates/node.properties.j2
-      268  2015-09-14 12:09   package/templates/config.properties-COORDINATOR.j2
-      186  2015-09-14 12:09   package/templates/jvm.config.j2
-     2020  2015-09-14 12:09   metainfo.xml
+        0  2015-11-30 22:57   package/
+        0  2015-11-30 22:57   package/files/
+411459833  2015-11-30 20:26   package/files/presto-server-0.123.tar.gz
+     1210  2015-11-30 22:57   appConfig-default.json
+      606  2015-11-30 22:57   resources-default.json
+        0  2015-11-30 20:26   package/scripts/
+        0  2015-11-30 21:22   package/plugins/
+        0  2015-11-30 20:26   package/templates/
+      897  2015-11-30 22:57   package/scripts/presto_coordinator.py
+      892  2015-11-30 22:57   package/scripts/presto_worker.py
+     2801  2015-11-30 22:57   package/scripts/configure.py
+      787  2015-11-30 22:57   package/scripts/__init__.py
+     2285  2015-11-30 22:57   package/scripts/params.py
+     1944  2015-11-30 22:57   package/scripts/presto_server.py
+       35  2015-11-30 22:57   package/plugins/README.txt
+      948  2015-11-30 22:57   package/files/README.txt
+      236  2015-11-30 22:57   package/templates/config.properties-WORKER.j2
+       69  2015-11-30 22:57   package/templates/node.properties.j2
+      304  2015-11-30 22:57   package/templates/config.properties-COORDINATOR.j2
+     2020  2015-11-30 22:57   metainfo.xml
 ---------                     -------
-402861812                     19 files
+411474867                     20 files
 ```
 
 ## Preparing other slider specific configuration
@@ -60,6 +61,7 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
 ```
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 ```
+* To add plugin jars add the site.global.plugin property in your appConfig.json. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` and thus the app package built presto-yarn-package-1.0.0-SNAPSHOT.zip will have the jars under ```package/plugins``` directory.
 
 * If you want to use a port other than 8080 for Presto server, configure it via site.global.presto_server_port in appConfig.json
 

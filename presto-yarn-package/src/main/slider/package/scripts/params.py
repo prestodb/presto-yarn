@@ -32,6 +32,9 @@ app_name = config['configurations']['global']['app_name']
 presto_root = format("{app_root}/{app_name}")
 conf_dir = format("{presto_root}/etc")
 catalog_dir = format("{conf_dir}/catalog")
+presto_plugin_dir = format("{presto_root}/plugin")
+source_plugin_dir = config['configurations']['global']['app_pkg_plugin']
+addon_plugins = default('/configurations/global/plugin', '')
 
 presto_user = config['configurations']['global']['app_user']
 user_group = config['configurations']['global']['user_group']

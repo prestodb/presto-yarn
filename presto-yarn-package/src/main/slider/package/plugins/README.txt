@@ -14,7 +14,4 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-
-Place the presto-server-<version>.tar.gz installation file here, after manually configuring etc/ and the config files under presto-server-<version>/etc
-
-
+Place Presto plugin jars in this directory.

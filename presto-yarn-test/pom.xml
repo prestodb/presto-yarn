@@ -32,6 +32,8 @@
     <properties>
         <skip.product.tests>true</skip.product.tests>
         <package.dir>${project.build.directory}/package</package.dir>
+        <app.package>presto-yarn-package-${project.version}</app.package>
+        <presto.server>presto-server-${presto.version}</presto.server>
     </properties>
 
     <build>
@@ -68,10 +70,10 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy package</id>
+                        <id>unpack presto app package</id>
                         <phase>process-test-resources</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
                             <artifactItems>
@@ -82,7 +84,37 @@
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${project.build.directory}/package</outputDirectory>
+                            <outputDirectory>${package.dir}/${app.package}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy presto-ml to plugins</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>presto-ml</includeArtifactIds>
+                            <includeTypes>jar</includeTypes>
+                            <outputDirectory>${package.dir}/${app.package}/package/plugins</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack presto server tarball</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.facebook.presto</groupId>
+                                    <artifactId>presto-server</artifactId>
+                                    <version>${presto.version}</version>
+                                    <type>tar.gz</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${package.dir}</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -144,8 +176,43 @@
                 <version>${groovy-eclipse-compiler.version}</version>
                 <extensions>true</extensions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>build presto server tar excluding ml</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptor>${project.basedir}/src/test/assembly/presto-server.xml</descriptor>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>${presto.server}</finalName>
+                            <outputDirectory>${package.dir}/${app.package}/package/files</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build presto app package for tests</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptor>${project.basedir}/src/test/assembly/presto-app.xml</descriptor>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>${app.package}</finalName>
+                            <outputDirectory>${package.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>com.teradata.tempto</groupId>
@@ -168,6 +235,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.facebook.presto</groupId>
+            <artifactId>presto-ml</artifactId>
+            <version>${presto.version}</version>
         </dependency>
     </dependencies>
 
