@@ -7,14 +7,17 @@
     "site.global.user_group": "hadoop",
     "site.global.data_dir": "/var/presto/data",
     "site.global.app_name": "${dep.pkg.basename}",
+    "site.global.app_pkg_plugin": "${AGENT_WORK_ROOT}/app/definition/package/plugins/",
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
     "site.global.presto_query_max_memory": "5GB",
     "site.global.presto_query_max_memory_per_node": "600MB",
     "site.global.presto_server_port": "8080",
-
-    "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}",
+    
+    "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch'], 'jmx': ['connector.name=jmx']}",
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p', '-DHADOOP_USER_NAME=hdfs', '-Duser.timezone=UTC']",
+
+    "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"

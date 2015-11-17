@@ -67,7 +67,7 @@ class PrestoClusterTest
   
   @Inject
   @Named("cluster.slaves")
-  private List<String> workers;
+  private List<String> workers
 
   @BeforeTestWithContext
   public void setUp()
@@ -123,6 +123,25 @@ class PrestoClusterTest
       assertThatAllProcessesAreRunning(prestoCluster)
 
       assertThatApplicationIsStoppable(prestoCluster)
+    }
+  }
+
+  @Test
+  void 'single node presto app - adding plugin'()
+  {
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', APP_CONFIG_TEST_TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(0)
+
+      assertThatAllProcessesAreRunning(prestoCluster)
+
+      def queryExecutor = prestoCluster.queryExecutor
+      waitForNodesToBeActive(queryExecutor, prestoCluster)
+      QueryAssert.assertThat(queryExecutor.executeQuery("SELECT classify(features(1, 2), model) FROM " +
+              "(SELECT learn_classifier(labels, features) AS model FROM " +
+              "(VALUES ('cat', features(1, 2))) t(labels, features)) t2")
+      )
+              .containsExactly(row('cat'))
     }
   }
 

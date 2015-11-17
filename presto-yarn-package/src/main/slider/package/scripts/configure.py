@@ -18,7 +18,7 @@ limitations under the License.
 
 """
 from resource_management import *
-import ast
+import ast, os, shutil
 
 def set_configuration(component=None):
     """
@@ -45,6 +45,15 @@ def set_configuration(component=None):
         catalog_dict = ast.literal_eval(params.catalog_properties)
         for key, value in catalog_dict.iteritems():
             _store_configuration(value, format("{params.catalog_dir}/{key}.properties"))
+
+    if params.addon_plugins:
+        plugins_dict = ast.literal_eval(params.addon_plugins)
+        for key, value in plugins_dict.iteritems():
+            plugin_dir = os.path.join(params.presto_plugin_dir, key)
+            if not os.path.exists(plugin_dir):
+                os.makedirs(plugin_dir)
+            for jar in value:
+                shutil.copy2(os.path.join(params.source_plugin_dir, jar), plugin_dir)
 
 
 def _store_configuration(parameters, path):
