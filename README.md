@@ -49,7 +49,7 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
 * Copy the presto-yarn-package/src/main/resources/appConfig.json and presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json to appConfig.json and resources.json respectively. Update the sample .json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can  just use them too.
 * If site.global.singlenode property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, site.global.singlenode in appConfig.json should be set to false. The multinode resources-multinode-sample.json sample file is configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history.
 * Make jdk8 the default java or add it to "java_home" in your appConfig.json
-* The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and owned by user yarn, otherwise slider will fail to start Presto with permission errors.
+* The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 * To configure the connectors with Presto add the following property in your appConfig.json. It should be of the format {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
 
 ```
@@ -162,7 +162,7 @@ export JAVA_HOME=/usr/lib/jvm/java
 export HADOOP_CONF_DIR=/etc/hadoop/conf
 ```
  
-* Make sure the user running slider has a home dir in HDFS. I used yarn user, so did:
+* Make sure the user running slider has a home dir in HDFS.
 ```
 su hdfs
 $ hdfs dfs -mkdir /user/<user>
@@ -244,7 +244,7 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 * Install Ambari server. You may refer: http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html.
 
-* Copy the app package ```presto-yarn-package-1.0.0-SNAPSHOT.zip``` to ```/var/lib/resources/ambari-server/apps/``` directory on your Ambari server node. Restart ambari-server.
+* Copy the app package ```presto-yarn-package-1.0.0-SNAPSHOT.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
 
 * Prepare hdfs for Slider
   
@@ -264,7 +264,9 @@ hdfs dfs -chown yarn:hdfs /user/yarn
 
 * Select the "Views" control icon in the upper right, select the instance you created in the previous step, eg: "Slider".
 
-* Provide details of the Presto service. By default the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-1.0.0-SNAPSHOT.zip```.
+* Provide details of the Presto service. By default, the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-1.0.0-SNAPSHOT.zip```.
+
+* Make sure the data directory in the UI (added in appConfig-default.json eg: /var/presto/) is pre-created on all nodes and the directory must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
 * Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
 
