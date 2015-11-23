@@ -1,0 +1,25 @@
+{
+  "schema": "http://example.org/specification/v2.0.0",
+  "metadata": {
+  },
+  "global": {
+    "site.global.app_user": "yarn",
+    "site.global.user_group": "hadoop",
+    "site.global.data_dir": "/var/presto/data",
+    "site.global.app_name": "${dep.pkg.basename}",
+    "site.global.singlenode": "true",
+    "site.global.coordinator_host": "${COORDINATOR_HOST}",
+    "site.global.presto_jvm_heapsize": "1024M",
+    "site.global.presto_query_max_memory": "5GB",
+    "site.global.presto_query_max_memory_per_node": "600MB",
+    "site.global.presto_server_port": "8080",
+
+    "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
+    "java_home": "/usr/lib/jvm/java"
+  },
+  "components": {
+    "slider-appmaster": {
+      "jvm.heapsize": "128M"
+    }
+  }
+}

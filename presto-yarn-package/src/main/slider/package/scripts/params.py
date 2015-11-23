@@ -51,4 +51,4 @@ presto_server_port = config['configurations']['global']['presto_server_port']
 
 node_id = uuid.uuid1()
 
-catalog_properties = config['configurations']['global']['catalog']
+catalog_properties = default('/configurations/global/catalog', '')

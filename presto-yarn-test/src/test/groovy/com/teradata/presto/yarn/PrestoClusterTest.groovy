@@ -14,7 +14,6 @@
 
 package com.teradata.presto.yarn
 
-import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
 import com.teradata.presto.yarn.fulfillment.ImmutableNationTable
 import com.teradata.presto.yarn.slider.Slider
@@ -43,7 +42,9 @@ class PrestoClusterTest
         extends ProductTest
 {
 
-  private static final String TEMPLATE = 'appConfig.json'
+  private static final String APP_CONFIG_TEMPLATE = 'appConfig.json'
+  private static final String APP_CONFIG_WITHOUT_CATALOG_TEMPLATE = 'appConfig-no-catalog.json'
+
   private static final String JVM_HEAPSIZE = "1024.0MB"
 
   private static final long TIMEOUT = MINUTES.toMillis(4)
@@ -95,7 +96,7 @@ class PrestoClusterTest
   @Test
   void 'single node presto app lifecycle'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', APP_CONFIG_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
@@ -110,9 +111,22 @@ class PrestoClusterTest
   }
 
   @Test
+  void 'single node presto app missing catalog'()
+  {
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', APP_CONFIG_WITHOUT_CATALOG_TEMPLATE)
+    prestoCluster.withPrestoCluster {
+      prestoCluster.assertThatPrestoIsUpAndRunning(0)
+
+      assertThatAllProcessesAreRunning(prestoCluster)
+
+      assertThatApplicationIsStoppable(prestoCluster)
+    }
+  }
+
+  @Test
   void 'limit single node failures'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode-label.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode-label.json', APP_CONFIG_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
@@ -141,7 +155,7 @@ class PrestoClusterTest
   @Test
   void 'multi node with placement lifecycle'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', APP_CONFIG_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(workersCount())
 
@@ -165,7 +179,7 @@ class PrestoClusterTest
   @Requires(ImmutableNationTable.class)
   void 'multi node with placement - checking connectors'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', APP_CONFIG_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(workersCount())
 
@@ -208,7 +222,7 @@ class PrestoClusterTest
   @Test
   void 'labeling subset of nodes - single cordinatoor@master'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-single-coordinator@master.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-single-coordinator@master.json', APP_CONFIG_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
@@ -221,7 +235,7 @@ class PrestoClusterTest
   @Test
   void 'flex set of workers - multinode-flex-worker'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', APP_CONFIG_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(1)
       assertThatAllProcessesAreRunning(prestoCluster)

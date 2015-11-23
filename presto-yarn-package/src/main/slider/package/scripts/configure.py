@@ -37,12 +37,12 @@ def set_configuration(component=None):
     _template_config("{params.conf_dir}/jvm.config", params)
     _template_config("{params.conf_dir}/node.properties", params)
 
-    catalog_properties = params.config['configurations']['global']['catalog']
-    catalog_dict = ast.literal_eval(catalog_properties)
-    for key, value in catalog_dict.iteritems():
-        for configuration in value:
-            with open(format("{params.catalog_dir}/{key}.properties"), 'a') as fw:
-                fw.write("%s\n" % configuration)
+    if params.catalog_properties:
+        catalog_dict = ast.literal_eval(params.catalog_properties)
+        for key, value in catalog_dict.iteritems():
+            for configuration in value:
+                with open(format("{params.catalog_dir}/{key}.properties"), 'a') as fw:
+                    fw.write("%s\n" % configuration)
 
 
 def _directory(path, params):
