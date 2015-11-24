@@ -58,6 +58,11 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
 
 * If you want to use a port other than 8080 for Presto server, configure it via site.global.presto_server_port in appConfig.json
 
+*  ``site.global.presto_jvm_heapsize`` in appConfig.json should be configured for the jvm heapsize value. Any other jvm argument that needs to go to Presto's jvm.config can be configured using the property ``site.global.jvm_args`` in appConfig.json. This property must be a String and can be configured as:
+```
+       "site.global.jvm_args": "-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p",
+```
+
 * HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
   
   ```

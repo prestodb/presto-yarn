@@ -41,12 +41,13 @@ import static org.assertj.core.api.Assertions.assertThat
 class PrestoClusterTest
         extends ProductTest
 {
-
   private static final String APP_CONFIG_TEMPLATE = 'appConfig.json'
-  private static final String APP_CONFIG_WITHOUT_CATALOG_TEMPLATE = 'appConfig-no-catalog.json'
+  private static final String APP_CONFIG_WITHOUT_CATALOG_TEMPLATE = 'appConfig-test-no-catalog.json'
+  private static final String APP_CONFIG_TEST_TEMPLATE = 'appConfig-test.json'
 
   private static final String JVM_HEAPSIZE = "1024.0MB"
-
+  private static final String JVM_ARGS = "-DHADOOP_USER_NAME=hdfs -Duser.timezone=UTC"
+  
   private static final long TIMEOUT = MINUTES.toMillis(4)
 
   private static final long FLEX_RETRY_TIMEOUT = MINUTES.toMillis(10)
@@ -96,13 +97,15 @@ class PrestoClusterTest
   @Test
   void 'single node presto app lifecycle'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', APP_CONFIG_TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode.json', APP_CONFIG_TEST_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
       assertThatAllProcessesAreRunning(prestoCluster)
       
       assertThatMemorySettingsAreCorrect(prestoCluster)
+
+      assertThatJvmArgsAreCorrect(prestoCluster)
 
       assertThatKilledProcessesRespawn(prestoCluster)
 
@@ -272,6 +275,14 @@ class PrestoClusterTest
     def prestoJvmMemory = nodeSshUtils.getPrestoJvmMemory(coordinatorHost)
 
     assertThat(prestoJvmMemory).isEqualTo(JVM_HEAPSIZE)
+  }
+
+  private void assertThatJvmArgsAreCorrect(PrestoCluster prestoCluster)
+  {
+    String coordinatorHost = prestoCluster.coordinatorHost
+    def prestoProcess = nodeSshUtils.getPrestoJvmProcess(coordinatorHost)
+
+    assertThat(prestoProcess).contains(JVM_ARGS)
   }
 
   private void assertThatAllProcessesAreRunning(PrestoCluster prestoCluster)

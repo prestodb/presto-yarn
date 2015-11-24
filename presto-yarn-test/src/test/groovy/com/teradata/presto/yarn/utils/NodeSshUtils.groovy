@@ -68,6 +68,14 @@ public class NodeSshUtils
     })
   }
 
+  public String getPrestoJvmProcess(String host)
+  {
+    return withSshClient(host, { sshClient ->
+      def prestoProcessString = sshClient.command("ps aux | grep PrestoServer | grep -v grep").trim()
+      return prestoProcessString
+    })
+  }
+
   public String createLabels(Map<String, String> labels)
   {
     commandOnYarn("yarn rmadmin -addToClusterNodeLabels ${newHashSet(labels.values()).join(',')}")

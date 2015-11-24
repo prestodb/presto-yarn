@@ -15,7 +15,7 @@
     "site.global.presto_server_port": "8080",
 
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}",
-    "site.global.jvm_args": "-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p",
+    "site.global.jvm_args": "-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p -DHADOOP_USER_NAME=hdfs -Duser.timezone=UTC",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"

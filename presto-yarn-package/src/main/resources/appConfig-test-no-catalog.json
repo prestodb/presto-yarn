@@ -13,6 +13,8 @@
     "site.global.presto_query_max_memory": "5GB",
     "site.global.presto_query_max_memory_per_node": "600MB",
     "site.global.presto_server_port": "8080",
+    
+    "site.global.jvm_args": "-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/lib/jvm/java"

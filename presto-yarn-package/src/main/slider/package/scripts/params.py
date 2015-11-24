@@ -48,6 +48,7 @@ heapsize = config['configurations']['global']['presto_jvm_heapsize']
 presto_query_max_memory = config['configurations']['global']['presto_query_max_memory']
 presto_query_max_memory_per_node = config['configurations']['global']['presto_query_max_memory_per_node']
 presto_server_port = config['configurations']['global']['presto_server_port']
+jvm_args = default('/configurations/global/jvm_args', '')
 
 node_id = uuid.uuid1()
 
