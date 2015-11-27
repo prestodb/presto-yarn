@@ -183,6 +183,15 @@ $ hdfs dfs -chown <user>:<user> -R /user/<user>
   </property>
 ```
  
+* Configure path where slide packages will be installed
+
+``` 
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://master/</value>
+  </property>
+```
+ 
 * Now run slider as <user>
 ```
 su <user>
