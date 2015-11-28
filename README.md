@@ -50,6 +50,11 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
 * If site.global.singlenode property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, site.global.singlenode in appConfig.json should be set to false. The multinode resources-multinode-sample.json sample file is configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history.
 * Make jdk8 the default java or add it to "java_home" in your appConfig.json
 * The data directory (added in appConfig.json eg: /var/presto/) should be pre-created on all nodes and must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
+*  Presto's jvm.config must be configured using ``site.global.jvm_args`` in appConfig.json. Since Presto needs the jvm.config format to be a list of options, one per line, this property must be a String representation of list of strings. Each entry of this list will be a new line in your jvm.config. For example the configuration should look like:
+```
+    "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
+```
+
 * To configure the connectors with Presto add the following property in your appConfig.json. It should be of the format {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
 
 ```
@@ -57,11 +62,6 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
 ```
 
 * If you want to use a port other than 8080 for Presto server, configure it via site.global.presto_server_port in appConfig.json
-
-*  ``site.global.presto_jvm_heapsize`` in appConfig.json should be configured for the jvm heapsize value. Any other jvm argument that needs to go to Presto's jvm.config can be configured using the property ``site.global.jvm_args`` in appConfig.json. This property must be a String and can be configured as:
-```
-       "site.global.jvm_args": "-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UseGCOverheadLimit -XX:+ExplicitGCInvokesConcurrent -XX:+HeapDumpOnOutOfMemoryError -XX:OnOutOfMemoryError=kill -9 %p",
-```
 
 * HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
   
@@ -78,7 +78,7 @@ Memory and CPU related configuration properties must be modified as per your clu
 
 yarn.memory in resources.json declares the amount of memory to ask for in YARN containers. It should be defined for each component, COORDINATOR and WORKER based on the expected memory consumption, measured in  MB. A YARN cluster is usually configured with a minimum container allocation, set in yarn-site.xml by the configuration parameter yarn.scheduler.minimum-allocation-mb. It will also have a maximum size set in yarn.scheduler.maximum-allocation-mb. Asking for more than this will result in the request being rejected.
 
-The presto_jvm_heapsize property defined in appConfig.json, is used by the Presto JVM itself. Slider suggests that the value of yarn.memory must be bigger than this heapsize. The value of yarn.memory MUST be bigger than the heap size allocated to any JVM and Slider suggests using atleast 50% more appears to work, though some experimentation will be needed.
+The heapsize defined as -Xmx of jvm_args in appConfig.json, is used by the Presto JVM itself. Slider suggests that the value of yarn.memory must be bigger than this heapsize. The value of yarn.memory MUST be bigger than the heap size allocated to any JVM and Slider suggests using atleast 50% more appears to work, though some experimentation will be needed.
 
 In addition, set other memory specific properties ```presto_query_max_memory``` and ```presto_query_max_memory_per_node``` in appConfig.json as you would set the properties ```query.max-memory``` and ```query.max-memory-per-node``` in Presto's config.properties.
 
