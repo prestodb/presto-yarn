@@ -34,17 +34,24 @@ def set_configuration(component=None):
     _directory(params.log_dir, params)
 
     _template_config("{params.conf_dir}/config.properties", params, component)
-    _template_config("{params.conf_dir}/jvm.config", params)
     _template_config("{params.conf_dir}/node.properties", params)
+    
+
+    if params.jvm_args:
+        jvm_arg_list = ast.literal_eval(params.jvm_args)
+        _store_configuration(jvm_arg_list, format("{params.conf_dir}/jvm.config"))
 
     if params.catalog_properties:
         catalog_dict = ast.literal_eval(params.catalog_properties)
         for key, value in catalog_dict.iteritems():
-            for configuration in value:
-                with open(format("{params.catalog_dir}/{key}.properties"), 'a') as fw:
-                    fw.write("%s\n" % configuration)
+            _store_configuration(value, format("{params.catalog_dir}/{key}.properties"))
 
 
+def _store_configuration(parameters, path):
+    with open(path, 'a') as fw:
+        for parameter in parameters:
+            fw.write("%s\n" % parameter)
+            
 def _directory(path, params):
     Directory(path,
               owner=params.presto_user,
