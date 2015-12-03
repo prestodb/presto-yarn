@@ -53,7 +53,9 @@ Presto on YARN can be set up either manually using Apache Slider or via Ambari S
 
 ## Presto App Package configuration
 
-Follow the steps here and configure the presto-yarn configuration files to match your cluster requirements. The main configuration options are available at presto-yarn-package/src/main/resources directory in the repository. appConfig.json and resources-[singlenode|mutlinode].json files are the two major configuration files you need to configure before you can get Presto running on YARN. Copy the presto-yarn-package/src/main/resources/appConfig.json and presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json to a local file naming appConfig.json and resources.json respectively. Update these sample json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can just use them as-is.
+There are some sample configuration options files available at presto-yarn-package/src/main/resources directory in the repository. appConfig.json and resources-[singlenode|mutlinode].json files are the two major configuration files you need to configure before you can get Presto running on YARN. Copy the presto-yarn-package/src/main/resources/appConfig.json and presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json to a local file naming appConfig.json and resources.json respectively. Update these sample json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can just use them as-is. Follow the steps here and configure the presto-yarn configuration files to match your cluster requirements.
+
+Please note that changing these files manually is needed only if you are going to install Presto on YARN manually using Slider. If installing via Ambari, you can change these configurations from the Slider view.
 
 ### appConfig.json
 
@@ -71,13 +73,13 @@ Follow the steps here and configure the presto-yarn configuration files to match
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 ```
 
-``Note``: The NN_HOST used in ``hive.metastore.uri`` is a variable for your HDFS Namenode and this expects that your hive metastore is up and running on your Namenode host. You do not have to replace that with your actual Namenode hostname. This variable will be substituted with the appropriate Namenode hostname during runtime.
+``Note``: The NN_HOST used in ``hive.metastore.uri`` is a variable for your HDFS Namenode and this expects that your hive metastore is up and running on your Namenode host. You do not have to replace that with your actual Namenode hostname. This variable will be substituted with your Namenode hostname during runtime. If you have hive metastore running elsewhere make sure you update NN_HOST with the appropriate hostname.
 
-* To add plugin jars add the site.global.plugin property in your appConfig.json. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` and thus the app package built presto-yarn-package-1.0.0-SNAPSHOT.zip will have the jars under ```package/plugins``` directory.
+* To add plugin jars add the site.global.plugin property in your appConfig.json. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built presto-yarn-package-1.0.0-SNAPSHOT.zip will have the jars under ```package/plugins``` directory.
 
 * If you want to use a port other than 8080 for Presto server, configure it via site.global.presto_server_port in appConfig.json
 
-* Variables in appConfig.json like ${COORDINATOR_HOST}, ${AGENT_WORK_ROOT}, do not need any substitution and will be appropriately configured during runtime. 
+* Variables in appConfig.json like ${COORDINATOR_HOST}, ${AGENT_WORK_ROOT} etc. do not need any substitution and will be appropriately configured during runtime.
 
 ### resources.json
 
@@ -94,7 +96,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 Now you are ready to deploy Presto on YARN either manually or via Ambari.
 
-## Manual Installation via Slider scripts
+## Manual Installation via Slider
 
 * Download the slider 0.80.0 installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster
 ```
@@ -181,7 +183,7 @@ bin/slider flex presto1 --component WORKER 2
 Please note that if your cluster already had 3 WORKER nodes running, the above command will destroy one of them and retain 2 WORKERs.
 
 
-## Deployment via Ambari Slider View
+## Installation using Ambari Slider View
 
 You can also deploy Presto in Yarn via Ambari. Ambari provides Slider integration and also supports deploying any Slider application package using Slider 'views'. Slider View for Ambari delivers an integrated experience for deploying and managing Slider apps from Ambari Web.
 
@@ -219,7 +221,7 @@ hdfs dfs -chown yarn:hdfs /user/yarn
 
 ## Advanced Configuration
 
-A little more deeper explanation on various configuration options available.
+A little deeper explanation on various configuration options available.
 
 ### Configuring memory and CPU
 
