@@ -8,13 +8,13 @@
 
 # Create Presto App Package
 
-First step is to build the presto-yarn-package-<version>.zip package to deploy Presto on YARN. 
+First step is to build the presto-yarn-package-*.zip package to deploy Presto on YARN.
 
 ## Building the project
 
-Run ```mvn clean package``` and the presto app package will be packaged at presto-yarn-package/target/presto-yarn-package-1.0.0-SNAPSHOT.zip.
+Run ```mvn clean package``` and the presto app package will be packaged at presto-yarn-package/target/presto-yarn-package-*.zip.
 
-This .zip will have presto-server-<version>.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
+This .zip will have presto-server-*.tar.gz from Presto under package/files/. The Presto installed will use the configuration templates under package/templates.
 
 The app package built should look something like:
 
@@ -75,7 +75,7 @@ Please note that changing these files manually is needed only if you are going t
 
 ``Note``: The NN_HOST used in ``hive.metastore.uri`` is a variable for your HDFS Namenode and this expects that your hive metastore is up and running on your Namenode host. You do not have to replace that with your actual Namenode hostname. This variable will be substituted with your Namenode hostname during runtime. If you have hive metastore running elsewhere make sure you update NN_HOST with the appropriate hostname.
 
-* To add plugin jars add the site.global.plugin property in your appConfig.json. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built presto-yarn-package-1.0.0-SNAPSHOT.zip will have the jars under ```package/plugins``` directory.
+* To add plugin jars add the site.global.plugin property in your appConfig.json. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built presto-yarn-package-*.zip will have the jars under ```package/plugins``` directory.
 
 * If you want to use a port other than 8080 for Presto server, configure it via site.global.presto_server_port in appConfig.json
 
@@ -141,7 +141,7 @@ For details on appConfig.json and resources.json follow ``Advanced Configuration
 ```
 su <user>
 cd slider-0.80.0-incubating
-bin/slider package --install --name PRESTO --package ../presto-yarn-package-1.0.0-SNAPSHOT.zip
+bin/slider package --install --name PRESTO --package ../presto-yarn-package-*.zip
 bin/slider create presto1 --template appConfig.json --resources resources.json (using modified .json files as per your requirement)
 ```
 
@@ -191,7 +191,7 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 * Install Ambari server. You may refer: http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html.
 
-* Copy the app package ```presto-yarn-package-1.0.0-SNAPSHOT.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
+* Copy the app package ```presto-yarn-package-*.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
 
 * Prepare hdfs for Slider
   
@@ -211,7 +211,7 @@ hdfs dfs -chown yarn:hdfs /user/yarn
 
 * Select the "Views" control icon in the upper right, select the instance you created in the previous step, eg: "Slider".
 
-* Provide details of the Presto service. By default, the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-1.0.0-SNAPSHOT.zip```.
+* Provide details of the Presto service. By default, the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-*.zip```.
 
 * Make sure the data directory in the UI (added in appConfig-default.json eg: /var/presto/) is pre-created on all nodes and the directory must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
