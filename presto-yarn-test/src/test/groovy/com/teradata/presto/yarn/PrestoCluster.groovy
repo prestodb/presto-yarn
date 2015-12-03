@@ -93,7 +93,7 @@ public class PrestoCluster
   {
     retryUntil({
       getComponentHosts(component).size() == expectedCount
-    }, MINUTES.toMillis(2))
+    }, MINUTES.toMillis(3))
   }
 
   public List<String> getComponentHosts(String component)

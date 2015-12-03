@@ -5,7 +5,7 @@
 
 In order to run product tests you need to have: 
 
- * a provisioned cluster with java 8 pre-installed. The cluster also needs HDP 2.2+ or CDH 5.4+ and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster.
+ * a provisioned Red Hat based cluster with java 8 pre-installed. The cluster also needs HDP 2.2+ or CDH 5.4+ and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster.
 
  * create a new file ```src/test/resources/tempto-configuration-local.yaml``` copying the sample at ```src/test/resources/tempto-configuration.yaml```. Set the ```master``` (coordinator for Presto) and a 'list' (follow yaml list format) of ```slaves``` (workers for Presto) hostnames under ```cluster```.
 
@@ -24,6 +24,13 @@ ssh:
     yarn:
       ...
       password: yarn
+```
+
+ * set a number of virtual cores per node which is set in yarn on your cluster, by default it is set to ``8``
+ 
+```
+cluster:
+  vcores: 8
 ```
 
 ## Execution

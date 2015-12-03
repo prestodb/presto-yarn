@@ -143,6 +143,13 @@ public class NodeSshUtils
     })
   }
 
+  public <T> List<T> withSshClient(List<String> hosts, Closure<T> closure)
+  {
+    hosts.collect {
+      withSshClient(it, closure)
+    }
+  }
+
   public <T> T withSshClient(String host, Closure<T> closure)
   {
     SshClient sshClient = sshClientFactory.create(host)

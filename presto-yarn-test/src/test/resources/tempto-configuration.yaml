@@ -1,4 +1,5 @@
 cluster:
+  vcores: 8
   master: master
   slaves:
     - slave1

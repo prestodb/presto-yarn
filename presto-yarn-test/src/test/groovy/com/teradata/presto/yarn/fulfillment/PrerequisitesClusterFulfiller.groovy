@@ -48,8 +48,6 @@ public class PrerequisitesClusterFulfiller
   private List<String> slaves
 
   private static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
-  private static final String RESTART_RM_CMD = '/etc/init.d/hadoop-yarn-resourcemanager restart'
-
   private final SshClientFactory sshClientFactory
   private final NodeSshUtils nodeSshUtils
 
@@ -63,32 +61,34 @@ public class PrerequisitesClusterFulfiller
   @Override
   Set<State> fulfill(Set<Requirement> requirements)
   {
+    setupCgroup()
+
     setupYarnResourceManager()
 
     restartResourceManager()
 
     Map<String, String> node_labels = getNodeLabels()
-    
+
     nodeSshUtils.createLabels(node_labels)
 
     useLabelsForSchedulerQueues()
 
     restartResourceManager()
 
-    nodeSshUtils.labelNodes(node_labels)
-
     runOnAll([
             'mkdir -p /var/presto',
             'chown yarn:yarn /var/presto',
-            '/etc/init.d/hadoop-yarn-nodemanager start || true'
+            '/etc/init.d/hadoop-yarn-nodemanager restart'
     ])
+
+    nodeSshUtils.labelNodes(node_labels)
 
     return ImmutableSet.of(nodeSshUtils)
   }
 
   private Map<String, String> getNodeLabels() {
     Map<String, String> node_labels = new HashMap<String, String>()
-    
+
     node_labels.put(master, COORDINATOR_COMPONENT.toLowerCase())
     slaves.each { String worker ->
       node_labels.put(worker, WORKER_COMPONENT.toLowerCase())
@@ -98,8 +98,9 @@ public class PrerequisitesClusterFulfiller
 
   private void setupYarnResourceManager()
   {
-    nodeSshUtils.withSshClient(master, { SshClient sshClient ->
+    nodeSshUtils.withSshClient(allNodes, { SshClient sshClient ->
       sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'yarn-site.xml'), REMOTE_HADOOP_CONF_DIR)
+      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'yarn', 'container-executor.cfg'), REMOTE_HADOOP_CONF_DIR)
     })
 
     runOnMaster([
@@ -117,7 +118,26 @@ public class PrerequisitesClusterFulfiller
 
   private void restartResourceManager()
   {
-    runOnMaster([RESTART_RM_CMD])
+    runOnMaster(['/etc/init.d/hadoop-yarn-resourcemanager restart'])
+  }
+
+  private void setupCgroup()
+  {
+    runOnAll([
+            'ls /cgroup || yum install -y libcgroup',
+            'find / -name container-executor | xargs chown root:yarn',
+            'find / -name container-executor | xargs chmod 6050'
+    ])
+
+    nodeSshUtils.withSshClient(allNodes, { SshClient sshClient ->
+      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'cgroup', 'cgrules.conf'), '/etc/')
+      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'cgroup', 'yarn'), '/etc/cgconfig.d/')
+    })
+
+    runOnAll([
+            '/etc/init.d/cgconfig restart',
+            'chmod -R 777 /cgroup'
+    ]);
   }
 
   private void runOnMaster(List<String> commands)
@@ -127,11 +147,13 @@ public class PrerequisitesClusterFulfiller
 
   private void runOnAll(List<String> commands)
   {
-    runOnMaster(commands)
-
-    slaves.each { String node ->
+    allNodes.each { String node ->
       nodeSshUtils.runOnNode(node, commands)
     }
+  }
+
+  private List<String> getAllNodes() {
+    return [master] + slaves as List<String>
   }
 
   @Override

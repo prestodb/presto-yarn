@@ -24,7 +24,9 @@ import com.teradata.tempto.Requires
 import com.teradata.tempto.assertions.QueryAssert
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.QueryExecutor
+import com.teradata.tempto.ssh.SshClient
 import groovy.util.logging.Slf4j
+import org.assertj.core.data.Offset
 import org.testng.annotations.Test
 
 import javax.inject.Named
@@ -36,6 +38,7 @@ import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static java.sql.JDBCType.BIGINT
 import static java.util.concurrent.TimeUnit.MINUTES
 import static org.assertj.core.api.Assertions.assertThat
+import static org.assertj.core.data.Offset.offset
 
 @Slf4j
 class PrestoClusterTest
@@ -47,11 +50,11 @@ class PrestoClusterTest
 
   private static final String JVM_HEAPSIZE = "1024.0MB"
   private static final String JVM_ARGS = "-DHADOOP_USER_NAME=hdfs -Duser.timezone=UTC"
-  
+
   private static final long TIMEOUT = MINUTES.toMillis(4)
 
   private static final long FLEX_RETRY_TIMEOUT = MINUTES.toMillis(10)
-  
+
   @Inject
   private HdfsClient hdfsClient
 
@@ -64,7 +67,11 @@ class PrestoClusterTest
   @Inject
   @Named("cluster.master")
   private String master
-  
+
+  @Inject
+  @Named("cluster.vcores")
+  private int vcoresPerNode
+
   @Inject
   @Named("cluster.slaves")
   private List<String> workers
@@ -73,9 +80,10 @@ class PrestoClusterTest
   public void setUp()
   {
     def nodesCount = workers.size() + 1
-    if(nodeSshUtils.getNodeIds().size() == nodesCount) {
+    if (nodeSshUtils.getNodeIds().size() == nodesCount) {
       log.info("All nodemanagers are running..Skip restart")
-    } else {
+    }
+    else {
       restartNodeManagers()
       retryUntil({
         nodeSshUtils.getNodeIds().size() == nodesCount
@@ -83,7 +91,7 @@ class PrestoClusterTest
     }
   }
 
-  def void restartNodeManagers ()
+  def void restartNodeManagers()
   {
     List<String> command = ['/etc/init.d/hadoop-yarn-nodemanager restart || true']
     nodeSshUtils.runOnNode(master, command)
@@ -102,7 +110,7 @@ class PrestoClusterTest
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
       assertThatAllProcessesAreRunning(prestoCluster)
-      
+
       assertThatMemorySettingsAreCorrect(prestoCluster)
 
       assertThatJvmArgsAreCorrect(prestoCluster)
@@ -185,6 +193,8 @@ class PrestoClusterTest
 
       assertThatKilledProcessesRespawn(prestoCluster)
 
+      assertThatPrestoYarnContainersUsesCgroup(prestoCluster);
+
       // check placement policy
       assertThat(prestoCluster.coordinatorHost).contains(master)
       assertThat(prestoCluster.workerHosts, is(workers))
@@ -193,7 +203,8 @@ class PrestoClusterTest
     }
   }
 
-  private int workersCount() {
+  private int workersCount()
+  {
     return workers.size()
   }
 
@@ -213,13 +224,13 @@ class PrestoClusterTest
     }
   }
 
-  def waitForNodesToBeActive(QueryExecutor queryExecutor, PrestoCluster prestoCluster) {
+  def waitForNodesToBeActive(QueryExecutor queryExecutor, PrestoCluster prestoCluster)
+  {
     retryUntil({
       def result = queryExecutor.executeQuery('select count(*) from system.runtime.nodes where active = true')
       log.debug("Number of active nodes: ${result.rows()}")
       return result.rows() == [[prestoCluster.allNodes.size()]]
     }, TIMEOUT)
-
   }
 
   def waitForPrestoConnectors(QueryExecutor queryExecutor, List<String> connectors)
@@ -279,12 +290,11 @@ class PrestoClusterTest
     }, FLEX_RETRY_TIMEOUT)
   }
 
-
   private void flexWorkersAndAssertThatComponentsAreRunning(int workersCount, PrestoCluster prestoCluster)
   {
     prestoCluster.flex(WORKER_COMPONENT, workersCount)
     waitForWorkers(workersCount, WORKER_COMPONENT, prestoCluster)
-    
+
     prestoCluster.waitForComponents(workersCount)
   }
 
@@ -334,12 +344,30 @@ class PrestoClusterTest
     def allNodes = prestoCluster.allNodes
 
     prestoCluster.stop()
-    
+
     log.debug("Checking if presto process is stopped")
     allNodes.each { host ->
       retryUntil({
         nodeSshUtils.countOfPrestoProcesses(host) == 0
       }, TIMEOUT)
     }
+  }
+
+  private void assertThatPrestoYarnContainersUsesCgroup(PrestoCluster prestoCluster)
+  {
+    nodeSshUtils.withSshClient(prestoCluster.allNodes, { SshClient sshClient ->
+      List<Integer> cpuQuotas = linesToInts(sshClient.command('cat /cgroup/cpu/yarn/container*/cpu.cfs_quota_us'))
+      List<Integer> cpuPeriods = linesToInts(sshClient.command('cat /cgroup/cpu/yarn/container*/cpu.cfs_period_us'))
+      assertThat(cpuPeriods.size()).isEqualTo(cpuQuotas.size())
+      cpuQuotas.size().times {
+        double cpuUsed = cpuQuotas[it] / cpuPeriods[it]
+        assertThat(cpuUsed).isCloseTo((double) 1.0 / vcoresPerNode, offset(0.1))
+      }
+    })
+  }
+
+  private List<String> linesToInts(String s)
+  {
+    return s.split('\n').collect({ Integer.parseInt(it) })
   }
 }
