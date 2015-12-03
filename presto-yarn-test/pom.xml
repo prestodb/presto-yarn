@@ -232,6 +232,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.facebook.presto.hive</groupId>
+            <artifactId>hive-apache-jdbc</artifactId>
+            <version>${hive-jdbc.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>

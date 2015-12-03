@@ -26,8 +26,6 @@ ssh:
       password: yarn
 ```
 
- * also replace ${PRESTO_YARN_ROOT} under hive:jdbc_url to point to your ```presto-yarn``` workspace in the ```src/test/resources/tempto-configuration-local.yaml``` file created
-
 ## Execution
 
 To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase.
