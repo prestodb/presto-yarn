@@ -65,6 +65,10 @@ class PrestoClusterTest
   private NodeSshUtils nodeSshUtils
 
   @Inject
+  @Named("hive")
+  private QueryExecutor hiveQueryExecutor
+
+  @Inject
   @Named("cluster.master")
   private String master
 
@@ -221,6 +225,7 @@ class PrestoClusterTest
       waitForNodesToBeActive(queryExecutor, prestoCluster)
       assertThatCountFromNationWorks(queryExecutor, 'tpch.tiny.nation')
       assertThatCountFromNationWorks(queryExecutor, 'hive.default.nation')
+      assertThatCountFromNationWorks(hiveQueryExecutor, 'nation')
     }
   }
 
