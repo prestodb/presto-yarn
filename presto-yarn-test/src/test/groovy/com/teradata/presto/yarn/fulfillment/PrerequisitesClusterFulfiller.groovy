@@ -47,6 +47,10 @@ public class PrerequisitesClusterFulfiller
   @Named("cluster.slaves")
   private List<String> slaves
 
+  @Inject
+  @Named("cluster.prepared")
+  private boolean prepared
+
   private static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
   private final SshClientFactory sshClientFactory
   private final NodeSshUtils nodeSshUtils
@@ -61,6 +65,11 @@ public class PrerequisitesClusterFulfiller
   @Override
   Set<State> fulfill(Set<Requirement> requirements)
   {
+    if (prepared) {
+      log.info("Skipping cluster prerequisites fulfillment")
+      return ImmutableSet.of(nodeSshUtils)
+    }
+
     setupCgroup()
 
     setupYarnResourceManager()

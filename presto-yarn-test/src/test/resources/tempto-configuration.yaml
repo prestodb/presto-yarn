@@ -1,6 +1,7 @@
 cluster:
   vcores: 8
   master: master
+  prepared: ${CLUSTER_PREPARED:-false}
   slaves:
     - slave1
     - slave2
