@@ -151,7 +151,7 @@ class Slider
         } else if (e.exitStatus == 56) {
           log.warn('Unable to retrieve status,  node is unreachable temporarily. Retrying..')
           if(++count == maxRetries) {
-            throw e            
+            throw e
           }
         } else {
           throw e
@@ -179,6 +179,6 @@ class Slider
   @Override
   public Optional<String> getName()
   {
-    return Optional.empty();
+    return Optional.<String>empty();
   }
 }

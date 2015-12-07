@@ -163,6 +163,6 @@ public class NodeSshUtils
 
   @Override
   public Optional<String> getName() {
-    return Optional.empty();
+    return Optional.<String>empty();
   }
 }
