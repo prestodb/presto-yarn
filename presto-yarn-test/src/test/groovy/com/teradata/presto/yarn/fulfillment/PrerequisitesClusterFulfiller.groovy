@@ -133,7 +133,7 @@ public class PrerequisitesClusterFulfiller
   private void setupCgroup()
   {
     runOnAll([
-            'ls /cgroup || yum install -y libcgroup',
+            'yum install -y libcgroup',
             'find / -name container-executor | xargs chown root:yarn',
             'find / -name container-executor | xargs chmod 6050'
     ])
