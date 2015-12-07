@@ -74,7 +74,7 @@ public class PrerequisitesClusterFulfiller
       return ImmutableSet.of(nodeSshUtils)
     }
 
-    runOnMaster(["echo '${yarnPassword}' | passwd --stdin yarn"])
+    runOnMaster(["echo '${yarnPassword}' | passwd --stdin yarn"] as List<String>)
 
     setupCgroup()
 
@@ -139,14 +139,13 @@ public class PrerequisitesClusterFulfiller
   private void setupCgroup()
   {
     runOnAll([
-            'yum install -y libcgroup',
             'find / -name container-executor | xargs chown root:yarn',
             'find / -name container-executor | xargs chmod 6050'
     ])
 
     nodeSshUtils.withSshClient(allNodes, { SshClient sshClient ->
       sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'cgroup', 'cgrules.conf'), '/etc/')
-      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'cgroup', 'yarn'), '/etc/cgconfig.d/')
+      sshClient.upload(Paths.get(LOCAL_CONF_DIR, 'cgroup', 'cgconfig.conf'), '/etc/')
     })
 
     runOnAll([

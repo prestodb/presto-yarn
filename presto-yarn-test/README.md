@@ -29,6 +29,8 @@ cluster:
   vcores: 8
 ```
 
+> Note that running these tests may change the configuration of your cluster (services: yarn and cgroup, and yarm@master password).
+
 ## Execution
 
 To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase.

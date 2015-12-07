@@ -1,7 +1,0 @@
-group yarn{
-        cpu{
-                cpu.shares = 100;
-                cpu.cfs_quota_us=1000;
-                cpu.cfs_period_us=1000;
-        }
-}
