@@ -51,6 +51,10 @@ public class PrerequisitesClusterFulfiller
   @Named("cluster.prepared")
   private boolean prepared
 
+  @Inject
+  @Named("ssh.roles.yarn.password")
+  private String yarnPassword
+
   private static final String REMOTE_HADOOP_CONF_DIR = '/etc/hadoop/conf/'
   private final SshClientFactory sshClientFactory
   private final NodeSshUtils nodeSshUtils
@@ -69,6 +73,8 @@ public class PrerequisitesClusterFulfiller
       log.info("Skipping cluster prerequisites fulfillment")
       return ImmutableSet.of(nodeSshUtils)
     }
+
+    runOnMaster(["echo '${yarnPassword}' | passwd --stdin yarn"])
 
     setupCgroup()
 

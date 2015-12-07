@@ -15,15 +15,11 @@ In order to run product tests you need to have:
 
  * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
 
- * set a password for yarn user on master node. In your ```src/test/resources/tempto-configuration-local.yaml``` yarn@master password and a private key to connect any cluster node as root user, example settings:
+ * set a private key to connect any cluster node as root user, example settings:
 
 ```
 ssh:
   identity: path_to_your_key/insecure_key.pem
-  roles:
-    yarn:
-      ...
-      password: yarn
 ```
 
  * set a number of virtual cores per node which is set in yarn on your cluster, by default it is set to ``8``

@@ -45,4 +45,4 @@ ssh:
       host: ${cluster.master}
       port: 22
       user: yarn
-      password: ${YARN_PASSWORD}
+      password: yarntest
