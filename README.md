@@ -87,12 +87,14 @@ Please note that changing these files manually is needed only if you are going t
 
 ### Other configuration
 
-* HDFS home directory created for user yarn ```/user/yarn``` with ```yarn``` user as an owner
+* HDFS home directory created for the app_user. This has to be the same as ``site.global.app_user`` set in appConfig.json. Eg: for user yarn create ```/user/yarn``` with ```yarn``` user as an owner
   
   ```
-    hadoop fs -mkdir -p /user/yarn
-    hadoop fs -chown yarn:yarn /user/yarn
+    hdfs dfs -mkdir -p /user/yarn
+    hdfs dfs -chown yarn:yarn /user/yarn
   ```
+``Note``: For operations involving Hive connector in Presto, especially INSERT, ALTER TABLE etc, it may require that the user running Presto has access to HDFS directories like Hive warehouse directories. So make sure that the app_user you set has appropriate access permissions to those HDFS directories.
+For eg: /apps/hive/warehouse is usually where Presto user will need access for various DML operations involving Hive connector and is owned by hdfs in most cases. In that case, one way to fix the permission issue is to set ``site.global.app_user`` to user ``hdfs`` and also create ``/user/hdfs`` directory in HDFS if not already there (as above). You will also need to  run any slider scripts(bin/slider) as user ``hdfs`` in this case.
 
 Now you are ready to deploy Presto on YARN either manually or via Ambari.
 
@@ -127,7 +129,7 @@ export HADOOP_CONF_DIR=/etc/hadoop/conf
   </property>
 ```
  
-* Make sure the user running slider has a home dir in HDFS.
+* Make sure the user running slider, which should be same as ``site.global.app_user`` in appConfig.json, has a home dir in HDFS (See note under ``Other configuration`` section above to decide the user you want to choose).
 ```
 su hdfs
 $ hdfs dfs -mkdir /user/<user>
@@ -193,7 +195,7 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 * Copy the app package ```presto-yarn-package-*.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
 
-* Prepare hdfs for Slider
+* Prepare hdfs for Slider. The user directory you create here should be for the same user you set in ``site.global.app_user`` configuration in the Slider View later from the Ambari UI. If the ``app_user`` is going to be ``yarn`` then do:
   
   ```
 su hdfs
