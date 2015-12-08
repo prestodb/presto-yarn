@@ -14,12 +14,15 @@
 
 package com.teradata.presto.yarn.utils
 
+import com.google.common.base.CharMatcher
+import com.google.common.base.Splitter
 import com.teradata.tempto.context.State
 import com.teradata.tempto.ssh.SshClient
 import com.teradata.tempto.ssh.SshClientFactory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 
+import static com.google.common.base.CharMatcher.anyOf
 import static com.google.common.base.Preconditions.checkState
 import static com.google.common.collect.Sets.newHashSet
 import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil
@@ -126,7 +129,7 @@ public class NodeSshUtils
     return commandOnYarn('yarn node -list')
             .split('\n')
             .findAll { it.contains('RUNNING') }
-            .collect { it.split(' ')[0].trim() }
+            .collect { Splitter.on(anyOf(' \t')).omitEmptyStrings().trimResults().split(it)[0] }
   }
 
   public String commandOnYarn(String command)
