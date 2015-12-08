@@ -26,7 +26,6 @@ import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.query.QueryExecutor
 import com.teradata.tempto.ssh.SshClient
 import groovy.util.logging.Slf4j
-import org.assertj.core.data.Offset
 import org.testng.annotations.Test
 
 import javax.inject.Named
@@ -169,7 +168,6 @@ class PrestoClusterTest
       5.times {
         assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isEqualTo(1)
         nodeSshUtils.killPrestoProcesses(coordinatorHost)
-        assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isZero()
 
         retryUntil({
           nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == 1
@@ -337,12 +335,11 @@ class PrestoClusterTest
     int processesCount = nodeSshUtils.countOfPrestoProcesses(coordinatorHost)
     nodeSshUtils.killPrestoProcesses(coordinatorHost)
 
-    assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isZero()
-
     retryUntil({
       nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == processesCount
     }, TIMEOUT)
   }
+
 
   private void assertThatApplicationIsStoppable(PrestoCluster prestoCluster)
   {

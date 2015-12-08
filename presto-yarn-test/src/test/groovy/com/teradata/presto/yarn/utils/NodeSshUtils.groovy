@@ -14,13 +14,14 @@
 
 package com.teradata.presto.yarn.utils
 
-import com.google.common.base.CharMatcher
 import com.google.common.base.Splitter
 import com.teradata.tempto.context.State
 import com.teradata.tempto.ssh.SshClient
 import com.teradata.tempto.ssh.SshClientFactory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+
+import java.util.concurrent.TimeUnit
 
 import static com.google.common.base.CharMatcher.anyOf
 import static com.google.common.base.Preconditions.checkState
@@ -58,6 +59,9 @@ public class NodeSshUtils
   public void killPrestoProcesses(String host)
   {
     runOnNode(host, ["pkill -9 -f 'java.*PrestoServer.*'"])
+    retryUntil({
+      countOfPrestoProcesses(host) == 0
+    }, TimeUnit.SECONDS.toMillis(10))
   }
 
   public String getPrestoJvmMemory(String host)
