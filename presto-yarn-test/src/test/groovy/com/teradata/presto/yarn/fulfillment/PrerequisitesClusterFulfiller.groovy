@@ -91,8 +91,8 @@ public class PrerequisitesClusterFulfiller
     restartResourceManager()
 
     runOnAll([
-            'mkdir -p /var/presto',
-            'chown yarn:yarn /var/presto',
+            'mkdir -p /var/lib/presto',
+            'chown yarn:yarn /var/lib/presto',
             '/etc/init.d/hadoop-yarn-nodemanager restart'
     ])
 

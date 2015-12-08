@@ -63,7 +63,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 * If ``site.global.singlenode`` property in appConfig.json is set to true the master node will be set to run both coordinator and worker (singlenode mode). For multi-node set up, ``site.global.singlenode`` in appConfig.json should be set to false.
 * Presto requires Java 1.8. So make jdk8 the default java or add it to "java_home" in your ``appConfig.json``
-* The data directory (added in ``appConfig.json`` eg: ``/var/presto/``) should be pre-created on all nodes and must be owned by user ``yarn``, otherwise slider will fail to start Presto with permission errors.
+* The data directory (added in ``appConfig.json`` eg: ``/var/lib/presto/``) should be pre-created on all nodes and must be owned by user ``yarn``, otherwise slider will fail to start Presto with permission errors.
 * Presto's ``jvm.config`` must be configured using ``site.global.jvm_args`` in ``appConfig.json``. Since Presto needs the ``jvm.config`` format to be a list of options, one per line, this property must be a String representation of list of strings. Each entry of this list will be a new line in your jvm.config. For example the configuration should look like:
 ```
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
@@ -219,7 +219,7 @@ hdfs dfs -chown yarn:hdfs /user/yarn
 
 * Make sure you change the global.presto_server_port from 8080 to some other unused port, since Ambari by default uses 8080.
 
-* Make sure the data directory in the UI (added in appConfig-default.json eg: /var/presto/) is pre-created on all nodes and the directory must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
+* Make sure the data directory in the UI (added in appConfig-default.json eg: /var/lib/presto/) is pre-created on all nodes and the directory must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
 * Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
 
@@ -333,7 +333,7 @@ Subsequently every Slider application owner has the flexibility to set the inclu
 
 See http://slider.incubator.apache.org/docs/configuration/resources.html#logagg for details.
 
-Presto logs will be available under the standard Presto data directory location. By default it is ``/var/presto/data/var/log`` directory where ``/var/presto/data`` is the default data directory configured in Slider ``appConfig.json``. You can find both ``server.log`` and ``http-request.log`` files here. Please note that log rotation of these Presto log files will have to be manually enabled (for eg: using http://linuxcommand.org/man_pages/logrotate8.html)
+Presto logs will be available under the standard Presto data directory location. By default it is ``/var/lib/presto/data/var/log`` directory where ``/var/lib/presto/data`` is the default data directory configured in Slider ``appConfig.json``. You can find both ``server.log`` and ``http-request.log`` files here. Please note that log rotation of these Presto log files will have to be manually enabled (for eg: using http://linuxcommand.org/man_pages/logrotate8.html)
 
 
 # Links
