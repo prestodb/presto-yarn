@@ -215,6 +215,8 @@ hdfs dfs -chown yarn:hdfs /user/yarn
 
 * Provide details of the Presto service. By default, the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-*.zip```.
 
+* Make sure you change the global.presto_server_port from 8080 to some other unused port, since Ambari by default uses 8080.
+
 * Make sure the data directory in the UI (added in appConfig-default.json eg: /var/presto/) is pre-created on all nodes and the directory must owned by user yarn, otherwise slider will fail to start Presto with permission errors.
 
 * Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
