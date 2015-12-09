@@ -79,6 +79,10 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 * To add plugin jars add the ``site.global.plugin`` property in your ``appConfig.json``. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built presto-yarn-package-*.zip will have the jars under ```package/plugins``` directory.
 
+* Presto launched via Slider will use ``config.properties`` and ``node.properties`` created from templates ``presto-yarn-package/package/templates/config.properties*.j2`` and ``presto-yarn-package/package/target/node.properties.j2`` respectively. If you want to add any additional properties to these configuration files, add ``site.global.additional_config_properties`` and ``site.global.additional_node_properties`` to your ``appConfig.json``. The value of these has to be a string with each property that has to go to the ``.properties`` file separated by a ``\n``. Eg:
+
+    "site.global.additional_catalog_properties": "task.max-worker-threads=5\ndistributed-joins-enabled=true"
+
 * If you want to use a port other than 8080 for Presto server, configure it via ``site.global.presto_server_port`` in ``appConfig.json``
 
 * Variables in ``appConfig.json`` like ``${COORDINATOR_HOST}``, ``${AGENT_WORK_ROOT}`` etc. do not need any substitution and will be appropriately configured during runtime.
@@ -229,7 +233,9 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 * Make sure the data directory in the UI (added in ``appConfig-default.json`` eg: ``/var/lib/presto/``) is pre-created on all nodes and the directory must owned by user ``yarn``, otherwise slider will fail to start Presto with permission errors.
 
-* Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the ``bin/slider`` script. Once successfully deployed, you will see the Yarn application started for Presto.
+* If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now are ``global.plugin``, ``global.additional_config_properties`` and ``global.additional_node_propeties``. See ``Presto App Package configuration`` section above for requirements and format of these properties.
+
+* Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
 
 * You can manage the application lifecycle (e.g. start, stop, flex, destroy) from the View UI.
 
@@ -237,7 +243,7 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 Once the application is launched if you want to update the configuration of Presto (eg: add a new connector), first go to Actions on the Slider View instance screen and stop the running application.
 
-Once the running YARN application is stopped, under Actions you will have an option to 'Destroy' the existing Presto instance running via Slider. Destroy the existing one and re-create a new instance with whatever updates you want to make to the configuration.
+Once the running YARN application is stopped, under Actions you will have an option to 'Destroy' the existing Presto instance running via Slider. Destroy the existing one and re-create a new app (Create App button) with whatever updates you want to make to the configuration.
 
 ## Advanced Configuration
 

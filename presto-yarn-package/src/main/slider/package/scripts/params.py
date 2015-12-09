@@ -55,3 +55,5 @@ jvm_args = default('/configurations/global/jvm_args', '')
 node_id = uuid.uuid1()
 
 catalog_properties = default('/configurations/global/catalog', '')
+additional_config_properties=default('/configurations/global/additional_config_properties', '')
+additional_node_properties=default('/configurations/global/additional_node_properties', '')
