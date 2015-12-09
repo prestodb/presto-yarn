@@ -76,6 +76,8 @@ public class PrerequisitesClusterFulfiller
 
     runOnMaster(["echo '${yarnPassword}' | passwd --stdin yarn"] as List<String>)
 
+    fixHdpMapReduce()
+
     setupCgroup()
 
     setupYarnResourceManager()
@@ -99,6 +101,14 @@ public class PrerequisitesClusterFulfiller
     nodeSshUtils.labelNodes(node_labels)
 
     return ImmutableSet.of(nodeSshUtils)
+  }
+
+  private void fixHdpMapReduce()
+  {
+    nodeSshUtils.withSshClient(master, { SshClient sshClient ->
+      sshClient.upload(Paths.get('target/test-classes/fix_hdp_mapreduce.sh'), '/tmp')
+      sshClient.command('sh /tmp/fix_hdp_mapreduce.sh || true')
+    })
   }
 
   private Map<String, String> getNodeLabels() {
