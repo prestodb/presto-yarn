@@ -5,6 +5,7 @@
 * JDK 1.8 
 * Zookeeper 
 * openssl >= 1.0.1e-16
+* Ambari (optional) 2.1
 
 # Create Presto App Package
 
