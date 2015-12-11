@@ -13,7 +13,7 @@ First step is to build the ``presto-yarn-package-<version>.zip`` package to depl
 
 ## Building the project
 
-Run ```mvn clean package``` and the presto app package will be packaged at ``presto-yarn-package/target/presto-yarn-package-*.zip``.
+Run ```mvn clean package``` and the presto app package will be packaged at ``presto-yarn-package/target/presto-yarn-package-<version>.zip``.
 
 This .zip will have ``presto-server-<version>.tar.gz`` from Presto under ``package/files/``. The Presto installed will use the configuration templates under ``package/templates``.
 
@@ -225,7 +225,7 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 * Install Ambari server. You may refer: http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html.
 
-* Copy the app package ```presto-yarn-package-*.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
+* Copy the app package ```presto-yarn-package-<version>.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
 
 * Now Log In to Apache Ambari, ```http://ambariserver_ip:8080``` #username-admin password-admin
    
@@ -233,7 +233,7 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 * Customize/configure the services and install them. A minimum of HDFS, YARN, Zookeeper is required for Slider to work. You must also also select Slider to be installed.
 
-* Once you have all the services up and running on the cluster, you can configure Slider in Ambari to manage your application by creating a "View". Go to ``Admin`` (top right corner) -> ``Manage Ambari`` and then from the left pane select ``Views``.
+* Once you have all the services up and running on the cluster, you can configure Slider in Ambari to manage your application by creating a "View". Go to ``admin`` (top right corner) -> ``Manage Ambari`` and then from the left pane select ``Views``.
 
 * There, create a Slider View by populating all the necessary fields with a preferred instance name (eg: Slider). ``ambari.server.url`` can be of the format - ``http://<ambari-server-url>:8080/api/v1/clusters/<clustername>``, where ``<clustername>`` is what you have named your Ambari cluster.
 
