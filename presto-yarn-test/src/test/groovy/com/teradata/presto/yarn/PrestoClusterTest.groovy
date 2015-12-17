@@ -218,7 +218,7 @@ class PrestoClusterTest
   @Requires(ImmutableNationTable.class)
   void 'multi node with placement - checking connectors'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', APP_CONFIG_TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', APP_CONFIG_TEST_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(workersCount())
 

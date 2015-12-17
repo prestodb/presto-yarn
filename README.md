@@ -54,7 +54,9 @@ Presto on YARN can be set up either manually using Apache Slider or via Ambari S
 
 ## <a name="packageconfig"></a> Presto App Package configuration
 
-There are some sample configuration options files available at ``presto-yarn-package/src/main/resources`` directory in the repository. ``appConfig.json`` and ``resources-[singlenode|mutlinode].json`` files are the two major configuration files you need to configure before you can get Presto running on YARN. Copy the ``presto-yarn-package/src/main/resources/appConfig.json`` and ``presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json`` to a local file at a location where you are planning to run Slider. Name them as ``appConfig.json`` and ``resources.json``. Update these sample json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can just use them as-is.
+There are some sample configuration options files available at ``presto-yarn-package/src/main/resources`` directory in the repository. ``appConfig.json`` and ``resources-[singlenode|mutlinode].json`` files are the two major configuration files you need to configure before you can get Presto running on YARN. Copy the ``presto-yarn-package/src/main/resources/appConfig.json`` and ``presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json`` to a local file at a location where you are planning to run Slider. Name them as ``appConfig.json`` and ``resources.json``. Update these sample json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can just use them as-is. 
+
+The "default" values listed for the sections [appConfig.json](#appconfig) and [resources.json](#resources) are from ``presto-yarn-package/src/main/resources/appConfig.json`` and ``presto-yarn-package/src/main/resources/resources-multinode.json`` files respectively. These default values will also be used for installation using [Ambari](#sliderview) Slider View.
 
 ``Note``: If you are planning to use Ambari for your installation skip to this [section](#sliderview). Changing these files manually is needed only if you are going to install Presto on YARN manually using Slider. If installing via Ambari, you can change these configurations from the Slider view.
 
@@ -83,7 +85,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 * ``site.global.presto_server_port`` (default - ``8080``): Presto server's http port.
 
-* ``site.global.catalog`` (optional) (default - configures ``hive``, ``tpch`` and ``jmx`` connectors): It should be of the format (note the single quotes around each value) - {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
+* ``site.global.catalog`` (optional) (default - configures ``tpch`` connector): It should be of the format (note the single quotes around each value) - {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
                                                                                 
 ```
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
