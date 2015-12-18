@@ -81,6 +81,8 @@
 
         <encoding>UTF-8</encoding>
         <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+
+        <app.package.name>presto-yarn-package-${project.version}-${presto.version}</app.package.name>
     </properties>
 
     <distributionManagement>

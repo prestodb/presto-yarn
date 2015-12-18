@@ -31,7 +31,7 @@
     <!-- Assemble presto app package for product tests -->
     <fileSets>
         <fileSet>
-            <directory>${package.dir}/${app.package}</directory>
+            <directory>${package.dir}/${app.package.name}</directory>
             <outputDirectory>/</outputDirectory>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>

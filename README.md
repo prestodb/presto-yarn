@@ -9,24 +9,24 @@
 
 # Create Presto App Package
 
-First step is to build the ``presto-yarn-package-<version>.zip`` package to deploy Presto on YARN.
+First step is to build the ``presto-yarn-package-<version>-<presto-version>.zip`` package to deploy Presto on YARN.
 
 ## Building the project
 
-Run ```mvn clean package``` and the presto app package will be packaged at ``presto-yarn-package/target/presto-yarn-package-<version>.zip``.
+Run ```mvn clean package``` and the presto app package will be packaged at ``presto-yarn-package/target/presto-yarn-package-<version>-<presto-version>.zip``.
 
 This .zip will have ``presto-server-<version>.tar.gz`` from Presto under ``package/files/``. The Presto installed will use the configuration templates under ``package/templates``.
 
 The app package built should look something like:
 
 ```
- unzip -l "$@" ../presto-yarn-package-1.0.0-SNAPSHOT.zip
-Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT.zip
+ unzip -l "$@" ../presto-yarn-package-1.0.0-SNAPSHOT-0.130.zip
+Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT-0.130.zip
   Length      Date    Time    Name
 ---------  ---------- -----   ----
         0  2015-11-30 22:57   package/
         0  2015-11-30 22:57   package/files/
-411459833  2015-11-30 20:26   package/files/presto-server-0.123.tar.gz
+411459833  2015-11-30 20:26   package/files/presto-server-0.130.tar.gz
      1210  2015-11-30 22:57   appConfig-default.json
       606  2015-11-30 22:57   resources-default.json
         0  2015-11-30 20:26   package/scripts/
@@ -103,7 +103,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
     "site.global.additional_config_properties": "task.max-worker-threads=5\ndistributed-joins-enabled=true"
 ```    
 
-* ``site.global.plugin`` (optional) (default - None): This allows you to add any additional jars you want to copy to plugin ``presto-server-<version>/plugin/<connector>`` directory in addition to what is already available there. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built ``presto-yarn-package-<version>.zip`` will have the jars under ```package/plugins``` directory.
+* ``site.global.plugin`` (optional) (default - None): This allows you to add any additional jars you want to copy to plugin ``presto-server-<version>/plugin/<connector>`` directory in addition to what is already available there. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built ``presto-yarn-package-<version>-<presto-version>.zip`` will have the jars under ```package/plugins``` directory.
 
 ```
     "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
@@ -225,7 +225,7 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 * Install Ambari server. You may refer: http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html.
 
-* Copy the app package ```presto-yarn-package-<version>.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
+* Copy the app package ```presto-yarn-package-<version>-<presto-version>.zip``` to ```/var/lib/ambari-server/resources/apps/``` directory on your Ambari server node. Restart ambari-server.
 
 * Now Log In to Apache Ambari, ```http://ambariserver_ip:8080``` #username-admin password-admin
    

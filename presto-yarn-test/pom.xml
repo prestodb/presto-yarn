@@ -31,7 +31,6 @@
     <properties>
         <skip.product.tests>true</skip.product.tests>
         <package.dir>${project.build.directory}/package</package.dir>
-        <app.package>presto-yarn-package-${project.version}</app.package>
         <presto.server>presto-server-${presto.version}</presto.server>
     </properties>
 
@@ -83,7 +82,7 @@
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${package.dir}/${app.package}</outputDirectory>
+                            <outputDirectory>${package.dir}/${app.package.name}</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -95,7 +94,7 @@
                         <configuration>
                             <includeArtifactIds>presto-ml</includeArtifactIds>
                             <includeTypes>jar</includeTypes>
-                            <outputDirectory>${package.dir}/${app.package}/package/plugins</outputDirectory>
+                            <outputDirectory>${package.dir}/${app.package.name}/package/plugins</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -191,7 +190,7 @@
                             <descriptor>${project.basedir}/src/test/assembly/presto-server.xml</descriptor>
                             <appendAssemblyId>false</appendAssemblyId>
                             <finalName>${presto.server}</finalName>
-                            <outputDirectory>${package.dir}/${app.package}/package/files</outputDirectory>
+                            <outputDirectory>${package.dir}/${app.package.name}/package/files</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -203,7 +202,7 @@
                         <configuration>
                             <descriptor>${project.basedir}/src/test/assembly/presto-app.xml</descriptor>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>${app.package}</finalName>
+                            <finalName>${app.package.name}</finalName>
                             <outputDirectory>${package.dir}</outputDirectory>
                         </configuration>
                     </execution>

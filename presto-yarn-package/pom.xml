@@ -32,8 +32,6 @@
         <main.dir.filtered>${project.build.directory}/slider-filtered-files</main.dir.filtered>
         <main.resources.dir>${project.basedir}/src/main/resources</main.resources.dir>
         
-        <app.package.name>${project.artifactId}-${project.version}</app.package.name>
-
         <dep.pkg.dir>${project.build.directory}/dep-package-tmp</dep.pkg.dir>
         <dep.pkg.basename>presto-server-${presto.version}</dep.pkg.basename>
         <dep.pkg.name>${dep.pkg.basename}.tar.gz</dep.pkg.name>
@@ -93,7 +91,7 @@
                 <configuration>
                     <descriptor>${project.basedir}/src/main/assembly/presto.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>${project.artifactId}-${project.version}-${presto.version}</finalName>
+                    <finalName>${app.package.name}</finalName>
                 </configuration>
                 <executions>
                     <execution>
