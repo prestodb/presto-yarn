@@ -257,7 +257,7 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 * Make sure the data directory in the UI (added in ``appConfig-default.json`` eg: ``/var/lib/presto/``) is pre-created on all nodes and the directory must owned by user ``yarn``, otherwise slider will fail to start Presto with permission errors.
 
-* If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now are ``global.plugin``, ``global.additional_config_properties`` and ``global.additional_node_propeties``. See [section](#packageconfig) above for requirements and format of these properties.
+* If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now is ``global.plugin``. See [section](#packageconfig) above for requirements and format of these properties.
 
 * Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
 
