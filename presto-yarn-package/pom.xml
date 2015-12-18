@@ -94,7 +94,7 @@
                 <configuration>
                     <descriptor>${project.basedir}/src/main/assembly/presto.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <finalName>${project.artifactId}-${project.version}</finalName>
+                    <finalName>${project.artifactId}-${project.version}-${presto.version}</finalName>
                 </configuration>
                 <executions>
                     <execution>
