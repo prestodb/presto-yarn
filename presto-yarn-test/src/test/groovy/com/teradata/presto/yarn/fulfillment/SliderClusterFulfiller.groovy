@@ -23,6 +23,7 @@ import com.teradata.tempto.fulfillment.RequirementFulfiller
 import com.teradata.tempto.ssh.SshClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.filefilter.WildcardFileFilter
 
 import javax.inject.Named
 import java.nio.file.Path
@@ -56,11 +57,18 @@ public class SliderClusterFulfiller
     log.info('fulfilling slider cluster')
     slider.install(SLIDER_BINARY)
     
-    Path presto_app_package = Paths.get(presto_package_path)
+    Path presto_app_package = Paths.get(getPrestoAppPackagePath())
     log.info("Using Presto package from: " + presto_app_package)
     slider.installLocalPackage(presto_app_package, PACKAGE_NAME)
 
     return ImmutableSet.of(slider)
+  }
+
+  private String getPrestoAppPackagePath() {
+    File dir = new File(presto_package_path)
+    FileFilter fileFilter = new WildcardFileFilter("presto-yarn-package*.zip")
+    File[] files = dir.listFiles((FileFilter) fileFilter)
+    return files[0].getPath()
   }
 
   @Override

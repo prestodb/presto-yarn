@@ -36,7 +36,7 @@ tests:
   hdfs:
     path: /product-test/presto-yarn
   app_package:
-    path: target/package/presto-yarn-package-1.0.0-SNAPSHOT.zip
+    path: target/package
 
 ssh:
   identity: ${IDENTITY_FILE}
