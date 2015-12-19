@@ -234,7 +234,7 @@ class PrestoClusterTest
   def waitForNodesToBeActive(QueryExecutor queryExecutor, PrestoCluster prestoCluster)
   {
     retryUntil({
-      def result = queryExecutor.executeQuery("select count(*) from system.runtime.nodes where state = 'active'")
+      def result = queryExecutor.executeQuery("select count(*) from system.runtime.nodes")
       log.debug("Number of active nodes: ${result.rows()}")
       return result.rows() == [[prestoCluster.allNodes.size()]]
     }, TIMEOUT)
