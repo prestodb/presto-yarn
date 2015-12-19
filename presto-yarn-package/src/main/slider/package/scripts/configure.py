@@ -38,8 +38,13 @@ def set_configuration(component=None):
     
 
     if params.jvm_args:
-        jvm_arg_list = ast.literal_eval(params.jvm_args)
-        _store_configuration(jvm_arg_list, format("{params.conf_dir}/jvm.config"))
+        _parse_array_and_write(params.jvm_args, format("{params.conf_dir}/jvm.config"))
+
+    if params.additional_config_properties:        
+        _parse_array_and_write(params.additional_config_properties, format("{params.conf_dir}/config.properties"))
+
+    if params.additional_node_properties:
+        _parse_array_and_write(params.additional_node_properties, format("{params.conf_dir}/node.properties"))
 
     if params.catalog_properties:
         catalog_dict = ast.literal_eval(params.catalog_properties)
@@ -56,6 +61,10 @@ def set_configuration(component=None):
                 shutil.copy2(os.path.join(params.source_plugin_dir, jar), plugin_dir)
 
 
+def _parse_array_and_write(parameters, path):
+    arg_list = ast.literal_eval(parameters)
+    _store_configuration(arg_list, path)
+            
 def _store_configuration(parameters, path):
     with open(path, 'a') as fw:
         for parameter in parameters:
