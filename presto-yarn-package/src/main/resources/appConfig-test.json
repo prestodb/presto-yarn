@@ -17,7 +17,7 @@
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch'], 'jmx': ['connector.name=jmx']}",
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p', '-DHADOOP_USER_NAME=hdfs', '-Duser.timezone=UTC']",
 
-    "site.global.additional_node_properties": "plugin.config-dir=${AGENT_WORK_ROOT}/app/install/${dep.pkg.basename}/etc/catalog\nplugin.dir=${AGENT_WORK_ROOT}/app/install/${dep.pkg.basename}/plugin",
+    "site.global.additional_node_properties": "['plugin.config-dir=${AGENT_WORK_ROOT}/app/install/${dep.pkg.basename}/etc/catalog', 'plugin.dir=${AGENT_WORK_ROOT}/app/install/${dep.pkg.basename}/plugin']",
 
     "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
 
