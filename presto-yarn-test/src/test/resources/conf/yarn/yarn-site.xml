@@ -122,4 +122,10 @@
     <value>false</value>
   </property>
 
+  <!-- disable memory checking work-around for SWARM-1825 -->
+  <property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value>false</value>
+  </property>
+
 </configuration>
