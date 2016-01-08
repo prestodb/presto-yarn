@@ -43,7 +43,6 @@ import static org.assertj.core.data.Offset.offset
 class PrestoClusterTest
         extends ProductTest
 {
-  private static final String APP_CONFIG_TEMPLATE = 'appConfig.json'
   private static final String APP_CONFIG_WITHOUT_CATALOG_TEMPLATE = 'appConfig-test-no-catalog.json'
   private static final String APP_CONFIG_TEST_TEMPLATE = 'appConfig-test.json'
 
@@ -163,7 +162,7 @@ class PrestoClusterTest
   @Test
   void 'limit single node failures'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode-label.json', APP_CONFIG_TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-singlenode-label.json', APP_CONFIG_TEST_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
@@ -191,7 +190,7 @@ class PrestoClusterTest
   @Test
   void 'multi node with placement lifecycle'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', APP_CONFIG_TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode.json', APP_CONFIG_TEST_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(workersCount())
 
@@ -262,7 +261,7 @@ class PrestoClusterTest
   @Test
   void 'labeling subset of nodes - single cordinatoor@master'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-single-coordinator@master.json', APP_CONFIG_TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-single-coordinator@master.json', APP_CONFIG_TEST_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(0)
 
@@ -275,7 +274,7 @@ class PrestoClusterTest
   @Test
   void 'flex set of workers - multinode-flex-worker'()
   {
-    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', APP_CONFIG_TEMPLATE)
+    PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, 'resources-multinode-single-worker.json', APP_CONFIG_TEST_TEMPLATE)
     prestoCluster.withPrestoCluster {
       prestoCluster.assertThatPrestoIsUpAndRunning(1)
       assertThatAllProcessesAreRunning(prestoCluster)
