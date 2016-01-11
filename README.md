@@ -122,6 +122,7 @@ The configuration here can be added either globally (for COORDINATOR and WORKER)
 * ``yarn.vcores`` (default - ``1``): By default this is set globally. 
 
 * ``yarn.component.instances`` (default - ``1`` for COORDINATOR and ``3`` for WORKER): The multinode ``presto-yarn-package/src/main/resources/rresources-multinode.json`` sample file is now configured for a 4 node cluster where there will be 1 coordinator and 3 workers with strict placement policy, meaning, there will be one component instance running on every node irrespective of failure history. If there are insufficient number of nodemanager nodes in your cluster to accomodate the number of workers requested, the application launch will fail. The number of workers could be ``number of nodemanagers in your cluster - 1``, with 1 node reserved for the coordinator, if you want Presto to be on all YARN nodes.
+If you want to deploy Presto on a single node (``site.global.singlenode`` set to true), make sure you set 1 for the COORDINATOR and just not add the WORKER component section (Refer  ``presto-yarn-package/src/main/resources/resources-singlenode.json``). You can also just set ``yarn.component.instances`` to 0 for WORKER in this case.
  
 * ``yarn.memory`` (default - ``1500MB``): The heapsize defined as -Xmx of ``site.global.jvm_args`` in ``appConfig.json``, is used by the Presto JVM itself. Slider suggests that the value of ``yarn.memory`` must be bigger than this heapsize. The value of ``yarn.memory`` MUST be bigger than the heap size allocated to any JVM and Slider suggests using atleast 50% more appears to work, though some experimentation will be needed.
 
@@ -371,13 +372,15 @@ where coordinator and worker are the node labels created and configured with a s
 
 * Once the YARN application is launched, you can monitor the status at YARN ResourceManager WebUI. 
 
-* A successfully launched application will be in ``RUNNING`` state and can also use Slider to check [status](#status).
+* A successfully launched application will be in ``RUNNING`` state. The YARN ApplicationMaster UI (eg: ``http://master:8088/cluster/app/application_<id>``) will show slider-appmaster, COORDINATOR and WORKER components and the associated containers running based on your configuration. You can also use Slider cli script to check [status](#status).
 
-* If you have used [labels](#label) your COORDINATOR and WORKER components will be running on nodes which were 'labelled'. If you have not used labels, then you can check the status either at the YARN ResourceManager (eg: ``http://master:8088/cluster/app/application_<id>``) or you can use [status](#status) to get the "live" containers, and thus get the node hosting the Presto components.
+* If you have used [labels](#label) your COORDINATOR and WORKER components will be running on nodes which were 'labeled'.
+
+* If you have not used labels, then you can check the status either at the YARN ResourceManager (eg: ``http://master:8088/cluster/app/application_<id>``) or you can use [status](#status) to get the "live" containers, and thus get the node hosting the Presto components.
 
 * If Presto is up and running, then a ``pgrep`` of PrestoServer on your NodeManager nodes will give you the process details. This should also give the directory Presto is installed and the configuration files used by Presto.
 
-* It is recommended that log aggregation of YARN application log files be enabled in YARN, using ``yarn.log-aggregation-enable property`` in your ``yarn-site.xml``. Then slider logs created during the launch of Presto-YARN will be available locally on your nodemanager nodes under contanier logs directory eg: ``/var/log/hadoop-yarn/application_<id>/container_<id>/``. For any retries attempted by Slider to launch Presto a new container will be launched and hence you will find a new ``container_<id>`` directory.  You can look for any errors under ``errors_*.txt`` there, and also there is a ``slider-agent.log`` file which will give you Slider application lifetime details.
+* It is recommended that log aggregation of YARN application log files be enabled in YARN, using ``yarn.log-aggregation-enable property`` in your ``yarn-site.xml``. Then slider logs created during the launch of Presto-YARN will be available locally on your nodemanager nodes (where slider-appmaster and Presto components-COORDINATOR/WORKER are deployed) under contanier logs directory eg: ``/var/log/hadoop-yarn/application_<id>/container_<id>/``. For any retries attempted by Slider to launch Presto a new container will be launched and hence you will find a new ``container_<id>`` directory.  You can look for any errors under ``errors_*.txt`` there, and also there is a ``slider-agent.log`` file which will give you Slider application lifetime details.
 Subsequently every Slider application owner has the flexibility to set the include and exclude patterns of file names that they intend to aggregate, by adding the following properties in their ``resources.json``. For example, using
 
 ```
