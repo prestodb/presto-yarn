@@ -10,8 +10,8 @@
     "site.global.app_pkg_plugin": "${AGENT_WORK_ROOT}/app/definition/package/plugins/",
     "site.global.singlenode": "true",
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
-    "site.global.presto_query_max_memory": "5GB",
-    "site.global.presto_query_max_memory_per_node": "600MB",
+    "site.global.presto_query_max_memory": "50GB",
+    "site.global.presto_query_max_memory_per_node": "1GB",
     "site.global.presto_server_port": "8080",
 
     "site.global.catalog": "{'tpch': ['connector.name=tpch']}",
