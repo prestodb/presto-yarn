@@ -35,6 +35,7 @@ def set_configuration(component=None):
 
     _template_config("{params.conf_dir}/config.properties", params, component)
     _template_config("{params.conf_dir}/node.properties", params)
+    _template_config("{params.conf_dir}/queues.json", params)
     
 
     if params.jvm_args:
