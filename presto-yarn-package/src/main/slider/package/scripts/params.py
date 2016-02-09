@@ -30,7 +30,8 @@ app_root = config['configurations']['global']['app_root']
 app_name = config['configurations']['global']['app_name']
 
 presto_root = format("{app_root}/{app_name}")
-conf_dir = format("{presto_root}/etc")
+conf_dir = default('/configurations/global/config_dir', format("{presto_root}/etc"))
+
 catalog_dir = format("{conf_dir}/catalog")
 presto_plugin_dir = format("{presto_root}/plugin")
 source_plugin_dir = config['configurations']['global']['app_pkg_plugin']

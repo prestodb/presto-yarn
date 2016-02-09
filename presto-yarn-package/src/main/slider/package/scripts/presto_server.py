@@ -39,7 +39,7 @@ class PrestoServer(Script):
         env.set_params(params)
 
         self.configure()
-        process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher run >> {log_file} 2>&1")
+        process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher run --node-config {conf_dir}/node.properties --jvm-config {conf_dir}/jvm.config --config {conf_dir}/config.properties >> {log_file} 2>&1")
 
         Execute(process_cmd,
                 logoutput=True,

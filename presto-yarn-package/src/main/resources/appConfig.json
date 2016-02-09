@@ -6,6 +6,7 @@
     "site.global.app_user": "yarn",
     "site.global.user_group": "hadoop",
     "site.global.data_dir": "/var/lib/presto/data",
+    "site.global.config_dir": "/var/lib/presto/etc",
     "site.global.app_name": "${dep.pkg.basename}",
     "site.global.app_pkg_plugin": "${AGENT_WORK_ROOT}/app/definition/package/plugins/",
     "site.global.singlenode": "true",

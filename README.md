@@ -77,6 +77,8 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 * ``site.global.data_dir`` (default - ``/var/lib/presto/data``): The data directory configured should be pre-created on all nodes and must be owned by user ``yarn``, otherwise slider will fail to start Presto with permission errors.
 
+* ``site.global.config_dir`` (default - ``/var/lib/presto/etc``): The configuration directory on the cluster where the Presto config files node.properties, jvm.config, config.properties and connector configuration files are deployed. These files will have configuration values created from templates ``presto-yarn-package/package/templates/*.j2`` and other relevant ``appConfig.json`` parameters.
+
 * ``site.global.singlenode`` (default - ``true``): If set to true, the node used act as both coordinator and worker (singlenode mode). For multi-node set up, this should be set to false.
 
 * ``site.global.presto_query_max_memory`` (default - ``50GB``): This will be used as ``query.max-memory`` in Presto's config.properties file.
