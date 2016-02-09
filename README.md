@@ -260,7 +260,7 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 * Make sure you change the ``global.presto_server_port`` from 8080 to some other unused port, since Ambari by default uses 8080.
 
-* Make sure the data directory in the UI (added in ``appConfig-default.json`` eg: ``/var/lib/presto/``) is pre-created on all nodes and the directory must owned by ``global.app_user``, otherwise slider will fail to start Presto with permission errors.
+* Make sure the data directory in the UI (added in ``appConfig-default.json`` eg: ``/var/lib/presto/``) is pre-created on all nodes and the directory must be owned by ``global.app_user``, otherwise slider will fail to start Presto with permission errors.
 
 * If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now are ``site.global.plugin``, ``site.global.additional_config_properties`` and ``site.global.additional_node_properties``. See [section](#packageconfig) above for requirements and format of these properties.
 
@@ -396,7 +396,11 @@ See http://slider.incubator.apache.org/docs/configuration/resources.html#logagg 
 
 * Presto logs will be available under the standard Presto data directory location. By default it is ``/var/lib/presto/data/var/log`` directory where ``/var/lib/presto/data`` is the default data directory configured in Slider ``appConfig.json``. You can find both ``server.log`` and ``http-request.log`` files here. Please note that log rotation of these Presto log files will have to be manually enabled (for eg: using http://linuxcommand.org/man_pages/logrotate8.html)
 
+<<<<<<< HEAD
 * Presto configuration files will be at ``/var/lib/presto/etc`` directory if you are using the default ``appConfig.json`` property ``site.global.config_dir``.  
+=======
+* Presto configuration files will be at ``/var/lib/presto/etc`` directory if you are using the default ``appConfig.json`` property ``site.global.config_dir``.
+>>>>>>> Deploy Presto configuration files to a static location
 
 # Links
 

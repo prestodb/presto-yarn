@@ -87,13 +87,13 @@ class Slider
   private Path uploadIfNeeded(Path clusterPackage)
   {
     def packageName = clusterPackage.fileName
-/*    if (checkMd5OfUploadedFile(clusterPackage)) {
+    if (checkMd5OfUploadedFile(clusterPackage)) {
       log.info("Package ${packageName} is already uploaded. Md5sum checksums match.")
     }
     else {
       upload(clusterPackage)
       checkState(checkMd5OfUploadedFile(clusterPackage), "Uploaded file is corrupted, please try again")
-    }*/
+    }
     return packageName
   }
 
