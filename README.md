@@ -396,11 +396,7 @@ See http://slider.incubator.apache.org/docs/configuration/resources.html#logagg 
 
 * Presto logs will be available under the standard Presto data directory location. By default it is ``/var/lib/presto/data/var/log`` directory where ``/var/lib/presto/data`` is the default data directory configured in Slider ``appConfig.json``. You can find both ``server.log`` and ``http-request.log`` files here. Please note that log rotation of these Presto log files will have to be manually enabled (for eg: using http://linuxcommand.org/man_pages/logrotate8.html)
 
-<<<<<<< HEAD
-* Presto configuration files will be at ``/var/lib/presto/etc`` directory if you are using the default ``appConfig.json`` property ``site.global.config_dir``.  
-=======
 * Presto configuration files will be at ``/var/lib/presto/etc`` directory if you are using the default ``appConfig.json`` property ``site.global.config_dir``.
->>>>>>> Deploy Presto configuration files to a static location
 
 # Links
 
