@@ -48,8 +48,7 @@ class PrestoClusterTest
 
   private static final String JVM_HEAPSIZE = "1024.0MB"
   private static final String JVM_ARGS = "-DHADOOP_USER_NAME=hdfs -Duser.timezone=UTC"
-  private static final String ADDITIONAL_NODE_PROPERTY1 = "-Dplugin.config-dir="
-  private static final String ADDITIONAL_NODE_PROPERTY2 = "-Dplugin.dir="
+  private static final String ADDITIONAL_NODE_PROPERTY = "-Dplugin.dir="
   
   private static final long TIMEOUT = MINUTES.toMillis(4)
 
@@ -317,8 +316,7 @@ class PrestoClusterTest
     String coordinatorHost = prestoCluster.coordinatorHost
     def prestoProcess = nodeSshUtils.getPrestoJvmProcess(coordinatorHost)
 
-    assertThat(prestoProcess).contains(ADDITIONAL_NODE_PROPERTY1)
-    assertThat(prestoProcess).contains(ADDITIONAL_NODE_PROPERTY2)
+    assertThat(prestoProcess).contains(ADDITIONAL_NODE_PROPERTY)
   }
   
   private void assertThatJvmArgsAreCorrect(PrestoCluster prestoCluster)

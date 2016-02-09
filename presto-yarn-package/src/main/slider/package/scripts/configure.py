@@ -28,6 +28,9 @@ def set_configuration(component=None):
     """
     import params
 
+    if (os.path.exists(format("{conf_dir}"))):
+        shutil.rmtree(format("{conf_dir}"))
+                      
     _directory(params.conf_dir, params)
     _directory(params.catalog_dir, params)
     _directory(params.pid_dir, params)
@@ -36,7 +39,10 @@ def set_configuration(component=None):
     _template_config("{params.conf_dir}/config.properties", params, component)
     _template_config("{params.conf_dir}/node.properties", params)
     _template_config("{params.conf_dir}/queues.json", params)
-    
+
+    with open(format("{params.conf_dir}/README.txt"), 'a') as fw:
+        warning_string = 'DO NOT manually modify the configuration here. This is deployed via YARN-Slider and overwritten every time the application starts.'
+        fw.write("%s" % warning_string)
 
     if params.jvm_args:
         _parse_array_and_write(params.jvm_args, format("{params.conf_dir}/jvm.config"))
