@@ -28,6 +28,9 @@ def set_configuration(component=None):
     """
     import params
 
+    if (os.path.exists(format("{conf_dir}"))):
+        shutil.rmtree(format("{conf_dir}"))
+                      
     _directory(params.conf_dir, params)
     _directory(params.catalog_dir, params)
     _directory(params.pid_dir, params)
