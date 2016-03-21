@@ -11,26 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.teradata.presto.yarn.utils;
 
-package com.teradata.presto.yarn.utils
+import java.util.Iterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-
-public class TimeUtils
+public class Streams
 {
-  public static void retryUntil(Closure<Boolean> condition, long timeoutInMilliseconds)
-  {
-    long startTime = System.currentTimeMillis()
-
-    while (System.currentTimeMillis() - startTime < timeoutInMilliseconds) {
-      if (condition()) {
-        return
-      }
-
-      Thread.sleep(TimeUnit.SECONDS.toMillis(4))
+    public static <T> Stream<T> stream(Iterator<T> iterator)
+    {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
     }
-
-    throw new TimeoutException('exceeded timeout')
-  }
 }

@@ -12,25 +12,23 @@
  * limitations under the License.
  */
 
-package com.teradata.presto.yarn.fulfillment
+package com.teradata.presto.yarn.fulfillment;
 
-import com.teradata.tempto.Requirement
-import com.teradata.tempto.RequirementsProvider
-import com.teradata.tempto.configuration.Configuration
-import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement
+import com.teradata.tempto.Requirement;
+import com.teradata.tempto.RequirementsProvider;
+import com.teradata.tempto.configuration.Configuration;
+import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 
-import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions.NATION
-
+import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions.NATION;
 
 public class ImmutableNationTable
-        implements RequirementsProvider 
+        implements RequirementsProvider
 {
-    public static final Requirement NATION_TABLE = new ImmutableTableRequirement(NATION);
-
     @Override
-    public Requirement getRequirements(Configuration configuration) 
+    public Requirement getRequirements(Configuration configuration)
     {
         return NATION_TABLE;
     }
-}
 
+    public static final Requirement NATION_TABLE = new ImmutableTableRequirement(NATION);
+}
