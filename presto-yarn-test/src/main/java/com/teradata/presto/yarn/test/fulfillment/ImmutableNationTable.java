@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.presto.yarn.fulfillment;
+package com.teradata.presto.yarn.test.fulfillment;
 
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;

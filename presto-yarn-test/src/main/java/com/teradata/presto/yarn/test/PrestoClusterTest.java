@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn;
+package com.teradata.presto.yarn.test;
 
 import com.google.inject.Inject;
-import com.teradata.presto.yarn.fulfillment.ImmutableNationTable;
-import com.teradata.presto.yarn.slider.Slider;
-import com.teradata.presto.yarn.utils.NodeSshUtils;
+import com.teradata.presto.yarn.test.fulfillment.ImmutableNationTable;
+import com.teradata.presto.yarn.test.slider.Slider;
+import com.teradata.presto.yarn.test.utils.NodeSshUtils;
 import com.teradata.tempto.BeforeTestWithContext;
 import com.teradata.tempto.ProductTest;
 import com.teradata.tempto.Requires;
@@ -36,9 +36,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.facebook.presto.hive.$internal.com.google.common.base.Preconditions.checkState;
-import static com.teradata.presto.yarn.PrestoCluster.WORKER_COMPONENT;
-import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil;
+import static com.google.common.base.Preconditions.checkState;
+import static com.teradata.presto.yarn.test.PrestoCluster.WORKER_COMPONENT;
+import static com.teradata.presto.yarn.test.utils.TimeUtils.retryUntil;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
 import static java.sql.JDBCType.BIGINT;

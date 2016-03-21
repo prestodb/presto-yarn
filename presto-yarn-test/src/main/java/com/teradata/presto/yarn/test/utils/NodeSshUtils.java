@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn.utils;
+package com.teradata.presto.yarn.test.utils;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -31,12 +31,11 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.base.CharMatcher.anyOf;
 import static com.google.common.base.Preconditions.checkState;
-import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil;
+import static com.teradata.presto.yarn.test.utils.TimeUtils.retryUntil;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toList;

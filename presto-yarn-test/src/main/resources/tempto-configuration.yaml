@@ -1,7 +1,7 @@
 cluster:
   vcores: 8
-  master: master
   prepared: ${CLUSTER_PREPARED:-false}
+  master: master
   slaves:
     - slave1
     - slave2
@@ -14,15 +14,6 @@ hdfs:
     port: 50070
 
 databases:
-  presto:
-    host: ${cluster.master}
-    port: ${PRESTO_MASTER_PORT:-8080}
-    jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
-    jdbc_url: jdbc:presto://${databases.presto.host}:${databases.presto.port}/hive/default
-    jdbc_user: hdfs
-    jdbc_password: na
-    jdbc_pooling: false
-    table_manager_type: jdbc
   hive:
     host: ${cluster.master}
     jdbc_driver_class: org.apache.hive.jdbc.HiveDriver

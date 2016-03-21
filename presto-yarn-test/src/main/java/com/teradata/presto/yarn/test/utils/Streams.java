@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn.utils;
+package com.teradata.presto.yarn.test.utils;
 
 import java.util.Iterator;
 import java.util.Spliterators;

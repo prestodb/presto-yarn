@@ -11,14 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn.fulfillment;
+package com.teradata.presto.yarn.test.fulfillment;
 
-import com.facebook.presto.jdbc.internal.guava.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import com.teradata.presto.yarn.slider.Slider;
+import com.teradata.presto.yarn.test.slider.Slider;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.fulfillment.RequirementFulfiller;
+import com.teradata.tempto.fulfillment.TestStatus;
 import com.teradata.tempto.ssh.SshClient;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
-@RequirementFulfiller.AutoSuiteLevelFulfiller
+@RequirementFulfiller.AutoSuiteLevelFulfiller(priority = 2)
 public class SliderClusterFulfiller
         implements RequirementFulfiller
 {
@@ -74,7 +75,7 @@ public class SliderClusterFulfiller
     }
 
     @Override
-    public void cleanup()
+    public void cleanup(TestStatus testStatus)
     {
         slider.uninstallPackage(PACKAGE_NAME);
     }

@@ -11,15 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn;
+package com.teradata.presto.yarn.test;
 
 import com.facebook.presto.jdbc.PrestoDriver;
 import com.google.common.collect.ImmutableList;
-import com.teradata.presto.yarn.slider.Slider;
-import com.teradata.presto.yarn.slider.SliderStatus;
+import com.teradata.presto.yarn.test.slider.Slider;
+import com.teradata.presto.yarn.test.slider.SliderStatus;
+import com.teradata.presto.yarn.test.utils.SimpleJdbcQueryExecutor;
 import com.teradata.tempto.assertions.QueryAssert;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
-import com.teradata.tempto.query.JdbcQueryExecutor;
 import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
@@ -35,8 +35,8 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.teradata.presto.yarn.utils.Closures.withMethodHelper;
-import static com.teradata.presto.yarn.utils.TimeUtils.retryUntil;
+import static com.teradata.presto.yarn.test.utils.Closures.withMethodHelper;
+import static com.teradata.presto.yarn.test.utils.TimeUtils.retryUntil;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 public class PrestoCluster
@@ -69,7 +69,7 @@ public class PrestoCluster
     public void create()
     {
         cleanup();
-        checkState(!hdfsClient.exist(".slider/cluster/" + APP_NAME, "yarn"));
+        checkState(!hdfsClient.exist(".slider/cluster/" + APP_NAME));
 
         slider.create(APP_NAME, template, resource);
     }
@@ -132,7 +132,7 @@ public class PrestoCluster
         String url = "jdbc:presto://" + getCoordinatorHost() + ":8080";
         log.info("Waiting for Presto at connection url: " + url + "...");
 
-        return new JdbcQueryExecutor(getPrestoConnection(url), url);
+        return new SimpleJdbcQueryExecutor(getPrestoConnection(url));
     }
 
     private Connection getPrestoConnection(String url)

@@ -1,4 +1,4 @@
-package com.teradata.presto.yarn.utils;
+package com.teradata.presto.yarn.test.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;

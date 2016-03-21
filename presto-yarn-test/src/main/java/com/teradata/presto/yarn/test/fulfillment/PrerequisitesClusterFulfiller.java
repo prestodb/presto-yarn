@@ -11,15 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn.fulfillment;
+package com.teradata.presto.yarn.test.fulfillment;
 
-import com.facebook.presto.hive.$internal.com.google.common.collect.ImmutableList;
-import com.facebook.presto.jdbc.internal.guava.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import com.teradata.presto.yarn.utils.NodeSshUtils;
+import com.teradata.presto.yarn.test.utils.NodeSshUtils;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.fulfillment.RequirementFulfiller;
+import com.teradata.tempto.fulfillment.TestStatus;
 import com.teradata.tempto.ssh.SshClient;
 import com.teradata.tempto.ssh.SshClientFactory;
 import org.slf4j.Logger;
@@ -33,9 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.teradata.presto.yarn.PrestoCluster.COORDINATOR_COMPONENT;
-import static com.teradata.presto.yarn.PrestoCluster.WORKER_COMPONENT;
-import static com.teradata.presto.yarn.slider.Slider.LOCAL_CONF_DIR;
+import static com.teradata.presto.yarn.test.PrestoCluster.COORDINATOR_COMPONENT;
+import static com.teradata.presto.yarn.test.PrestoCluster.WORKER_COMPONENT;
+import static com.teradata.presto.yarn.test.slider.Slider.LOCAL_CONF_DIR;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -105,7 +106,7 @@ public class PrerequisitesClusterFulfiller
     private void fixHdpMapReduce()
     {
         nodeSshUtils.withSshClient(master, sshClient -> {
-            sshClient.upload(Paths.get("target/test-classes/fix_hdp_mapreduce.sh"), "/tmp");
+            sshClient.upload(Paths.get("target/classes/fix_hdp_mapreduce.sh"), "/tmp");
             return sshClient.command("sh /tmp/fix_hdp_mapreduce.sh || true");
         });
     }
@@ -178,7 +179,7 @@ public class PrerequisitesClusterFulfiller
     }
 
     @Override
-    public void cleanup()
+    public void cleanup(TestStatus testStatus)
     {
     }
 }

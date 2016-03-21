@@ -29,9 +29,9 @@
     <description>Presto Yarn Test</description>
 
     <properties>
-        <skip.product.tests>true</skip.product.tests>
         <package.dir>${project.build.directory}/package</package.dir>
         <presto.server>presto-server-${presto.version}</presto.server>
+        <main-class>com.teradata.presto.yarn.test.Main</main-class>
     </properties>
 
     <build>
@@ -39,7 +39,7 @@
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
-                <targetPath>${project.build.directory}/test-classes</targetPath>
+                <targetPath>${project.build.directory}/classes</targetPath>
             </resource>
         </resources>
         <plugins>
@@ -50,7 +50,7 @@
                 <executions>
                     <execution>
                         <id>unpack slider</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
@@ -69,7 +69,7 @@
                     </execution>
                     <execution>
                         <id>unpack presto app package</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -87,7 +87,7 @@
                     </execution>
                     <execution>
                         <id>copy presto-ml to plugins</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
@@ -99,7 +99,7 @@
                     </execution>
                     <execution>
                         <id>unpack presto server tarball</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -117,7 +117,7 @@
                     </execution>
                     <execution>
                         <id>unpack configuration files</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -138,29 +138,17 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <environmentVariables>
-                        <PRESTO_PRODUCT_TESTS_ROOT>${project.basedir}/</PRESTO_PRODUCT_TESTS_ROOT>
-                    </environmentVariables>
-                    <skipTests>${skip.product.tests}</skipTests>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>${maven-assembly-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>build presto server tar excluding ml</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <descriptor>${project.basedir}/src/test/assembly/presto-server.xml</descriptor>
+                            <descriptor>${project.basedir}/src/main/assembly/presto-server.xml</descriptor>
                             <appendAssemblyId>false</appendAssemblyId>
                             <finalName>${presto.server}</finalName>
                             <outputDirectory>${package.dir}/${app.package.name}/package/files</outputDirectory>
@@ -168,15 +156,39 @@
                     </execution>
                     <execution>
                         <id>build presto app package for tests</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <descriptor>${project.basedir}/src/test/assembly/presto-app.xml</descriptor>
+                            <descriptor>${project.basedir}/src/main/assembly/presto-app.xml</descriptor>
                             <appendAssemblyId>false</appendAssemblyId>
                             <finalName>${app.package.name}</finalName>
                             <outputDirectory>${package.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>executable</shadedClassifierName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>${main-class}</Main-Class>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
@@ -191,16 +203,19 @@
             <version>${tempto.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.teradata.tempto</groupId>
+            <artifactId>tempto-runner</artifactId>
+            <version>${tempto.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-jdbc</artifactId>
             <version>${presto.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.facebook.presto.hive</groupId>
             <artifactId>hive-apache-jdbc</artifactId>
             <version>${hive-jdbc.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -213,15 +228,5 @@
             <version>${presto.version}</version>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>productTests</id>
-            <properties>
-                <skip.product.tests>false</skip.product.tests>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>
 

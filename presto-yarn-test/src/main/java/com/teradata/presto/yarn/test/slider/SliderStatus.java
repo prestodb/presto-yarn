@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn.slider;
+package com.teradata.presto.yarn.test.slider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.teradata.presto.yarn.utils.Streams.stream;
+import static com.teradata.presto.yarn.test.utils.Streams.stream;
 
 public class SliderStatus
 {
@@ -41,7 +41,7 @@ public class SliderStatus
     public List<String> getLiveComponentsHost(String component)
     {
         return stream(getLiveComponents(component)).
-                map(liveComponent -> liveComponent.path("host").toString())
+                map(liveComponent -> liveComponent.path("host").asText())
                 .collect(Collectors.toList());
     }
 
@@ -57,6 +57,6 @@ public class SliderStatus
 
     public int getLiveContainers(String component)
     {
-        return status.path("statistics").path(component).path("container").path("live").asInt();
+        return status.path("statistics").path(component).path("containers.live").asInt();
     }
 }

@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.presto.yarn.slider;
+package com.teradata.presto.yarn.test.slider;
 
-import com.teradata.presto.yarn.utils.FileDigesters;
+import com.teradata.presto.yarn.test.utils.FileDigesters;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.process.CommandExecutionException;
 import com.teradata.tempto.ssh.SshClient;
@@ -32,7 +32,7 @@ public class Slider
     private static final Logger log = LoggerFactory.getLogger(Slider.class);
 
     private static final String SLIDER_REMOTE_CONF_DIR = "slider-0.80.0-incubating/conf/";
-    public static final String LOCAL_CONF_DIR = "target/test-classes/conf";
+    public static final String LOCAL_CONF_DIR = "target/classes/conf";
     private final SshClient sshClient;
 
     public Slider(SshClient sshClient)
