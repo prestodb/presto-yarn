@@ -1,4 +1,6 @@
-# Pre-requisities
+# Presto-yarn [![Build Status](https://travis-ci.org/prestodb/presto-yarn.svg?branch=master)](https://travis-ci.org/prestodb/presto-yarn)
+
+## Pre-requisities
 
 * A cluster with HDP 2.2+ or CDH5.4+ installed
 * Apache Slider 0.80.0
@@ -7,11 +9,11 @@
 * openssl >= 1.0.1e-16
 * Ambari (optional) 2.1
 
-# Create Presto App Package
+## Create Presto App Package
 
 First step is to build the ``presto-yarn-package-<version>-<presto-version>.zip`` package to deploy Presto on YARN.
 
-## Building the project
+### Building the project
 
 Run ```mvn clean package``` and the presto app package will be packaged at ``presto-yarn-package/target/presto-yarn-package-<version>-<presto-version>.zip``.
 
@@ -48,11 +50,11 @@ Archive:  ../presto-yarn-package-1.0.0-SNAPSHOT-0.130.zip
 411474867                     20 files
 ```
 
-# Presto-YARN deployment 
+## Presto-YARN deployment 
 
 Presto on YARN can be set up either manually using Apache Slider or via Ambari Slider Views if you are planning to use HDP distribution.
 
-## <a name="packageconfig"></a> Presto App Package configuration
+### <a name="packageconfig"></a> Presto App Package configuration
 
 There are some sample configuration options files available at ``presto-yarn-package/src/main/resources`` directory in the repository. ``appConfig.json`` and ``resources-[singlenode|mutlinode].json`` files are the two major configuration files you need to configure before you can get Presto running on YARN. Copy the ``presto-yarn-package/src/main/resources/appConfig.json`` and ``presto-yarn-package/src/main/resources/resources-[singlenode|multinode].json`` to a local file at a location where you are planning to run Slider. Name them as ``appConfig.json`` and ``resources.json``. Update these sample json files with whatever configurations you want to have for Presto. If you are ok with the default values in the sample file you can just use them as-is. 
 
@@ -62,7 +64,7 @@ The "default" values listed for the sections [appConfig.json](#appconfig) and [r
 
 Follow the steps here and configure the presto-yarn configuration files to match your cluster requirements. Optional ones are marked (optional). Please do not change any variables other than the ones listed below.
 
-### <a name="appconfig"></a> appConfig.json
+#### <a name="appconfig"></a> appConfig.json
 
 * ``site.global.app_user`` (default - ``yarn``): This is the user which will be launching the YARN application for Presto. So all the Slider commands (using ``bin/slider`` script) will be run as this user. Make sure that you have a HDFS home directory created for the ``app_user``. Eg: for user ``yarn`` create ```/user/yarn``` with ```yarn``` user as an owner.
 
@@ -117,7 +119,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
     
 * Variables in ``appConfig.json`` like ``${COORDINATOR_HOST}``, ``${AGENT_WORK_ROOT}`` etc. do not need any substitution and will be appropriately configured during runtime.
 
-### <a name="resources"></a> resources.json
+#### <a name="resources"></a> resources.json
 
 The configuration here can be added either globally (for COORDINATOR and WORKER) or for each component. Refer [configuration](#advanced) section for further details.
 
@@ -132,7 +134,7 @@ If you want to deploy Presto on a single node (``site.global.singlenode`` set to
 
 Now you are ready to deploy Presto on YARN either manually or via Ambari.
 
-## Manual Installation via Slider
+### Manual Installation via Slider
 
 * Download the slider 0.80.0 installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster
 
@@ -186,11 +188,11 @@ bin/slider create presto1 --template appConfig.json --resources resources.json (
 
 This should start your application, and you can see it under the Yarn ResourceManager webUI.
 
-### Additional Slider commands
+#### Additional Slider commands
 
 Some additional slider commands to manage your existing Presto application.
 
-#### <a name="status"></a> Check the status
+##### <a name="status"></a> Check the status
 
 If you want to check the status of running application you run the following, and you will have status printed to a file ``status_file``
 
@@ -198,7 +200,7 @@ If you want to check the status of running application you run the following, an
 bin/slider status presto1 --out status_file
 ```
 
-#### Destroy the app and re-create
+##### Destroy the app and re-create
 
 If you want to re-create the app due to some failures or you want to reconfigure Presto (eg: add a new connector)
 
@@ -207,7 +209,7 @@ bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
 ```
 
-#### 'Flex'ible app
+##### 'Flex'ible app
 
 Flex the number of Presto workers to the new value. If greater than before, new copies of the  worker will be requested. If less, component instances will be destroyed.
 
@@ -222,7 +224,7 @@ bin/slider flex presto1 --component WORKER 2
 Please note that if your cluster already had 3 WORKER nodes running, the above command will destroy one of them and retain 2 WORKERs.
 
 
-## <a name="sliderview"></a> Installation using Ambari Slider View
+### <a name="sliderview"></a> Installation using Ambari Slider View
 
 You can also deploy Presto in Yarn via Ambari. Ambari provides Slider integration and also supports deploying any Slider application package using Slider 'views'. Slider View for Ambari delivers an integrated experience for deploying and managing Slider apps from Ambari Web.
 
@@ -268,13 +270,13 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 * You can manage the application lifecycle (e.g. start, stop, flex, destroy) from the View UI.
 
-### Reconfiguration in Slider View
+#### Reconfiguration in Slider View
 
 Once the application is launched if you want to update the configuration of Presto (eg: add a new connector), first go to ``Actions`` on the Slider View instance screen and stop the running application.
 
 Once the running YARN application is stopped, under ``Actions`` you will have an option to ``Destroy`` the existing Presto instance running via Slider. ``Destroy`` the existing one and re-create a new app (``Create App`` button) with whatever updates you want to make to the configuration.
 
-## Presto Installation Directory Structure
+### Presto Installation Directory Structure
 
 If you use Slider scripts or use Ambari slider view to set up Presto on YARN, Presto is going to be installed using the Presto server tarball (and not the rpm). Installation happens when the YARN application is launched and you can find the Presto server installation directory under the ``yarn.nodemanager.local-dirs`` on your YARN nodemanager nodes. If for example, your ``yarn.nodemanager.local-dirs`` is ``/mnt/hadoop/nm-local-dirs`` and ``app_user`` is ``yarn``, you can find Presto is installated under ``/mnt/hadoop-hdfs/nm-local-dir/usercache/yarn/appcache/application_<id>/container_<id>/app/install/presto-server-<version>``. The first part of this path (till the container_id) is called the AGENT_WORK_ROOT in Slider and so in terms of that, Presto is available under ``AGENT_WORK_ROOT/app/install/presto-server-<version>``.
 
@@ -282,11 +284,11 @@ Normally for a tarball installed Presto the catalog, plugin and lib directories 
 
 The Presto logs are available at locations based on your configuration for data directory. If you have it configured at ``/var/lib/presto/data`` in ``appConfig.json`` then you will have Presto logs at ``/var/lib/presto/data/var/log/``.
 
-## <a name="advanced"></a> Advanced Configuration
+### <a name="advanced"></a> Advanced Configuration
 
 A little deeper explanation on various configuration options available.
 
-### Configuring memory and CPU
+#### Configuring memory and CPU
 
 Memory and CPU related configuration properties must be modified as per your cluster configuration and requirements.
 
@@ -324,7 +326,7 @@ Slider can also define YARN queues to submit the application creation request to
     </property>
 ```
 
-### Failure policy
+#### Failure policy
 
 Follow this section if you want to change the default Slider failure policy. Yarn containers hosting Presto may fail due to some misconfiguration in Presto or some other conflicts. The number of times the component may fail within a failure window is defined in ``resources.json``.
 
@@ -343,7 +345,7 @@ Based on the placement policy there are two more failure related properties you 
 Take a look here: http://slider.incubator.apache.org/docs/configuration/resources.html#failurepolicy for more details on failure policy.
 
 
-### <a name="label"></a> Using YARN label
+#### <a name="label"></a> Using YARN label
 
 This is an optional feature and is not required to run Presto in YARN. To guarantee that a certain set of nodes are reserved for deploying Presto or to configure a particular node for a component type we can make use of YARN label expressions.
 
@@ -370,7 +372,7 @@ If a label expression is specified for the slider-appmaster component then it al
 
 where coordinator and worker are the node labels created and configured with a scheduler queue in YARN
 
-# Debugging and Logging
+## Debugging and Logging
 
 * Once the YARN application is launched, you can monitor the status at YARN ResourceManager WebUI. 
 
@@ -398,7 +400,7 @@ See http://slider.incubator.apache.org/docs/configuration/resources.html#logagg 
 
 * Presto configuration files will be at ``/var/lib/presto/etc`` directory if you are using the default ``appConfig.json`` property ``site.global.config_dir``. The configuration files here will be generated by Slider and overwritten for every application restart. These files should NOT be modified manually.
 
-# Links
+## Links
 
  * http://slider.incubator.apache.org/docs/getting_started.html
  * http://docs.hortonworks.com/HDPDocuments/Ambari-2.0.1.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html
