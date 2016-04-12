@@ -13,7 +13,6 @@
  */
 package com.teradata.presto.yarn.test.slider;
 
-import com.teradata.presto.yarn.test.utils.FileDigesters;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.process.CommandExecutionException;
 import com.teradata.tempto.ssh.SshClient;
@@ -21,10 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.teradata.presto.yarn.test.utils.Resources.extractResource;
 
 public class Slider
         implements State
@@ -32,7 +31,6 @@ public class Slider
     private static final Logger log = LoggerFactory.getLogger(Slider.class);
 
     private static final String SLIDER_REMOTE_CONF_DIR = "slider-0.80.0-incubating/conf/";
-    public static final String LOCAL_CONF_DIR = "target/classes/conf";
     private final SshClient sshClient;
 
     public Slider(SshClient sshClient)
@@ -49,9 +47,9 @@ public class Slider
 
         sshClient.command("unzip " + String.valueOf(upload(sliderBinary)));
 
-        sshClient.upload(Paths.get(LOCAL_CONF_DIR, "slider", "log4j.properties"), SLIDER_REMOTE_CONF_DIR);
-        sshClient.upload(Paths.get(LOCAL_CONF_DIR, "slider", "slider-client.xml"), SLIDER_REMOTE_CONF_DIR);
-        sshClient.upload(Paths.get(LOCAL_CONF_DIR, "slider", "slider-env.sh"), SLIDER_REMOTE_CONF_DIR);
+        sshClient.upload(extractResource("/conf/slider/log4j.properties"), SLIDER_REMOTE_CONF_DIR);
+        sshClient.upload(extractResource("/conf/slider/slider-client.xml"), SLIDER_REMOTE_CONF_DIR);
+        sshClient.upload(extractResource("/conf/slider/slider-env.sh"), SLIDER_REMOTE_CONF_DIR);
     }
 
     private Path upload(Path path)
@@ -74,38 +72,14 @@ public class Slider
 
     public void installLocalPackage(Path clusterPackage, final String packageName)
     {
-        final Path remotePackage = uploadIfNeeded(clusterPackage);
-        action("package --install --name " + packageName + " --package " + String.valueOf(remotePackage) + " --replacepkg");
+        upload(clusterPackage);
+        Path remotePackage = clusterPackage.getFileName();
+        action("package --install --name " + packageName + " --package " + remotePackage + " --replacepkg");
     }
 
     public void uninstallPackage(final String packageName)
     {
         action("package --delete --name " + packageName);
-    }
-
-    private Path uploadIfNeeded(Path clusterPackage)
-    {
-        final Path packageName = clusterPackage.getFileName();
-        if (checkMd5OfUploadedFile(clusterPackage)) {
-            log.info("Package " + String.valueOf(packageName) + " is already uploaded. Md5sum checksums match.");
-        }
-        else {
-            upload(clusterPackage);
-            checkState(checkMd5OfUploadedFile(clusterPackage), "Uploaded file is corrupted, please try again");
-        }
-
-        return packageName;
-    }
-
-    private boolean checkMd5OfUploadedFile(Path clusterPackage)
-    {
-        final String localMd5sum = FileDigesters.md5sum(clusterPackage);
-
-        final Path packageName = clusterPackage.getFileName();
-        final String remoteMd5sum = sshClient.command("md5sum " + String.valueOf(packageName) + " || echo 0").split(" ")[0];
-        log.debug("md5sum checksums: " + localMd5sum + " (local), " + remoteMd5sum + " (remote)");
-
-        return localMd5sum.equals(remoteMd5sum);
     }
 
     public void cleanup(final String appName)

@@ -54,11 +54,12 @@ public class PrestoClusterTest
 
     private static final String APP_CONFIG_WITHOUT_CATALOG_TEMPLATE = "appConfig-test-no-catalog.json";
     private static final String APP_CONFIG_TEST_TEMPLATE = "appConfig-test.json";
-    private static final String JVM_HEAPSIZE = "1024.0MB";
+    private static final long JVM_HEAPSIZE = 1024 * 1024 * 1024;
     private static final String JVM_ARGS = "-DHADOOP_USER_NAME=hdfs -Duser.timezone=UTC";
     private static final String ADDITIONAL_NODE_PROPERTY = "-Dplugin.dir=";
     private static final long TIMEOUT = MINUTES.toMillis(4);
     private static final long FLEX_RETRY_TIMEOUT = MINUTES.toMillis(10);
+    private static final String HDP2_3_QUARANTINE = "hdp2.3_quarantine";
 
     @Inject
     private HdfsClient hdfsClient;
@@ -74,38 +75,44 @@ public class PrestoClusterTest
     @Named("cluster.master")
     private String master;
     @Inject
-    @Named("cluster.vcores")
-    private int vcoresPerNode;
-    @Inject
     @Named("cluster.slaves")
     private List<String> workers;
+    @Inject
+    @Named("tests.slider.conf_dir")
+    private String sliderConfDirPath;
 
     @BeforeTestWithContext
     public void setUp()
     {
         int nodesCount = workers.size() + 1;
-        if (nodeSshUtils.getNodeIds().size() == nodesCount) {
+        int actualNodesCount = nodeSshUtils.getNodeIds().size();
+        if (actualNodesCount == nodesCount) {
             log.info("All nodemanagers are running..Skip restart");
         }
         else {
-            restartNodeManagers();
-            retryUntil(() -> nodeSshUtils.getNodeIds().size() == nodesCount, MINUTES.toMillis(2));
+            log.info(
+                    "There are {} nodemanagers are running, missing {}. Clearing Yarn cache and restarting nodemanagers.",
+                    actualNodesCount,
+                    nodesCount - actualNodesCount);
+            nodeSshUtils.runOnNode(master, singletonList("rm -rf /tmp/hadoop-yarn/nm-local-dir"));
+            restartYarn();
+            retryUntil(() -> nodeSshUtils.getNodeIds().size() >= nodesCount, MINUTES.toMillis(2));
         }
     }
 
-    public void restartNodeManagers()
+    public void restartYarn()
     {
-        String restartNodeManagerCommand = "/etc/init.d/hadoop-yarn-nodemanager restart || true";
+        String restartNodeManagerCommand = "supervisorctl restart yarn-nodemanager";
         nodeSshUtils.runOnNode(master, restartNodeManagerCommand);
         workers.forEach(worker -> nodeSshUtils.runOnNode(worker, restartNodeManagerCommand));
 
-        nodeSshUtils.runOnNode(master, "/etc/init.d/hadoop-yarn-resourcemanager restart || true");
+        nodeSshUtils.runOnNode(master, "supervisorctl restart yarn-resourcemanager");
     }
 
     @Test
     public void singleNodePrestoAppLifecycle()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-singlenode.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-singlenode.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(0);
 
@@ -126,7 +133,7 @@ public class PrestoClusterTest
     @Test
     public void singleNodePrestoAppMissingCatalog()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-singlenode.json", APP_CONFIG_WITHOUT_CATALOG_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-singlenode.json", APP_CONFIG_WITHOUT_CATALOG_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(0);
 
@@ -139,7 +146,7 @@ public class PrestoClusterTest
     @Test
     public void singleNodePrestoAppAddingPlugin()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-singlenode.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-singlenode.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(0);
 
@@ -155,22 +162,20 @@ public class PrestoClusterTest
         });
     }
 
-    @Test
+    @Test(groups = HDP2_3_QUARANTINE)
     public void limitSingleNodeFailures()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-singlenode-label.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath,  "resources-singlenode-label.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(0);
 
-            final String coordinatorHost = prestoCluster.getCoordinatorHost();
-
+            String coordinatorHost = prestoCluster.getCoordinatorHost();
             for (int i = 0; i < 5; i++) {
                 Assertions.assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isEqualTo(1);
                 nodeSshUtils.killPrestoProcesses(coordinatorHost);
 
-                retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == 1, TIMEOUT);
-
                 Assertions.assertThat(prestoCluster.status().isPresent()).isTrue();
+                retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == 1, TIMEOUT);
             }
 
             // presto cluster should fail after 5 failures in a row
@@ -179,10 +184,10 @@ public class PrestoClusterTest
         });
     }
 
-    @Test
+    @Test(groups = HDP2_3_QUARANTINE)
     public void multiNodeWithPlacementLifecycle()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-multinode.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-multinode.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(workersCount());
 
@@ -209,7 +214,7 @@ public class PrestoClusterTest
     @Requires(ImmutableNationTable.class)
     public void multiNodeWithPlacementCheckingConnectors()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-multinode.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-multinode.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(workersCount());
 
@@ -221,18 +226,19 @@ public class PrestoClusterTest
             assertThatCountFromNationWorks(hiveQueryExecutor, "nation");
         });
     }
-
-    public void waitForNodesToBeActive(final QueryExecutor queryExecutor, final PrestoCluster prestoCluster)
+    public void waitForNodesToBeActive(QueryExecutor queryExecutor, PrestoCluster prestoCluster)
     {
         retryUntil(() ->
         {
-            QueryResult result = queryExecutor.executeQuery("select count(*) from system.runtime.nodes");
-            log.debug("Number of active nodes: " + String.valueOf(result.rows()));
-            return result.rows().equals(singletonList(prestoCluster.getAllNodes().size()));
+            QueryResult result = queryExecutor.executeQuery("select * from system.runtime.nodes");
+            Collection<String> allNodes = prestoCluster.getAllNodes()   ;
+            log.info("Active nodes: {}, presto nodes: {}", result.rows(), allNodes);
+            result = queryExecutor.executeQuery("select count(*) from system.runtime.nodes");
+            return result.rows().contains(singletonList((long)allNodes.size()));
         }, TIMEOUT);
     }
 
-    public void waitForPrestoConnectors(final QueryExecutor queryExecutor, List<String> connectors)
+    public void waitForPrestoConnectors(QueryExecutor queryExecutor, List<String> connectors)
     {
         List<List<String>> connectorRows = connectors.stream()
                 .map(Collections::singletonList)
@@ -244,7 +250,7 @@ public class PrestoClusterTest
         }, TIMEOUT);
     }
 
-    private void assertThatCountFromNationWorks(QueryExecutor queryExecutor, final String nationTable)
+    private void assertThatCountFromNationWorks(QueryExecutor queryExecutor, String nationTable)
     {
         assertThat(queryExecutor.executeQuery("select count(*) from " + nationTable)).hasColumns(BIGINT).containsExactly(row(25));
     }
@@ -252,7 +258,7 @@ public class PrestoClusterTest
     @Test
     public void labelingSubsetOfNodesSingleCoordinatorAtMaster()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-single-coordinator@master.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-single-coordinator@master.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(0);
 
@@ -265,7 +271,7 @@ public class PrestoClusterTest
     @Test
     public void flexSetOfWorkersMultinodeFlexWorker()
     {
-        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, "resources-multinode-single-worker.json", APP_CONFIG_TEST_TEMPLATE);
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-multinode-single-worker.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
             prestoCluster.assertThatPrestoIsUpAndRunning(1);
             assertThatAllProcessesAreRunning(prestoCluster);
@@ -278,7 +284,7 @@ public class PrestoClusterTest
         });
     }
 
-    public void waitForWorkers(final int nodeCount, final String component, final PrestoCluster prestoCluster)
+    public void waitForWorkers(int nodeCount, String component, PrestoCluster prestoCluster)
     {
         retryUntil(() -> {
             int liveContainers = prestoCluster.getLiveContainers(component);
@@ -298,7 +304,7 @@ public class PrestoClusterTest
     private void assertThatMemorySettingsAreCorrect(PrestoCluster prestoCluster)
     {
         String coordinatorHost = prestoCluster.getCoordinatorHost();
-        String prestoJvmMemory = nodeSshUtils.getPrestoJvmMemory(coordinatorHost);
+        long prestoJvmMemory = nodeSshUtils.getPrestoJvmMemory(coordinatorHost);
 
         Assertions.assertThat(prestoJvmMemory).isEqualTo(JVM_HEAPSIZE);
     }
@@ -321,17 +327,17 @@ public class PrestoClusterTest
 
     private void assertThatAllProcessesAreRunning(PrestoCluster prestoCluster)
     {
-        log.info("Presto processes distribution: %s", prestoCluster.getAllNodes());
+        log.info("Presto processes distribution: {}", prestoCluster.getAllNodes());
         prestoCluster.getAllNodes().forEach(node -> Assertions.assertThat(nodeSshUtils.countOfPrestoProcesses(node)).isEqualTo(1));
     }
 
     private void assertThatKilledProcessesRespawn(PrestoCluster prestoCluster)
     {
-        final String coordinatorHost = prestoCluster.getCoordinatorHost();
-        final int processesCount = nodeSshUtils.countOfPrestoProcesses(coordinatorHost);
+        String coordinatorHost = prestoCluster.getCoordinatorHost();
+        int processesCount = nodeSshUtils.countOfPrestoProcesses(coordinatorHost);
         nodeSshUtils.killPrestoProcesses(coordinatorHost);
 
-        retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == processesCount, TIMEOUT);
+        retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(prestoCluster.getCoordinatorHost()) == processesCount, TIMEOUT);
     }
 
     private void assertThatApplicationIsStoppable(PrestoCluster prestoCluster)
@@ -347,12 +353,14 @@ public class PrestoClusterTest
     private void assertThatPrestoYarnContainersUsesCgroup(PrestoCluster prestoCluster)
     {
         nodeSshUtils.withSshClient(prestoCluster.getAllNodes(), sshClient -> {
-            List<Integer> cpuQuotas = linesToInts(sshClient.command("cat /cgroup/cpu/yarn/container*/cpu.cfs_quota_us"));
-            List<Integer> cpuPeriods = linesToInts(sshClient.command("cat /cgroup/cpu/yarn/container*/cpu.cfs_period_us"));
+            String cgroupContainers = sshClient.command("ls /sys/fs/cgroup/cpu/yarn/container*");
+            List<Integer> cpuQuotas = linesToInts(sshClient.command("cat /sys/fs/cgroup/cpu/yarn/container*/cpu.cfs_quota_us"));
+            List<Integer> cpuPeriods = linesToInts(sshClient.command("cat /sys/fs/cgroup/cpu/yarn/container*/cpu.cfs_period_us"));
+            log.info("CPU cgroup configuration: containers: {}, quota: {}, periods: {}", cgroupContainers, cpuQuotas, cpuPeriods);
             Assertions.assertThat(cpuPeriods.size()).isEqualTo(cpuQuotas.size());
             for (int i = 0; i < cpuQuotas.size(); i++) {
                 double cpuUsed = (double) cpuQuotas.get(i) / cpuPeriods.get(i);
-                Assertions.assertThat(cpuUsed).isCloseTo(1.0 / vcoresPerNode, offset(0.1));
+                Assertions.assertThat(cpuUsed).isCloseTo(1.0, offset(0.01));
             }
             return null;
         });

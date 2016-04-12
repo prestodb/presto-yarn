@@ -51,4 +51,6 @@ public class TimeUtils
             throw new RuntimeException(e);
         }
     }
+
+    private TimeUtils() {}
 }

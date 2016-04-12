@@ -3,7 +3,25 @@
 <configuration>
   <property>
     <name>yarn.application.classpath</name>
-    <value>/etc/hadoop/conf,/usr/lib/hadoop/*,/usr/lib/hadoop/lib/*,/usr/lib/hadoop-hdfs/*,/usr/lib/hadoop-hdfs/lib/*,/usr/lib/hadoop-yarn/*,/usr/lib/hadoop-yarn/lib/*,/usr/lib/hadoop-mapreduce/*,/usr/lib/hadoop-mapreduce/lib/*</value>
+    <value>
+      /etc/hadoop/conf,
+      /usr/lib/hadoop/*,
+      /usr/lib/hadoop/lib/*,
+      /usr/lib/hadoop-hdfs/*,
+      /usr/lib/hadoop-hdfs/lib/*,
+      /usr/lib/hadoop-yarn/*,
+      /usr/lib/hadoop-yarn/lib/*,
+      /usr/lib/hadoop-mapreduce/*,
+      /usr/lib/hadoop-mapreduce/lib/*,
+      /usr/hdp/current/hadoop-client/*,
+      /usr/hdp/current/hadoop-client/lib/*,
+      /usr/hdp/current/hadoop-hdfs-client/*,
+      /usr/hdp/current/hadoop-hdfs-client/lib/*,
+      /usr/hdp/current/hadoop-yarn-client/*,
+      /usr/hdp/current/hadoop-yarn-client/lib/*,
+      /usr/hdp/current/hadoop-mapreduce-client/*,
+      /usr/hdp/current/hadoop-mapreduce-client/lib/*
+    </value>
   </property>
   <property>
     <name>yarn.log-aggregation-enable</name>
@@ -15,7 +33,7 @@
   </property>
   <property>
     <name>yarn.log.server.url</name>
-    <value>master:19888/jobhistory/logs</value>
+    <value>hadoop-master:19888/jobhistory/logs</value>
   </property>
   <property>
     <name>yarn.nodemanager.address</name>
@@ -47,7 +65,7 @@
   </property>
   <property>
     <name>yarn.nodemanager.remote-app-log-dir</name>
-    <value>/app-logs</value>
+    <value>/var/log/hadoop-yarn</value>
   </property>
   <property>
     <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
@@ -55,15 +73,15 @@
   </property>
   <property>
     <name>yarn.resourcemanager.address</name>
-    <value>master:8050</value>
+    <value>hadoop-master:8032</value>
   </property>
   <property>
     <name>yarn.resourcemanager.hostname</name>
-    <value>master</value>
+    <value>hadoop-master</value>
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value>master:8088</value>
+    <value>hadoop-master:8088</value>
   </property>
   <property>
     <name>yarn.scheduler.maximum-allocation-vcores</name>
@@ -71,6 +89,10 @@
   </property>
 
   <!-- labels -->
+  <property>
+    <name>yarn.node-labels.enabled</name>
+    <value>true</value>
+  </property>
   <property>
     <name>yarn.resourcemanager.scheduler.class</name>
     <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
@@ -81,7 +103,7 @@
   </property>
   <property>
     <name>yarn.node-labels.fs-store.root-dir</name>
-    <value>hdfs://master:8020/user/yarn/node-labels/</value>
+    <value>hdfs://hadoop-master:8020/user/yarn/node-labels/</value>
   </property>
 
   <!-- cgroups -->
@@ -103,7 +125,7 @@
   </property>
   <property>
     <name>yarn.nodemanager.linux-container-executor.cgroups.mount-path</name>
-    <value>/cgroup</value>
+    <value>/sys/fs/cgroup</value>
   </property>
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
@@ -120,6 +142,10 @@
   <property>
     <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.limit-users</name>
     <value>false</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.linux-container-executor.path</name>
+    <value>/usr/lib/hadoop-yarn/bin/container-executor</value>
   </property>
 
   <!-- disable memory checking work-around for SWARM-1825 -->

@@ -40,11 +40,13 @@ public class SliderClusterFulfiller
     private static final Logger log = LoggerFactory.getLogger(SliderClusterFulfiller.class);
 
     public static final String PACKAGE_NAME = "PRESTO";
-    private static final Path SLIDER_BINARY = Paths.get("target/package/slider-assembly-0.80.0-incubating-all.zip");
-
     @Inject
     @Named("tests.app_package.path")
-    private String presto_package_path;
+    private String prestoPackagePath;
+
+    @Inject
+    @Named("tests.slider.binary")
+    private String sliderBinaryPath;
     private final Slider slider;
 
     @Inject
@@ -57,7 +59,7 @@ public class SliderClusterFulfiller
     public Set<State> fulfill(Set<Requirement> requirements)
     {
         log.info("fulfilling slider cluster");
-        slider.install(SLIDER_BINARY);
+        slider.install(Paths.get(sliderBinaryPath));
 
         Path presto_app_package = Paths.get(getPrestoAppPackagePath());
         log.info("Using Presto package from: " + presto_app_package);
@@ -68,7 +70,7 @@ public class SliderClusterFulfiller
 
     private String getPrestoAppPackagePath()
     {
-        File dir = new File(presto_package_path);
+        File dir = new File(prestoPackagePath);
         FileFilter fileFilter = new WildcardFileFilter("presto-yarn-package*.zip");
         File[] files = dir.listFiles(fileFilter);
         return files[0].getPath();

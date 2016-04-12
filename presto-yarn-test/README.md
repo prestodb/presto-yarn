@@ -5,58 +5,48 @@
 
 In order to run product tests you need to have: 
 
- * a provisioned Red Hat based cluster with java 8 pre-installed. The cluster also needs HDP 2.2+ or CDH 5.4+ and any other pre-requisites mentioned at presto-yarn/README.md. For HDP installation, we recommend installing it the standard way/locations. We expect the hadoop configuration to be at ```/etc/hadoop/conf``` and use ```/etc/init.d/hadoop-yarn*``` scripts to manage yarn processes in the cluster.
+ * docker (tested with 1.10)
 
- * create a new file ```src/test/resources/tempto-configuration-local.yaml``` copying the sample at ```src/test/resources/tempto-configuration.yaml```. Set the ```master``` (coordinator for Presto) and a 'list' (follow yaml list format) of ```slaves``` (workers for Presto) hostnames under ```cluster```.
-
- * Yarn nodemanagers and any other pre-requisite service like Zookeeper should be running on all configured nodes.
-
- * the appConfig.json and resources-multinode.json used by the tests (available under src/main/resources/) are designed for a 4 node cluster (1 master and 3 slaves). If you have a different cluster configuration defined under ```cluster``` in your tempto-configuration-local.yaml, update the .json accordingly and run ```mvn install``` prior to running product tests
-
- * make sure that network locations (like a property ```yarn.resourcemanager.address, yarn.resourcemanager.scheduler.address, slider.zookeeper.quorum```) from ```src/test/resources/slider/conf/slider-client.xml``` file are accessible from your local machine
-
- * set a private key to connect any cluster node as root user, example settings:
-
-```
-ssh:
-  identity: path_to_your_key/insecure_key.pem
-```
-
- * set a number of virtual cores per node which is set in yarn on your cluster, by default it is set to ``8``
- 
-```
-cluster:
-  vcores: 8
-```
-
-> Note that running these tests may change the configuration of your cluster (services: yarn and cgroup, and yarm@master password).
+ * docker-compose (tested with 1.6.2)
 
 ## Execution
 
-To run product tests you need to enable maven profile ```productTests``` and then all product tests will be executed run during ```mvn test``` phase.
-```
-mvn test -PproductTests
-```
+Execution will spin up a docker cluster for hadoop with yarn. Such cluster consists of 4 docker containers with several jvm processes in it, so it is strongly recommended to run these tests on a highly capable workstation.
 
-## Debugging
+Before you run any product test you need to build test binaries:
 
 ```
-mvn test -PproductTests -Dmaven.surefire.debug
+mvn clean package
 ```
 
-## Running single test (single method)
+### Execution profiles
+
+There are two profiles which can be used for testing: 
+ - cdh5 - Cloudera distribution of hadoop
+ - hdp2.3 - Hortonworks distribution of hadoop
+
+> Note that there are two tests which fails for hdp2.3. They are marked with `hdp2.3_quarantine` test group.
+
+### Execution with automation script
 
 ```
-mvn test -PproductTests -Dtest=Presto*#multi* (Use -DfailIfNoTests=false flag if necessary)
+bin/run_on_docker.sh <profile>
 ```
 
-## Troubleshooting
-
- * In case you run a lot tests in row it is possible that hdfs usercache is getting so large causing yarn node go into state UNHEALTHY, to fix that run (replace the paths, if needed, as per your hadoop configuration):
+## Manual execution
 
 ```
-for node in master slave{1,2,3}; do
- ssh $node 'rm -rf  /mnt/hadoop-hdfs/nm-local-dir/*cache*'
- ssh $node /etc/init.d/hadoop-yarn-nodemanager restart
-done
+cd presto-yarn-test/etc/docker/<profile>
+docker-compose up -d
+# wait until everything get ready
+docker-compose run runner java -jar /workspace/target/presto-yarn-test-1.2-SNAPSHOT-executable.jar --config-local /workspace/etc/docker/tempto-configuration-docker-local.yaml
+```
+
+## Debugging product tests 
+
+```
+cd presto-yarn-test/etc/docker/<profile>
+docker-compose up -d
+# wait until everything get ready
+docker-compose run -p 5005:5005 runner java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -jar /workspace/target/presto-yarn-test-1.2-SNAPSHOT-executable.jar --config-local /workspace/etc/docker/tempto-configuration-docker-local.yaml
 ```

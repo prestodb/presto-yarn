@@ -3,7 +3,7 @@
 <configuration>
   <property>
     <name>yarn.scheduler.capacity.maximum-am-resource-percent</name>
-    <value>0.1</value>
+    <value>0.5</value>
   </property>
   <property>
     <name>yarn.scheduler.capacity.maximum-applications</name>
@@ -12,6 +12,12 @@
   <property>
     <name>yarn.scheduler.capacity.node-locality-delay</name>
     <value>-1</value>
+  </property>
+
+  <!-- queues -->
+  <property>
+    <name>yarn.scheduler.capacity.root.queues</name>
+    <value>default</value>
   </property>
   <property>
     <name>yarn.scheduler.capacity.root.default.acl_administer_queue</name>
@@ -37,6 +43,8 @@
     <name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
     <value>1</value>
   </property>
+
+  <!-- labels -->
   <property>
     <name>yarn.scheduler.capacity.root.default.accessible-node-labels</name>
     <value>coordinator,worker</value>
@@ -46,23 +54,19 @@
     <value>worker</value>
   </property>
   <property>
-    <name>yarn.scheduler.capacity.root.default.accessible-node-labels.coordinator.capacity</name>
-    <value>100</value>
-  </property>
-  <property>
-    <name>yarn.scheduler.capacity.root.default.accessible-node-labels.worker.capacity</name>
-    <value>100</value>
-  </property>
-  <property>
-    <name>yarn.scheduler.capacity.root.queues</name>
-    <value>default</value>
-  </property>
-  <property>
     <name>yarn.scheduler.capacity.root.accessible-node-labels.coordinator.capacity</name>
     <value>100</value>
   </property>
   <property>
+    <name>yarn.scheduler.capacity.root.default.accessible-node-labels.coordinator.capacity</name>
+    <value>100</value>
+  </property>
+  <property>
     <name>yarn.scheduler.capacity.root.accessible-node-labels.worker.capacity</name>
+    <value>100</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.default.accessible-node-labels.worker.capacity</name>
     <value>100</value>
   </property>
 </configuration>

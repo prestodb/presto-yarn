@@ -1,0 +1,15 @@
+ssh:
+  identity: /workspace/etc/docker/key
+cluster:
+  master: hadoop-master
+  slaves: 
+    - hadoop-slave1
+    - hadoop-slave2
+    - hadoop-slave3
+
+tests:
+  app_package:
+    path: /workspace/target/package
+  slider:
+    binary: /workspace/target/package/slider-assembly-0.80.0-incubating-all.zip
+    conf_dir: /workspace/target/package/

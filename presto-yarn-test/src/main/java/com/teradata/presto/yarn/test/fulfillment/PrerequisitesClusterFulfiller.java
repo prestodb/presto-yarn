@@ -21,6 +21,7 @@ import com.teradata.tempto.Requirement;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.fulfillment.RequirementFulfiller;
 import com.teradata.tempto.fulfillment.TestStatus;
+import com.teradata.tempto.process.CommandExecutionException;
 import com.teradata.tempto.ssh.SshClient;
 import com.teradata.tempto.ssh.SshClientFactory;
 import org.slf4j.Logger;
@@ -28,15 +29,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.teradata.presto.yarn.test.PrestoCluster.COORDINATOR_COMPONENT;
 import static com.teradata.presto.yarn.test.PrestoCluster.WORKER_COMPONENT;
-import static com.teradata.presto.yarn.test.slider.Slider.LOCAL_CONF_DIR;
+import static com.teradata.presto.yarn.test.utils.Resources.extractResource;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -54,9 +55,6 @@ public class PrerequisitesClusterFulfiller
     @Named("cluster.slaves")
     private List<String> slaves;
     @Inject
-    @Named("cluster.prepared")
-    private boolean prepared;
-    @Inject
     @Named("ssh.roles.yarn.password")
     private String yarnPassword;
 
@@ -73,14 +71,14 @@ public class PrerequisitesClusterFulfiller
     @Override
     public Set<State> fulfill(Set<Requirement> requirements)
     {
-        if (prepared) {
-            log.info("Skipping cluster prerequisites fulfillment");
+        if (isPrepared()) {
+            log.info("Skipping cluster prerequisites fulfillment as it is already prepared");
             return ImmutableSet.of(nodeSshUtils);
         }
 
         runOnMaster(singletonList("echo \'" + yarnPassword + "\' | passwd --stdin yarn"));
 
-        fixHdpMapReduce();
+        fixHdp();
 
         setupCgroup();
 
@@ -94,21 +92,43 @@ public class PrerequisitesClusterFulfiller
 
         useLabelsForSchedulerQueues();
 
+        runOnAll(asList("supervisorctl stop yarn-nodemanager"));
+
         restartResourceManager();
 
-        runOnAll(asList("mkdir -p /var/lib/presto", "chown yarn:yarn /var/lib/presto", "/etc/init.d/hadoop-yarn-nodemanager restart"));
+        runOnAll(asList("supervisorctl start yarn-nodemanager"));
 
         nodeSshUtils.labelNodes(node_labels);
+
+        runOnAll(asList(
+                "mkdir -p /var/lib/presto",
+                "chown yarn:yarn /var/lib/presto"));
+
+        runOnMaster(asList("touch prepared"));
 
         return ImmutableSet.of(nodeSshUtils);
     }
 
-    private void fixHdpMapReduce()
+    private boolean isPrepared() {
+        try {
+            runOnMaster(asList("ls prepared"));
+            return true;
+        }
+        catch (CommandExecutionException e) {
+            log.debug("Checking if cluster is prepared", e);
+            return false;
+        }
+    }
+
+    private void fixHdp()
     {
         nodeSshUtils.withSshClient(master, sshClient -> {
-            sshClient.upload(Paths.get("target/classes/fix_hdp_mapreduce.sh"), "/tmp");
+            sshClient.upload(extractResource("/fix_hdp_mapreduce.sh"), "/tmp/");
             return sshClient.command("sh /tmp/fix_hdp_mapreduce.sh || true");
         });
+        runOnAll(asList(
+                "test -x /usr/lib/hadoop-yarn || ln -s /usr/hdp/2.3.*/hadoop-yarn /usr/lib/hadoop-yarn",
+                "test -x /var/log/hadoop-yarn || (mkdir -p /var/log/hadoop-yarn && chown yarn:hadoop /var/log/hadoop-yarn)"));
     }
 
     private Map<String, String> getNodeLabels()
@@ -123,27 +143,27 @@ public class PrerequisitesClusterFulfiller
     private void setupYarnResourceManager()
     {
         nodeSshUtils.withSshClient(getAllNodes(), sshClient -> {
-            sshClient.upload(Paths.get(LOCAL_CONF_DIR, "yarn", "yarn-site.xml"), REMOTE_HADOOP_CONF_DIR);
-            sshClient.upload(Paths.get(LOCAL_CONF_DIR, "yarn", "container-executor.cfg"), REMOTE_HADOOP_CONF_DIR);
+            sshClient.upload(extractResource("/conf/yarn/yarn-site.xml"), REMOTE_HADOOP_CONF_DIR);
+            sshClient.upload(extractResource("/conf/yarn/container-executor.cfg"), REMOTE_HADOOP_CONF_DIR);
             return null;
         });
 
         runOnMaster(asList(
-                "su - hdfs -c 'hadoop fs -mkdir -p /user/yarn'",
-                "su - hdfs -c 'hadoop fs -chown yarn:yarn /user/yarn'"));
+                "su hdfs -c 'hadoop fs -mkdir -p /user/yarn'",
+                "su hdfs -c 'hadoop fs -chown yarn:yarn /user/yarn'"));
     }
 
     private void useLabelsForSchedulerQueues()
     {
         nodeSshUtils.withSshClient(master, sshClient -> {
-            sshClient.upload(Paths.get(LOCAL_CONF_DIR, "yarn", "capacity-scheduler.xml"), REMOTE_HADOOP_CONF_DIR);
+            sshClient.upload(extractResource("/conf/yarn/capacity-scheduler.xml"), REMOTE_HADOOP_CONF_DIR);
             return null;
         });
     }
 
     private void restartResourceManager()
     {
-        runOnMaster(singletonList("/etc/init.d/hadoop-yarn-resourcemanager restart"));
+        runOnMaster(singletonList("supervisorctl restart yarn-resourcemanager"));
     }
 
     private void setupCgroup()
@@ -153,14 +173,15 @@ public class PrerequisitesClusterFulfiller
                 "find / -name container-executor | xargs chmod 6050"));
 
         nodeSshUtils.withSshClient(getAllNodes(), sshClient -> {
-            sshClient.upload(Paths.get(LOCAL_CONF_DIR, "cgroup", "cgrules.conf"), "/etc/");
-            sshClient.upload(Paths.get(LOCAL_CONF_DIR, "cgroup", "cgconfig.conf"), "/etc/");
+            sshClient.upload(extractResource("/conf/cgroup/cgrules.conf"), "/etc/");
+            sshClient.upload(extractResource("/conf/cgroup/cgconfig.conf"), "/etc/");
             return null;
         });
 
+        String restartCgroupCmd= "/etc/init.d/cgconfig restart";
         runOnAll(asList(
-                "/etc/init.d/cgconfig restart",
-                "chmod -R 777 /cgroup"));
+                restartCgroupCmd,
+                "chmod -R 777 /sys/fs/cgroup"));
     }
 
     private void runOnMaster(List<String> commands)
@@ -168,9 +189,12 @@ public class PrerequisitesClusterFulfiller
         nodeSshUtils.runOnNode(master, commands);
     }
 
-    private void runOnAll(final List<String> commands)
+    private List<String> runOnAll(List<String> commands)
     {
-        getAllNodes().forEach(node -> nodeSshUtils.runOnNode(node, commands));
+        return getAllNodes().stream()
+            .map(node -> nodeSshUtils.runOnNode(node, commands))
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 
     private List<String> getAllNodes()

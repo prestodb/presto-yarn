@@ -15,6 +15,7 @@ package com.teradata.presto.yarn.test;
 
 import com.facebook.presto.jdbc.PrestoDriver;
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.SettableFuture;
 import com.teradata.presto.yarn.test.slider.Slider;
 import com.teradata.presto.yarn.test.slider.SliderStatus;
 import com.teradata.presto.yarn.test.utils.SimpleJdbcQueryExecutor;
@@ -33,6 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.presto.yarn.test.utils.Closures.withMethodHelper;
@@ -45,7 +47,6 @@ public class PrestoCluster
 
     public static final String COORDINATOR_COMPONENT = "COORDINATOR";
     public static final String WORKER_COMPONENT = "WORKER";
-    public static final String PACKAGE_DIR = "target/package/";
     public static final String APP_NAME = "presto_cluster";
 
     private final Path resource;
@@ -53,12 +54,12 @@ public class PrestoCluster
     private final Slider slider;
     private final HdfsClient hdfsClient;
 
-    public PrestoCluster(Slider slider, HdfsClient hdfsClient, String resource, String template)
+    public PrestoCluster(Slider slider, HdfsClient hdfsClient, String sliderConfDir, String resource, String template)
     {
         this.hdfsClient = hdfsClient;
         this.slider = slider;
-        this.resource = Paths.get(PACKAGE_DIR, resource);
-        this.template = Paths.get(PACKAGE_DIR, template);
+        this.resource = Paths.get(sliderConfDir, resource);
+        this.template = Paths.get(sliderConfDir, template);
     }
 
     public void withPrestoCluster(Runnable closure)
@@ -190,7 +191,15 @@ public class PrestoCluster
 
     public String getCoordinatorHost()
     {
-        retryUntil(() -> getComponentHosts(COORDINATOR_COMPONENT).size() == 1, MINUTES.toMillis(2));
-        return getComponentHosts(COORDINATOR_COMPONENT).get(0);
+        String[] coordinatorHost = new String[1];
+        retryUntil(() -> {
+            List<String> componentHosts = getComponentHosts(COORDINATOR_COMPONENT);
+            if (componentHosts.size() == 1) {
+                coordinatorHost[0] = componentHosts.get(0);
+                return true;
+            }
+            return false;
+        }, MINUTES.toMillis(4));
+        return coordinatorHost[0];
     }
 }

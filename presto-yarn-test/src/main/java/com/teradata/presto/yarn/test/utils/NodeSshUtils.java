@@ -15,7 +15,6 @@ package com.teradata.presto.yarn.test.utils;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.ssh.SshClient;
 import com.teradata.tempto.ssh.SshClientFactory;
@@ -35,7 +34,9 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.CharMatcher.anyOf;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.teradata.presto.yarn.test.utils.TimeUtils.retryUntil;
+import static java.lang.Long.parseLong;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toList;
@@ -46,13 +47,16 @@ public class NodeSshUtils
 {
     private static final Logger log = LoggerFactory.getLogger(NodeSshUtils.class);
 
+    private final SshClientFactory sshClientFactory;
+    private final SshClient yarnSshClient;
+
     public NodeSshUtils(SshClientFactory sshClientFactory, SshClient yarnSshClient)
     {
         this.yarnSshClient = yarnSshClient;
         this.sshClientFactory = sshClientFactory;
     }
 
-    public int countOfPrestoProcesses(final String host)
+    public int countOfPrestoProcesses(String host)
     {
         return withSshClient(host, sshClient -> {
             String prestoProcessesCountRow = sshClient.command("ps aux | grep PrestoServer | grep -v grep || true").trim();
@@ -61,22 +65,22 @@ public class NodeSshUtils
                 prestoProcessesCount = 0;
             }
 
-            log.info("Presto processes count on %s: %d", host, prestoProcessesCount);
+            log.info("Presto processes count on {}: {}", host, prestoProcessesCount);
             return prestoProcessesCount;
         });
     }
 
-    public void killPrestoProcesses(final String host)
+    public void killPrestoProcesses(String host)
     {
         runOnNode(host, singletonList("pkill -9 -f 'java.*PrestoServer.*'"));
         retryUntil(() -> countOfPrestoProcesses(host) == 0, TimeUnit.SECONDS.toMillis(10));
     }
 
-    public String getPrestoJvmMemory(final String host)
+    public long getPrestoJvmMemory(String host)
     {
         return withSshClient(host, sshClient -> {
             String prestoServerPid = sshClient.command("pgrep -f PrestoServer").trim();
-            String prestoProcessJvm = sshClient.command("jmap -heap " + prestoServerPid + " | grep capacity | awk 'NR == 1' | awk '{print \\$4}' | cut -d '(' -f 2 | cut -d ')' -f 1").trim();
+            long prestoProcessJvm = parseLong(sshClient.command("jmap -heap " + prestoServerPid + " | grep capacity | awk 'NR == 1' | awk '{print $3}'"));
             log.info("Presto jvm memory " + host + ": " + prestoProcessJvm);
             return prestoProcessJvm;
         });
@@ -87,15 +91,15 @@ public class NodeSshUtils
         return withSshClient(host, sshClient -> sshClient.command("ps aux | grep PrestoServer | grep -v grep").trim());
     }
 
-    public String createLabels(final Map<String, String> labels)
+    public String createLabels(Map<String, String> labels)
     {
-        return commandOnYarn("yarn rmadmin -addToClusterNodeLabels " + Joiner.on(",").join(Sets.newHashSet(labels.values())));
+        return commandOnYarn("yarn rmadmin -addToClusterNodeLabels " + Joiner.on(",").join(newHashSet(labels.values())));
     }
 
     public void labelNodes(Map<String, String> labels)
     {
         waitForNodeManagers(labels.size());
-        final List<String> nodeIds = getNodeIds();
+        List<String> nodeIds = getNodeIds();
 
         Map<String, String> nodeToNodeIds = labels.keySet().stream()
                 .collect(toMap(
@@ -114,9 +118,9 @@ public class NodeSshUtils
         return (first, second) -> first + separator + second;
     }
 
-    private void checkThatLabelsAreSetCorrectly(Map<String, String> labels, final Map<String, String> nodeToNodeIds)
+    private void checkThatLabelsAreSetCorrectly(Map<String, String> labels, Map<String, String> nodeToNodeIds)
     {
-        final String clusterNodeLabels = commandOnYarn("yarn queue -status default | grep 'Accessible Node Labels'");
+        String clusterNodeLabels = commandOnYarn("yarn queue -status default | grep 'Accessible Node Labels'");
         labels.values().forEach(label -> checkState(clusterNodeLabels.contains(label), "Cluster node labels '{}', does not contain label '{}'", clusterNodeLabels, label));
         labels.entrySet().stream().forEach(entry -> {
             String node = entry.getKey();
@@ -126,10 +130,10 @@ public class NodeSshUtils
         });
     }
 
-    private void waitForNodeManagers(final int numberOfNodes)
+    private void waitForNodeManagers(int numberOfNodes)
     {
         log.info("Waiting for NodeManagers...");
-        retryUntil(() -> getNodeIds().size() == numberOfNodes, MINUTES.toMillis(2));
+        retryUntil(() -> getNodeIds().size() >= numberOfNodes, MINUTES.toMillis(2));
     }
 
     public List<String> getNodeIds()
@@ -142,7 +146,7 @@ public class NodeSshUtils
 
     public String commandOnYarn(String command)
     {
-        return yarnSshClient.command(command).trim();
+        return yarnSshClient.command("source /etc/profile && " + command).trim();
     }
 
     public void runOnNode(String node, String command)
@@ -150,15 +154,16 @@ public class NodeSshUtils
         runOnNode(node, singletonList(command));
     }
 
-    public void runOnNode(String node, final List<String> commands)
+    public List<String> runOnNode(String node, List<String> commands)
     {
-        withSshClient(node, sshClient -> {
-            commands.forEach(sshClient::command);
-            return null;
+        return withSshClient(node, sshClient -> {
+            return commands.stream()
+                    .map(sshClient::command)
+                    .collect(toList());
         });
     }
 
-    public <T> List<T> withSshClient(Collection<String> hosts, final Function<SshClient, T> closure)
+    public <T> List<T> withSshClient(Collection<String> hosts, Function<SshClient, T> closure)
     {
         return hosts.stream()
                 .map(host -> withSshClient(host, closure))
@@ -180,7 +185,4 @@ public class NodeSshUtils
     {
         return Optional.empty();
     }
-
-    private final SshClientFactory sshClientFactory;
-    private final SshClient yarnSshClient;
 }

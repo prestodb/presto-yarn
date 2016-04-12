@@ -24,16 +24,16 @@
 
   <property>
     <name>yarn.resourcemanager.address</name>
-    <value>master:8050</value>
+    <value>hadoop-master:8032</value>
   </property>
 
   <property>
     <name>yarn.resourcemanager.scheduler.address</name>
-    <value>master:8030</value>
+    <value>hadoop-master:8030</value>
   </property>
   <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://master/</value>
+    <value>hdfs://hadoop-master/</value>
   </property>
 
   <property>
@@ -56,7 +56,7 @@
 
   <property>
       <name>slider.zookeeper.quorum</name>
-      <value>master:5181</value>
+      <value>hadoop-master:2181</value>
   </property>
 
   <property>

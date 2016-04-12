@@ -1,6 +1,4 @@
 cluster:
-  vcores: 8
-  prepared: ${CLUSTER_PREPARED:-false}
   master: master
   slaves:
     - slave1
@@ -28,6 +26,9 @@ tests:
     path: /product-test/presto-yarn
   app_package:
     path: target/package
+  slider:
+    binary: target/package/slider-assembly-0.80.0-incubating-all.zip
+    conf_dir: target/package/
 
 ssh:
   identity: ${IDENTITY_FILE}
