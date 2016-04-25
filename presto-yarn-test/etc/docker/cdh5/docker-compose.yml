@@ -2,24 +2,24 @@ version: '2'
 services:
   hadoop-master:
     hostname: hadoop-master
-    image: 'teradatalabs/presto-yarn-cdh5-hive-master'
+    image: 'teradatalabs/presto-yarn-cdh5-hive-master:1'
     ports:
       - '8088:8088'
     privileged: true
 
   hadoop-slave1:
     hostname: 'hadoop-slave1'
-    image: 'teradatalabs/presto-yarn-cdh5-hive-slave'
+    image: 'teradatalabs/presto-yarn-cdh5-hive-slave:1'
     privileged: true
 
   hadoop-slave2:
     hostname: 'hadoop-slave2'
-    image: 'teradatalabs/presto-yarn-cdh5-hive-slave'
+    image: 'teradatalabs/presto-yarn-cdh5-hive-slave:1'
     privileged: true
 
   hadoop-slave3:
     hostname: 'hadoop-slave3'
-    image: 'teradatalabs/presto-yarn-cdh5-hive-slave'
+    image: 'teradatalabs/presto-yarn-cdh5-hive-slave:1'
     privileged: true
 
   runner:
