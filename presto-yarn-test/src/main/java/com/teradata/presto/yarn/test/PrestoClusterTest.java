@@ -171,11 +171,11 @@ public class PrestoClusterTest
 
             String coordinatorHost = prestoCluster.getCoordinatorHost();
             for (int i = 0; i < 5; i++) {
-                Assertions.assertThat(nodeSshUtils.countOfPrestoProcesses(coordinatorHost)).isEqualTo(1);
+                Assertions.assertThat(nodeSshUtils.isPrestoProcessRunning(coordinatorHost)).isEqualTo(true);
                 nodeSshUtils.killPrestoProcesses(coordinatorHost);
 
                 Assertions.assertThat(prestoCluster.status().isPresent()).isTrue();
-                retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(coordinatorHost) == 1, TIMEOUT);
+                retryUntil(() -> nodeSshUtils.isPrestoProcessRunning(coordinatorHost), TIMEOUT);
             }
 
             // presto cluster should fail after 5 failures in a row
@@ -184,8 +184,27 @@ public class PrestoClusterTest
         });
     }
 
-    @Test(groups = HDP2_3_QUARANTINE)
+    @Test
     public void multiNodeWithPlacementLifecycle()
+    {
+        PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-multinode.json", APP_CONFIG_TEST_TEMPLATE);
+        prestoCluster.withPrestoCluster(() -> {
+            prestoCluster.assertThatPrestoIsUpAndRunning(workersCount());
+
+            assertThatAllProcessesAreRunning(prestoCluster);
+
+            assertThatPrestoYarnContainersUsesCgroup(prestoCluster);
+
+            // check placement policy
+            Assertions.assertThat(prestoCluster.getCoordinatorHost()).contains(master);
+            Assertions.assertThat(prestoCluster.getWorkerHosts()).containsAll(workers);
+
+            assertThatApplicationIsStoppable(prestoCluster);
+        });
+    }
+
+    @Test(groups = HDP2_3_QUARANTINE)
+    public void multiNodeWithPlacementRespawn()
     {
         PrestoCluster prestoCluster = new PrestoCluster(slider, hdfsClient, sliderConfDirPath, "resources-multinode.json", APP_CONFIG_TEST_TEMPLATE);
         prestoCluster.withPrestoCluster(() -> {
@@ -195,13 +214,8 @@ public class PrestoClusterTest
 
             assertThatKilledProcessesRespawn(prestoCluster);
 
-            assertThatPrestoYarnContainersUsesCgroup(prestoCluster);
-
-            // check placement policy
+            // check placement policy of respawned process
             Assertions.assertThat(prestoCluster.getCoordinatorHost()).contains(master);
-            Assertions.assertThat(prestoCluster.getWorkerHosts()).containsAll(workers);
-
-            assertThatApplicationIsStoppable(prestoCluster);
         });
     }
 
@@ -328,16 +342,15 @@ public class PrestoClusterTest
     private void assertThatAllProcessesAreRunning(PrestoCluster prestoCluster)
     {
         log.info("Presto processes distribution: {}", prestoCluster.getAllNodes());
-        prestoCluster.getAllNodes().forEach(node -> Assertions.assertThat(nodeSshUtils.countOfPrestoProcesses(node)).isEqualTo(1));
+        prestoCluster.getAllNodes().forEach(node -> Assertions.assertThat(nodeSshUtils.isPrestoProcessRunning(node)).isEqualTo(true));
     }
 
     private void assertThatKilledProcessesRespawn(PrestoCluster prestoCluster)
     {
         String coordinatorHost = prestoCluster.getCoordinatorHost();
-        int processesCount = nodeSshUtils.countOfPrestoProcesses(coordinatorHost);
         nodeSshUtils.killPrestoProcesses(coordinatorHost);
 
-        retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(prestoCluster.getCoordinatorHost()) == processesCount, TIMEOUT);
+        retryUntil(() -> nodeSshUtils.isPrestoProcessRunning(prestoCluster.getCoordinatorHost()), TIMEOUT);
     }
 
     private void assertThatApplicationIsStoppable(PrestoCluster prestoCluster)
@@ -347,7 +360,7 @@ public class PrestoClusterTest
         prestoCluster.stop();
 
         log.debug("Checking if presto process is stopped");
-        allNodes.forEach(node -> retryUntil(() -> nodeSshUtils.countOfPrestoProcesses(node) == 0, TIMEOUT));
+        allNodes.forEach(node -> retryUntil(() -> !nodeSshUtils.isPrestoProcessRunning(node), TIMEOUT));
     }
 
     private void assertThatPrestoYarnContainersUsesCgroup(PrestoCluster prestoCluster)

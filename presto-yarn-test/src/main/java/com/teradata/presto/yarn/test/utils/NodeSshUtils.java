@@ -56,24 +56,25 @@ public class NodeSshUtils
         this.sshClientFactory = sshClientFactory;
     }
 
-    public int countOfPrestoProcesses(String host)
+    public boolean isPrestoProcessRunning(String host)
     {
         return withSshClient(host, sshClient -> {
             String prestoProcessesCountRow = sshClient.command("ps aux | grep PrestoServer | grep -v grep || true").trim();
-            int prestoProcessesCount = prestoProcessesCountRow.split("\n").length;
+            int processesCount = prestoProcessesCountRow.split("\n").length;
             if (StringUtils.isEmpty(prestoProcessesCountRow)) {
-                prestoProcessesCount = 0;
+                processesCount = 0;
             }
 
-            log.info("Presto processes count on {}: {}", host, prestoProcessesCount);
-            return prestoProcessesCount;
+            log.info("Presto processes count on {}: {}", host, processesCount);
+            checkState(processesCount == 0 || processesCount == 1, "Unexpected number of presto proceses: %s on: %s", processesCount, host);
+            return processesCount == 1;
         });
     }
 
     public void killPrestoProcesses(String host)
     {
         runOnNode(host, singletonList("pkill -9 -f 'java.*PrestoServer.*'"));
-        retryUntil(() -> countOfPrestoProcesses(host) == 0, TimeUnit.SECONDS.toMillis(10));
+        retryUntil(() -> !isPrestoProcessRunning(host), TimeUnit.SECONDS.toMillis(10));
     }
 
     public long getPrestoJvmMemory(String host)
