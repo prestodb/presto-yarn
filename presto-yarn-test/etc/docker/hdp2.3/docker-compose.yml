@@ -3,9 +3,6 @@ services:
   hadoop-master:
     hostname: hadoop-master
     image: 'teradatalabs/presto-yarn-hdp2.3-master:1'
-    ports:
-      - '8088:8088'
-      - '50070:50070'
     privileged: true
 
   hadoop-slave1:
@@ -30,8 +27,6 @@ services:
 
   runner:
     image: 'teradatalabs/centos6-java8-oracle'
-    ports:
-      - '5005:5005'
     volumes:
       - '../../..:/workspace'
 
