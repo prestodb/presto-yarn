@@ -17,7 +17,7 @@
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
-    "java_home": "/usr/lib/jvm/java"
+    "java_home": "/usr/java/jdk1.8.0_92/jre"
   },
   "components": {
     "slider-appmaster": {
