@@ -23,7 +23,7 @@
     "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
 
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
-    "java_home": "/usr/java/jdk1.8.0_92/jre"
+    "java_home": "/usr/lib/jvm/java"
   },
   "components": {
     "slider-appmaster": {
