@@ -115,6 +115,10 @@ Follow the steps here and configure the presto-yarn configuration files to match
     "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
 ```
 
+* ``site.global.app_name`` (optional) (default - ``presto-server-0.130``) This value should be the name of the tar.gz file contained within the zip file produced by presto-yarn (in package/files/ within the zip). If you use a custom presto server distribution or anything other than the default presto-yarn package settings, please be sure to modify this.
+
+* ``application.def`` For Slider users, when the command to install the presto package is run, the logs will explicitly tell the user which value to use for this parameter. Changing this is only required if you are using a custom built presto package.
+
 * ``java_home`` (default - ``/usr/lib/jvm/java``): Presto requires Java 1.8. So make jdk8 the default java or add it to ``java_home`` here
     
 * Variables in ``appConfig.json`` like ``${COORDINATOR_HOST}``, ``${AGENT_WORK_ROOT}`` etc. do not need any substitution and will be appropriately configured during runtime.
@@ -136,7 +140,8 @@ Now you are ready to deploy Presto on YARN either manually or via Ambari.
 
 ### Manual Installation via Slider
 
-* Download the slider 0.80.0 installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster
+Note: Only slider-0.80.0 is officially supported, and the code has not been tested for other versions. 
+* Download the slider 0.8* installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster (0.8* is the current stable version, this example will use 0.80.0).
 
 ```
 tar -xvf slider-0.80.0-incubating-all.tar.gz
@@ -149,7 +154,7 @@ export JAVA_HOME=/usr/lib/jvm/java
 export HADOOP_CONF_DIR=/etc/hadoop/conf
 ```
  
-* Configure zookeeper in ``conf/slider-client.xml``. In case zookeper is listening on ``master:2181`` you need to add there the following section:
+* Configure zookeeper in ``conf/slider-client.xml``. In case zookeper is listening on ``master:2181`` you need to add there the following section: 
 
 ```
   <property>
@@ -186,7 +191,7 @@ bin/slider package --install --name PRESTO --package ../presto-yarn-package-*.zi
 bin/slider create presto1 --template appConfig.json --resources resources.json (using modified .json files as per your requirement)
 ```
 
-This should start your application, and you can see it under the Yarn ResourceManager webUI.
+This should start your application, and you can see it under the Yarn ResourceManager webUI. If your application is successfully run, it should continuously be available in the YARN resource manager as a running application. If the job fails, please be sure to check the job history's logs along with the logs on the node's disk (more information below).
 
 #### Additional Slider commands
 
@@ -207,6 +212,12 @@ If you want to re-create the app due to some failures or you want to reconfigure
 ```
 bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
+```
+
+##### Completely remote the app
+
+```
+bin/slider package --delete --name PRESTO
 ```
 
 ##### 'Flex'ible app
