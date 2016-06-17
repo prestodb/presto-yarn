@@ -192,7 +192,7 @@ bin/slider destroy presto1
 bin/slider create presto1 --template appConfig.json --resources resources.json
 ```
 
-##### Completely remote the app
+##### Completely remove the app
 
 ```
 bin/slider package --delete --name PRESTO
