@@ -123,20 +123,20 @@ Note: Only slider-0.80.0 is officially supported, and the code has not been test
 
 1. Download the slider 0.8* installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster
 
-```
+  ```
 tar -xvf slider-0.80.0-incubating-all.tar.gz
 ```
  
 2. Now configure Slider with JAVA_HOME and HADOOP_CONF_DIR in ``slider-0.80.0-incubating/conf/slider-env.sh``
 
-```
+  ```
 export JAVA_HOME=/usr/lib/jvm/java
 export HADOOP_CONF_DIR=/etc/hadoop/conf
 ```
  
 3. Configure zookeeper in ``conf/slider-client.xml``. In case zookeper is listening on ``master:2181`` you need to add there the following section: 
 
-```
+  ```
   <property>
       <name>slider.zookeeper.quorum</name>
       <value>master:2181</value>
@@ -145,7 +145,7 @@ export HADOOP_CONF_DIR=/etc/hadoop/conf
  
 4. Configure path where slide packages will be installed
 
-``` 
+  ``` 
   <property>
     <name>fs.defaultFS</name>
     <value>hdfs://master/</value>
@@ -154,17 +154,15 @@ export HADOOP_CONF_DIR=/etc/hadoop/conf
  
 5. Make sure the user running slider, which should be same as ``site.global.app_user`` in ``appConfig.json``, has a home dir in HDFS (See note [here](#appconfig)).
 
-```
+  ```
 su hdfs
 $ hdfs dfs -mkdir -p /user/<user>
 $ hdfs dfs -chown <user>:<user> -R /user/<user>
 ```
 
-6. Now run slider as <user>
+6. Now run slider as <user>. For more details on [appConfig.json](#appconfig) and [resources.json](#resources) follow  [configuration](#advanced) section.
 
-For more details on [appConfig.json](#appconfig) and [resources.json](#resources) follow  [configuration](#advanced) section.
-
-```
+  ```
 su <user>
 cd slider-0.80.0-incubating
 bin/slider package --install --name PRESTO --package ../presto-yarn-package-*.zip
@@ -241,7 +239,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
     hdfs dfs -chown yarn:yarn /user/yarn
   ```
 
-``Note``: For operations involving Hive connector in Presto, especially INSERT, ALTER TABLE etc, it may require that the user running Presto has access to HDFS directories like Hive warehouse directories. So make sure that the ``app_user`` you set has appropriate access permissions to those HDFS directories. For eg: ``/apps/hive/warehouse`` is usually where Presto user will need access for various DML operations involving Hive connector and is owned by ``hdfs`` in most cases. In that case, one way to fix the permission issue is to set ``site.global.app_user`` to user ``hdfs`` and also create ``/user/hdfs`` directory in HDFS if not already there (as above). You will also need to  run any slider scripts(bin/slider) as user ``hdfs`` in this case.
+  ``Note``: For operations involving Hive connector in Presto, especially INSERT, ALTER TABLE etc, it may require that the user running Presto has access to HDFS directories like Hive warehouse directories. So make sure that the ``app_user`` you set has appropriate access permissions to those HDFS directories. For eg: ``/apps/hive/warehouse`` is usually where Presto user will need access for various DML operations involving Hive connector and is owned by ``hdfs`` in most cases. In that case, one way to fix the permission issue is to set ``site.global.app_user`` to user ``hdfs`` and also create ``/user/hdfs`` directory in HDFS if not already there (as above). You will also need to  run any slider scripts(bin/slider) as user ``hdfs`` in this case.
 
 2 ``site.global.user_group`` (default - ``hadoop``): The group owning the application.
 
@@ -259,27 +257,27 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 9. ``site.global.catalog`` (optional) (default - configures ``tpch`` connector): It should be of the format (note the single quotes around each value) - {'connector1' : ['key1=value1', 'key2=value2'..], 'connector2' : ['key1=value1', 'key2=value2'..]..}. This will create files connector1.properties, connector2.properties for Presto with entries key1=value1 etc.
                                                                                 
-```
+  ```
     "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 ```
 
-``Note``: The ``NN_HOST`` used in ``hive.metastore.uri`` is a variable for your HDFS Namenode and this expects that your hive metastore is up and running on your HDFS Namenode host. You do not have to replace that with your actual Namenode hostname. This variable will be substituted with your Namenode hostname during runtime. If you have hive metastore running elsewhere make sure you update ``NN_HOST`` with the appropriate hostname.
+  ``Note``: The ``NN_HOST`` used in ``hive.metastore.uri`` is a variable for your HDFS Namenode and this expects that your hive metastore is up and running on your HDFS Namenode host. You do not have to replace that with your actual Namenode hostname. This variable will be substituted with your Namenode hostname during runtime. If you have hive metastore running elsewhere make sure you update ``NN_HOST`` with the appropriate hostname.
 
 10. ``site.global.jvm_args`` (default - as in example below): This configures Presto ``jvm.config`` file and default heapsize is ``1GB``. Since Presto needs the ``jvm.config`` format to be a list of options, one per line, this property must be a String representation of list of strings. Each entry of this list will be a new line in your jvm.config. For example the configuration should look like:
 
-```
+  ```
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
 ```
 
 11. ``site.global.additional_node_properties`` and ``site.global.additional_config_properties`` (optional) (default - None): Presto launched via Slider will use ``config.properties`` and ``node.properties`` created from templates ``presto-yarn-package/package/templates/config.properties*.j2`` and ``presto-yarn-package/package/target/node.properties.j2`` respectively. If you want to add any additional properties to these configuration files, add ``site.global.additional_config_properties`` and ``site.global.additional_node_properties`` to your ``appConfig.json``. The value of these has to be a string representation of an array of entries (key=value) that has to go to the ``.properties`` file. Eg:
 
-```
+  ```
     "site.global.additional_config_properties": "['task.max-worker-threads=50', 'distributed-joins-enabled=true']"
 ```    
 
 12. ``site.global.plugin`` (optional) (default - None): This allows you to add any additional jars you want to copy to plugin ``presto-server-<version>/plugin/<connector>`` directory in addition to what is already available there. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built ``presto-yarn-package-<version>-<presto-version>.zip`` will have the jars under ```package/plugins``` directory.
 
-```
+  ```
     "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
 ```
 
