@@ -107,7 +107,7 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 18. Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
 
-19. If the application fails to launch refer this section to debug.
+19. If the application fails to launch refer this [section](#debugging)  to debug.
 
 20. You can manage the application lifecycle (e.g. start, stop, flex, destroy) from the View UI.
 
@@ -119,8 +119,9 @@ Once the running YARN application is stopped, under ``Actions`` you will have an
 
 ### Manual Installation via Slider
 
-Note: Only slider-0.80.0 is officially supported, and the code has not been tested for other versions. 
-1. Download the slider 0.8* installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster (0.8* is the current stable version, this example will use 0.80.0).
+Note: Only slider-0.80.0 is officially supported, and the code has not been tested for other versions.
+
+1. Download the slider 0.8* installation file from http://slider.incubator.apache.org/index.html to one of your nodes in the cluster
 
 ```
 tar -xvf slider-0.80.0-incubating-all.tar.gz
@@ -170,7 +171,7 @@ bin/slider package --install --name PRESTO --package ../presto-yarn-package-*.zi
 bin/slider create presto1 --template appConfig.json --resources resources.json (using modified .json files as per your requirement)
 ```
 
-This should start your application, and you can see it under the Yarn ResourceManager webUI. If your application is successfully run, it should continuously be available in the YARN resource manager as a running application. If the job fails, please be sure to check the job history's logs along with the logs on the node's disk (more information below).
+This should start your application, and you can see it under the Yarn ResourceManager webUI. If your application is successfully run, it should continuously be available in the YARN resource manager as a running application. If the job fails, please be sure to check the job history's logs along with the logs on the node's disk (more information [below](#debugging)).
 
 #### Additional Slider commands
 
@@ -393,7 +394,7 @@ If a label expression is specified for the slider-appmaster component then it al
 
 where coordinator and worker are the node labels created and configured with a scheduler queue in YARN
 
-## Debugging and Logging
+## <a name="debugging"></a> Debugging and Logging
 
 * Once the YARN application is launched, you can monitor the status at YARN ResourceManager WebUI. 
 
