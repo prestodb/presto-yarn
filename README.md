@@ -241,7 +241,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
   ``Note``: For operations involving Hive connector in Presto, especially INSERT, ALTER TABLE etc, it may require that the user running Presto has access to HDFS directories like Hive warehouse directories. So make sure that the ``app_user`` you set has appropriate access permissions to those HDFS directories. For eg: ``/apps/hive/warehouse`` is usually where Presto user will need access for various DML operations involving Hive connector and is owned by ``hdfs`` in most cases. In that case, one way to fix the permission issue is to set ``site.global.app_user`` to user ``hdfs`` and also create ``/user/hdfs`` directory in HDFS if not already there (as above). You will also need to  run any slider scripts(bin/slider) as user ``hdfs`` in this case.
 
-2 ``site.global.user_group`` (default - ``hadoop``): The group owning the application.
+2. ``site.global.user_group`` (default - ``hadoop``): The group owning the application.
 
 3. ``site.global.data_dir`` (default - ``/var/lib/presto/data``): The data directory configured should be pre-created on all nodes and must be owned by user ``yarn``, otherwise slider will fail to start Presto with permission errors.
 
