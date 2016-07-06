@@ -107,7 +107,7 @@ hdfs dfs -chown yarn:yarn /user/yarn
 
 18. If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now are ``site.global.plugin``, ``site.global.additional_config_properties`` and ``site.global.additional_node_properties``. See [section](#packageconfig) above for requirements and format of these properties.
 
-19. Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto. You can click on app launched, and then if monitor the status either from Slider view or you can click on the Quick Links which should take you to the YARN WebUI. If your application is successfully run, it should continuously be available in the YARN resource manager as a "RUNNING" application.
+19. Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do for [manual](#manual) installation. Once successfully deployed, you will see the Yarn application started for Presto. You can click on app launched, and then monitor the status either from Slider view or you can click on the ``Quick Links`` which should take you to the YARN WebUI. If your application is successfully run, it should continuously be available in the YARN resource manager as a "RUNNING" application.
 
 20. If the job fails, please be sure to check the job history’s logs along with the logs on the node’s disk. Refer this [section](#debugging) for more details.
 
@@ -119,7 +119,7 @@ Once the application is launched if you want to update the configuration of Pres
 
 Once the running YARN application is stopped, under ``Actions`` you will have an option to ``Destroy`` the existing Presto instance running via Slider. ``Destroy`` the existing one and re-create a new app (``Create App`` button) with whatever updates you want to make to the configuration.
 
-### Manual Installation via Slider
+### <a name="manual"></a> Manual Installation via Slider
 
 Note: Only slider-0.80.0 is officially supported, and the code has not been tested for other versions.
 
