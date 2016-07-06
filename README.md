@@ -89,9 +89,11 @@ The steps for deploying Presto on Yarn via Slider views in Ambari are:
 
 12. Provide details of the Presto service. By default, the UI will be populated with the values you have in the ```*-default.json``` files in your ```presto-yarn-package-*.zip```.
 
-13. The app name should be of lower case, eg: presto1, and also set all the configuration here as per your cluster requirement. See [here](#packageconfig) for explanation on each configuration variable.
+13. The app name should be of lower case, eg: presto1
+ 
+14. You can set the configuration property fields as per your cluster requirement. For example, if you want to set a connector for Presto, you can update the ```global.catalog``` property. See [here](#packageconfig) for explanation on each configuration variable.
 
-14. Prepare HDFS for Slider. The user directory you create here should be for the same user you set in ``global.app_user`` field. If the ``app_user`` is going to be ``yarn`` then do:
+15. Prepare HDFS for Slider. The user directory you create here should be for the same user you set in ``global.app_user`` field. If the ``app_user`` is going to be ``yarn`` then do:
   
   ```
 su hdfs
@@ -99,17 +101,17 @@ hdfs dfs -mkdir -p /user/yarn
 hdfs dfs -chown yarn:yarn /user/yarn
 ```
 
-15. Make sure you change the ``global.presto_server_port`` from 8080 to some other unused port, since Ambari by default uses 8080.
+16. Make sure you change the ``global.presto_server_port`` from 8080 to some other unused port, since Ambari by default uses 8080.
 
-16. Make sure the data directory in the UI (added in ``appConfig-default.json`` eg: ``/var/lib/presto/``) is pre-created on all nodes and the directory must be owned by ``global.app_user``, otherwise slider will fail to start Presto with permission errors.
+17. Make sure the data directory in the UI (added in ``appConfig-default.json`` eg: ``/var/lib/presto/``) is pre-created on all nodes and the directory must be owned by ``global.app_user``, otherwise slider will fail to start Presto with permission errors.
 
-17. If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now are ``site.global.plugin``, ``site.global.additional_config_properties`` and ``site.global.additional_node_properties``. See [section](#packageconfig) above for requirements and format of these properties.
+18. If you want to add any additional Custom properties, use Custom property section. Additional properties supported as of now are ``site.global.plugin``, ``site.global.additional_config_properties`` and ``site.global.additional_node_properties``. See [section](#packageconfig) above for requirements and format of these properties.
 
-18. Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto.
+19. Click Finish. This will basically do the equivalent of ```package  --install``` and ```create``` you do via the bin/slider script. Once successfully deployed, you will see the Yarn application started for Presto. You can click on app launched, and then if monitor the status either from Slider view or you can click on the Quick Links which should take you to the YARN WebUI. If your application is successfully run, it should continuously be available in the YARN resource manager as a "RUNNING" application.
 
-19. If the application fails to launch refer this [section](#debugging)  to debug.
+20. If the job fails, please be sure to check the job history’s logs along with the logs on the node’s disk. Refer this [section](#debugging) for more details.
 
-20. You can manage the application lifecycle (e.g. start, stop, flex, destroy) from the View UI.
+21. You can manage the application lifecycle (e.g. start, stop, flex, destroy) from the View UI.
 
 #### Reconfiguration in Slider View
 
