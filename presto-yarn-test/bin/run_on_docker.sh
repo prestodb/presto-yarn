@@ -34,7 +34,7 @@ function check_hive() {
 
 function run_product_tests() {
   compose run runner \
-    java -jar /workspace/target/presto-yarn-test-1.2-SNAPSHOT-executable.jar \
+    java -jar /workspace/target/presto-yarn-test-1.2.1-executable.jar \
     --config-local /workspace/etc/docker/tempto-configuration-docker-local.yaml \
     $*
 }
