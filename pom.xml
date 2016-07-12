@@ -57,6 +57,7 @@
     <modules>
         <module>presto-yarn-package</module>
         <module>presto-yarn-test</module>
+	<module>presto-yarn-docs</module>
     </modules>
 
     <properties>
