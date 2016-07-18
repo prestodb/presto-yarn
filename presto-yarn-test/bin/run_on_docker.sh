@@ -33,8 +33,9 @@ function check_hive() {
 }
 
 function run_product_tests() {
+  PRESTO_YARN_VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
   compose run runner \
-    java -jar /workspace/target/presto-yarn-test-1.2.1-executable.jar \
+    java -jar /workspace/target/presto-yarn-test-$PRESTO_YARN_VERSION-executable.jar \
     --config-local /workspace/etc/docker/tempto-configuration-docker-local.yaml \
     $*
 }
