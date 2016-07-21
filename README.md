@@ -253,7 +253,7 @@ Follow the steps here and configure the presto-yarn configuration files to match
 
 6. ``site.global.presto_query_max_memory`` (default - ``50GB``): This will be used as ``query.max-memory`` in Presto's config.properties file.
 
-7. ``site.global.presto_query_max_memory_per_node`` (default - ``1GB``):  This will be used as ``query.max-memory-per-node`` in Presto's config.properties file.
+7. ``site.global.presto_query_max_memory_per_node`` (default - ``600MB``):  This will be used as ``query.max-memory-per-node`` in Presto's config.properties file.
 
 8. ``site.global.presto_server_port`` (default - ``8080``): Presto server's http port.
 
