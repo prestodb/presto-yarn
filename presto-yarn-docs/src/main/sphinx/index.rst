@@ -20,8 +20,11 @@ Content
 .. toctree::
    :maxdepth: 2
 
-   requirements
-   deployment
-   debugging
-   references
+   installation-yarn-manual
+   installation-yarn-automated
+   installation-yarn-directory-structure.rst
+   installation-yarn-configuration-options.rst
+   installation-yarn-configuration-options-advanced.rst
+   installation-yarn-debugging-logging.rst
    developers
+   
