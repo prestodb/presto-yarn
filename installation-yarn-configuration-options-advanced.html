@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Advanced Configuration Options for YARN-Based Clusters &mdash; Presto YARN 1.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Presto YARN 1.3 documentation" href="index.html" />
+    <link rel="next" title="Debugging and Logging for a YARN-Based Cluster" href="installation-yarn-debugging-logging.html" />
+    <link rel="prev" title="Presto Configuration Options for YARN-Based Clusters" href="installation-yarn-configuration-options.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation-yarn-debugging-logging.html" title="Debugging and Logging for a YARN-Based Cluster"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation-yarn-configuration-options.html" title="Presto Configuration Options for YARN-Based Clusters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="advanced-configuration-options-for-yarn-based-clusters">
+<h1>Advanced Configuration Options for YARN-Based Clusters<a class="headerlink" href="#advanced-configuration-options-for-yarn-based-clusters" title="Permalink to this headline">¶</a></h1>
+<p>The following sections explain a few advanced configuration options.</p>
+<div class="section" id="configuring-memory-cpu-and-yarn-cgroups">
+<h2>Configuring Memory, CPU, and YARN CGroups<a class="headerlink" href="#configuring-memory-cpu-and-yarn-cgroups" title="Permalink to this headline">¶</a></h2>
+<p>Memory and CPU related configuration properties must be modified as per
+your cluster configuration and requirements.</p>
+<ol class="arabic simple">
+<li>Memory</li>
+</ol>
+<p><code class="docutils literal"><span class="pre">yarn.memory</span></code> in <code class="docutils literal"><span class="pre">resources.json</span></code> declares the amount of memory to
+ask for in YARN containers. It should be defined for each component,
+COORDINATOR and WORKER based on the expected memory consumption,
+measured in MB. A YARN cluster is usually configured with a minimum
+container allocation, set in <code class="docutils literal"><span class="pre">yarn-site.xml</span></code> by the configuration
+parameter <code class="docutils literal"><span class="pre">yarn.scheduler.minimum-allocation-mb</span></code>. It will also have a
+maximum size set in <code class="docutils literal"><span class="pre">yarn.scheduler.maximum-allocation-mb</span></code>. Asking for
+more than this will result in the request being rejected.</p>
+<p>The heapsize defined as -Xmx of <code class="docutils literal"><span class="pre">site.global.jvm_args</span></code> in
+<code class="docutils literal"><span class="pre">appConfig.json</span></code>, is used by the Presto JVM itself. Slider suggests
+that the value of <code class="docutils literal"><span class="pre">yarn.memory</span></code> must be bigger than this heapsize. The
+value of <code class="docutils literal"><span class="pre">yarn.memory</span></code> MUST be bigger than the heap size allocated to
+any JVM and Slider suggests using atleast 50% more appears to work,
+though some experimentation will be needed.</p>
+<p>In addition, set other memory specific properties
+<code class="docutils literal"><span class="pre">presto_query_max_memory</span></code> and <code class="docutils literal"><span class="pre">presto_query_max_memory_per_node</span></code> in
+<code class="docutils literal"><span class="pre">appConfig.json</span></code> as you would set the properties <code class="docutils literal"><span class="pre">query.max-memory</span></code>
+and <code class="docutils literal"><span class="pre">query.max-memory-per-node</span></code> in Presto&#8217;s config.properties.</p>
+<ol class="arabic simple" start="2">
+<li>CPU</li>
+</ol>
+<p>Slider also supports configuring the YARN virtual cores to use for the
+process which can be defined per component. <code class="docutils literal"><span class="pre">yarn.vcores</span></code> declares the
+number of &#8220;virtual cores&#8221; to request. Ask for more vcores if your
+process needs more CPU time.</p>
+<p>See
+<a class="reference external" href="http://slider.incubator.apache.org/docs/configuration/resources.html#core">http://slider.incubator.apache.org/docs/configuration/resources.html#core</a>
+for more details.</p>
+<ol class="arabic simple" start="3">
+<li>CGroups in YARN</li>
+</ol>
+<p>If you are using CPU scheduling (using the DominantResourceCalculator),
+you should also use CGroups to constrain and manage CPU processes.
+CGroups compliments CPU scheduling by providing CPU resource isolation.
+With CGroups strict enforcement turned on, each CPU process gets only
+the resources it asks for. This way, we can guarantee that containers
+hosting Presto services is assigned with a percentage of CPU. If you
+have another process that needs to run on a node that also requires CPU
+resources, you can lower the percentage of CPU allocated to YARN to free
+up resources for the other process.</p>
+<p>See Hadoop documentation on how to configure CGroups in YARN:
+<a class="reference external" href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/NodeManagerCgroups.html">https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/NodeManagerCgroups.html</a>.
+Once you have CGroups configured, Presto on YARN containers will be
+configured in the CGroups hierarchy like any other YARN application
+containers.</p>
+<p>Slider can also define YARN queues to submit the application creation
+request to, which can set the priority, resource limits and other values
+of the application. But this configuration is global to Slider and
+defined in <code class="docutils literal"><span class="pre">conf/slider-client.xml</span></code>. You can define the queue name and
+also the priority within the queue. All containers created in the Slider
+cluster will share this same queue.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nb">property</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">slider</span><span class="o">.</span><span class="n">yarn</span><span class="o">.</span><span class="n">queue</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span><span class="n">default</span><span class="o">&lt;/</span><span class="n">value</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="nb">property</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="nb">property</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="n">slider</span><span class="o">.</span><span class="n">yarn</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">priority</span><span class="o">&lt;/</span><span class="n">name</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span><span class="mi">1</span><span class="o">&lt;/</span><span class="n">value</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="nb">property</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="failure-policy">
+<h2>Failure Policy<a class="headerlink" href="#failure-policy" title="Permalink to this headline">¶</a></h2>
+<p>Follow this section if you want to change the default Slider failure
+policy. Yarn containers hosting Presto may fail due to some
+misconfiguration in Presto or some other conflicts. The number of times
+the component may fail within a failure window is defined in
+<code class="docutils literal"><span class="pre">resources.json</span></code>.</p>
+<p>The related properties are:</p>
+<ol class="arabic simple">
+<li>The duration of a failure window, a time period in which failures are
+counted. The related properties are
+<code class="docutils literal"><span class="pre">yarn.container.failure.window.days</span></code>,
+<code class="docutils literal"><span class="pre">yarn.container.failure.window.hours</span></code>,
+<code class="docutils literal"><span class="pre">yarn.container.failure.window.minutes</span></code> and should be set in the
+global section as it relates just to slider. The default value is
+<code class="docutils literal"><span class="pre">yarn.container.failure.window.hours=6</span></code>. The initial window is
+measured from the start of the slider application master —once the
+duration of that window is exceeded, all failure counts are reset,
+and the window begins again.</li>
+<li>The maximum number of failures of any component in this time period.
+<code class="docutils literal"><span class="pre">yarn.container.failure.threshold</span></code> is the property for this and in
+most cases, should be set proportional to the the number of instances
+of the component. For Presto clusters, where there will be one
+coordinator and some number of workers it is reasonable to have a
+failure threshold for workers more than that of coordinator. This is
+because a higher failure rate of worker nodes is to be expected if
+the cause of the failure is due to the underlying hardware. At the
+same time the threshold should be low enough to detect any Presto
+configuration issues causing the workers to fail rapidly and breach
+the threshold sooner.</li>
+</ol>
+<p>These failure thresholds are all heuristics. When initially configuring
+an application instance, low thresholds reduce the disruption caused by
+components which are frequently failing due to configuration problems.
+In a production application, large failure thresholds and/or shorter
+windows ensures that the application is resilient to transient failures
+of the underlying YARN cluster and hardware.</p>
+<p>Based on the placement policy there are two more failure related
+properties you can set.</p>
+<ol class="arabic simple">
+<li>The configuration property <code class="docutils literal"><span class="pre">yarn.node.failure.threshold</span></code> defines
+how &#8220;unreliable&#8221; a node must be before it is skipped for placement
+requests. This is only used for the default
+yarn.component.placement.policy where unreliable nodes are avoided.</li>
+<li><code class="docutils literal"><span class="pre">yarn.placement.escalate.seconds</span></code> is the timeout after which slider
+will escalate the request of pending containers to be launched on
+other nodes. For strict placement policy where the requested
+components are deployed on all nodes, this property is irrelevant.
+For other placement policies this property is relevant and the higher
+the cost of migrating a component instance from one host to another,
+the longer value of escalation timeout is recommended. Thus slider
+will wait longer before the component instance is escalated to be
+started on other nodes. During restart, for cases where redeploying
+the component instances on the same node as before is beneficial (due
+to locality of data or similar reasons), a higher escalation timeout
+is recommended.</li>
+</ol>
+<p>Take a look here:
+<a class="reference external" href="http://slider.incubator.apache.org/docs/configuration/resources.html#failurepolicy">http://slider.incubator.apache.org/docs/configuration/resources.html#failurepolicy</a>
+for more details on failure policy.</p>
+</div>
+<div class="section" id="using-yarn-label">
+<span id="id1"></span><h2>Using YARN label<a class="headerlink" href="#using-yarn-label" title="Permalink to this headline">¶</a></h2>
+<p>This is an optional feature and is not required to run Presto in YARN.
+To guarantee that a certain set of nodes are reserved for deploying
+Presto or to configure a particular node for a component type we can
+make use of YARN label expressions.</p>
+<ol class="arabic simple">
+<li>First assign the nodes/subset of nodes with appropriate labels. See
+<a class="reference external" href="http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html">http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.3.0/bk_yarn_resource_mgt/content/ch_node_labels.html</a></li>
+<li>Then set the components in <code class="docutils literal"><span class="pre">resource.json</span></code> with
+<code class="docutils literal"><span class="pre">yarn.label.expression</span></code> to have labels to be used when allocating
+containers for Presto.</li>
+<li>Create the application using
+<code class="docutils literal"><span class="pre">bin/slider</span> <span class="pre">create</span> <span class="pre">..</span> <span class="pre">--queue</span> <span class="pre">&lt;queuename&gt;</span></code>. <code class="docutils literal"><span class="pre">queuename</span></code> will be
+the queue defined in step one for the appropriate label.</li>
+</ol>
+<p>If a label expression is specified for the slider-appmaster component
+then it also becomes the default label expression for all component.
+Sample <code class="docutils literal"><span class="pre">resources.json</span></code> may look like:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>&quot;COORDINATOR&quot;: {
+  &quot;yarn.role.priority&quot;: &quot;1&quot;,
+  &quot;yarn.component.instances&quot;: &quot;1&quot;,
+  &quot;yarn.component.placement.policy&quot;: &quot;1&quot;,
+  &quot;yarn.label.expression&quot;:&quot;coordinator&quot;
+},
+&quot;WORKER&quot;: {
+  &quot;yarn.role.priority&quot;: &quot;2&quot;,
+  &quot;yarn.component.instances&quot;: &quot;2&quot;,
+  &quot;yarn.component.placement.policy&quot;: &quot;1&quot;,
+  &quot;yarn.label.expression&quot;:&quot;worker&quot;
+}
+</pre></div>
+</div>
+<p>where coordinator and worker are the node labels created and configured
+with a scheduler queue in YARN</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Advanced Configuration Options for YARN-Based Clusters</a><ul>
+<li><a class="reference internal" href="#configuring-memory-cpu-and-yarn-cgroups">Configuring Memory, CPU, and YARN CGroups</a></li>
+<li><a class="reference internal" href="#failure-policy">Failure Policy</a></li>
+<li><a class="reference internal" href="#using-yarn-label">Using YARN label</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation-yarn-configuration-options.html"
+                        title="previous chapter">Presto Configuration Options for YARN-Based Clusters</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation-yarn-debugging-logging.html"
+                        title="next chapter">Debugging and Logging for a YARN-Based Cluster</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation-yarn-configuration-options-advanced.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation-yarn-debugging-logging.html" title="Debugging and Logging for a YARN-Based Cluster"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation-yarn-configuration-options.html" title="Presto Configuration Options for YARN-Based Clusters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

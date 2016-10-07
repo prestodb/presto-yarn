@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Debugging and Logging for a YARN-Based Cluster &mdash; Presto YARN 1.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Presto YARN 1.3 documentation" href="index.html" />
+    <link rel="next" title="Developers" href="developers.html" />
+    <link rel="prev" title="Advanced Configuration Options for YARN-Based Clusters" href="installation-yarn-configuration-options-advanced.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developers.html" title="Developers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation-yarn-configuration-options-advanced.html" title="Advanced Configuration Options for YARN-Based Clusters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="debugging-and-logging-for-a-yarn-based-cluster">
+<h1>Debugging and Logging for a YARN-Based Cluster<a class="headerlink" href="#debugging-and-logging-for-a-yarn-based-cluster" title="Permalink to this headline">¶</a></h1>
+<p>Once the YARN application is launched, you can monitor the status at
+YARN ResourceManager WebUI.</p>
+<p>A successfully launched application will be in <code class="docutils literal"><span class="pre">RUNNING</span></code> state. The
+YARN ApplicationMaster UI (eg:
+<code class="docutils literal"><span class="pre">http://master:8088/cluster/app/application_&lt;id&gt;</span></code>) will show
+slider-appmaster, COORDINATOR and WORKER components and the
+associated containers running based on your configuration. You can
+also use Slider cli script to <a class="reference internal" href="installation-yarn-manual.html#check-status-label"><span class="std std-ref">Check the Status</span></a>.</p>
+<p>Slider retries to launch Presto in case of failure in the same YARN application.
+The YARN application will be still in <code class="docutils literal"><span class="pre">RUNNING</span></code> state during this retry phase.
+It ultimately kills the job after 5 unsuccessful retrials.</p>
+<p>If you have used <a class="reference internal" href="installation-yarn-configuration-options-advanced.html#using-yarn-label"><span class="std std-ref">Using YARN label</span></a> your COORDINATOR and WORKER
+components will be running on nodes which were &#8216;labeled&#8217;.</p>
+<p>If you have not used labels, then you can check the status either at
+the YARN ResourceManager (eg:
+<code class="docutils literal"><span class="pre">http://master:8088/cluster/app/application_&lt;id&gt;</span></code>) or you can use
+<a class="reference internal" href="installation-yarn-manual.html#check-status-label"><span class="std std-ref">Check the Status</span></a> to get the &#8220;live&#8221; containers, and thus get the
+node hosting the Presto components.</p>
+<p>If Presto is up and running, then a <code class="docutils literal"><span class="pre">pgrep</span></code> of PrestoServer on your
+NodeManager nodes will give you the process details. This should also
+give the directory Presto is installed and the configuration files
+used by Presto.</p>
+<p>If the YARN application has failed to launch Presto, then you may want to
+take a look at the slider logs created under YARN log directory for the
+corresponding application. It is recommended that log aggregation of YARN application log
+files be enabled in YARN, using
+<code class="docutils literal"><span class="pre">yarn.log-aggregation-enable</span> <span class="pre">property</span></code> in your <code class="docutils literal"><span class="pre">yarn-site.xml</span></code>.
+Then slider logs created during the launch of Presto-YARN will be
+available locally on your nodemanager nodes (where slider-appmaster
+and Presto components-COORDINATOR/WORKER are deployed) under
+contanier logs directory eg:
+<code class="docutils literal"><span class="pre">/var/log/hadoop-yarn/application_&lt;id&gt;/container_&lt;id&gt;/</span></code>. For any
+retries attempted by Slider to launch Presto a new container will be
+launched and hence you will find a new <code class="docutils literal"><span class="pre">container_&lt;id&gt;</span></code> directory.
+You can look for any errors under <code class="docutils literal"><span class="pre">errors_*.txt</span></code> there, and also
+there is a <code class="docutils literal"><span class="pre">slider-agent.log</span></code> file which will give you Slider
+application lifetime details.
+Subsequently every Slider application owner has the flexibility to
+set the include and exclude patterns of file names that they intend
+to aggregate, by adding the following properties in their
+<code class="docutils literal"><span class="pre">resources.json</span></code>. For example, using</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
+   <span class="s2">&quot;yarn.log.include.patterns&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+   <span class="s2">&quot;yarn.log.exclude.patterns&quot;</span><span class="p">:</span> <span class="s2">&quot;*.*out&quot;</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<p>See
+<a class="reference external" href="http://slider.incubator.apache.org/docs/configuration/resources.html#logagg">http://slider.incubator.apache.org/docs/configuration/resources.html#logagg</a>
+for details.</p>
+<p>If there are no errors in <code class="docutils literal"><span class="pre">slider.log</span></code> then you may want to look at Presto
+logs for any errors. Presto logs will be available under the standard Presto data
+directory location. By default it is <code class="docutils literal"><span class="pre">/var/lib/presto/data/var/log</span></code>
+directory where <code class="docutils literal"><span class="pre">/var/lib/presto/data</span></code> is the default data
+directory <code class="docutils literal"><span class="pre">site.global.data_dir</span></code> configured in Slider <code class="docutils literal"><span class="pre">appConfig.json</span></code>.
+You can find both <code class="docutils literal"><span class="pre">server.log</span></code> and <code class="docutils literal"><span class="pre">http-request.log</span></code> files here. Please note that
+log rotation of these Presto log files will have to be manually
+enabled (for eg: using
+<a class="reference external" href="http://linuxcommand.org/man_pages/logrotate8.html">http://linuxcommand.org/man_pages/logrotate8.html</a>)</p>
+<p>Presto configuration files will be at <code class="docutils literal"><span class="pre">/var/lib/presto/etc</span></code>
+directory if you are using the default <code class="docutils literal"><span class="pre">appConfig.json</span></code> property
+<code class="docutils literal"><span class="pre">site.global.config_dir</span></code>. The configuration files here will be
+generated by Slider and overwritten for every application restart.
+These files should NOT be modified manually.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation-yarn-configuration-options-advanced.html"
+                        title="previous chapter">Advanced Configuration Options for YARN-Based Clusters</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developers.html"
+                        title="next chapter">Developers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation-yarn-debugging-logging.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developers.html" title="Developers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation-yarn-configuration-options-advanced.html" title="Advanced Configuration Options for YARN-Based Clusters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

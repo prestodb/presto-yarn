@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Automated Installation on a YARN-Based Cluster &mdash; Presto YARN 1.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Presto YARN 1.3 documentation" href="index.html" />
+    <link rel="next" title="Presto Installation Directory Structure on YARN-Based Clusters" href="installation-yarn-directory-structure.html" />
+    <link rel="prev" title="Manual Installation on a YARN-Based Cluster" href="installation-yarn-manual.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation-yarn-directory-structure.html" title="Presto Installation Directory Structure on YARN-Based Clusters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation-yarn-manual.html" title="Manual Installation on a YARN-Based Cluster"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="automated-installation-on-a-yarn-based-cluster">
+<h1><a class="toc-backref" href="#id1">Automated Installation on a YARN-Based Cluster</a><a class="headerlink" href="#automated-installation-on-a-yarn-based-cluster" title="Permalink to this headline">¶</a></h1>
+<p>If you are planning to use HDP distribution, you can use Ambari and
+<a class="reference external" href="https://slider.incubator.apache.org/">Apache Slider</a>. to perform automated Presto installation and
+integration on a YARN-based cluster. During installation, both the
+Apache Slider package and Presto are installed.</p>
+<div class="contents topic" id="installing-and-integrating-presto-with-yarn">
+<p class="topic-title first">Installing and Integrating Presto with YARN</p>
+<ul class="simple">
+<li><a class="reference internal" href="#automated-installation-on-a-yarn-based-cluster" id="id1">Automated Installation on a YARN-Based Cluster</a><ul>
+<li><a class="reference internal" href="#deploying-presto-on-a-yarn-based-cluster" id="id2">Deploying Presto on a YARN-Based Cluster</a><ul>
+<li><a class="reference internal" href="#pre-requisites" id="id3">Pre-Requisites</a></li>
+<li><a class="reference internal" href="#presto-installation-directory-structure" id="id4">Presto Installation Directory Structure</a></li>
+<li><a class="reference internal" href="#presto-installation-configuration-options" id="id5">Presto Installation Configuration Options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-ambari-slider-view-to-install-presto-on-a-yarn-based-cluster" id="id6">Using Ambari Slider View to Install Presto on a YARN-Based Cluster</a></li>
+<li><a class="reference internal" href="#additional-configuration-options" id="id7">Additional Configuration Options</a><ul>
+<li><a class="reference internal" href="#reconfiguring-presto-in-slider-view" id="id8">Reconfiguring Presto in Slider View</a></li>
+<li><a class="reference internal" href="#advanced-configuration-options" id="id9">Advanced Configuration Options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#debugging-and-logging" id="id10">Debugging and Logging</a></li>
+<li><a class="reference internal" href="#links" id="id11">Links</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="deploying-presto-on-a-yarn-based-cluster">
+<h2><a class="toc-backref" href="#id2">Deploying Presto on a YARN-Based Cluster</a><a class="headerlink" href="#deploying-presto-on-a-yarn-based-cluster" title="Permalink to this headline">¶</a></h2>
+<p>The installation procedures assume that you have a basic knowledge of Presto
+and the configuration files and properties it uses.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All example files referred to are from:
+<a class="reference external" href="https://github.com/prestodb/presto-yarn/">https://github.com/prestodb/presto-yarn/</a></p>
+</div>
+<hr class="docutils" />
+<div class="section" id="pre-requisites">
+<h3><a class="toc-backref" href="#id3">Pre-Requisites</a><a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>A cluster with HDP 2.2+ or CDH5.4+ installed</li>
+<li>Apache Slider 0.80.0 (download from <a class="reference external" href="https://slider.incubator.apache.org/">https://slider.incubator.apache.org/</a>)</li>
+<li>JDK 1.8</li>
+<li>Zookeeper</li>
+<li>openssl &gt;= 1.0.1e-16</li>
+<li>Ambari 2.1</li>
+</ul>
+<blockquote>
+<div></div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="presto-installation-directory-structure">
+<h3><a class="toc-backref" href="#id4">Presto Installation Directory Structure</a><a class="headerlink" href="#presto-installation-directory-structure" title="Permalink to this headline">¶</a></h3>
+<p>When you use Ambari Slider View to install Presto on a YARN-based cluster, the
+Presto installation directory structure differs from the standard structure.</p>
+<p>For more information, see <a class="reference internal" href="installation-yarn-directory-structure.html"><span class="doc">Presto Installation Directory Structure for YARN-Based Clusters</span></a>.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="presto-installation-configuration-options">
+<h3><a class="toc-backref" href="#id5">Presto Installation Configuration Options</a><a class="headerlink" href="#presto-installation-configuration-options" title="Permalink to this headline">¶</a></h3>
+<p>During installation, Ambari Slider View allows you to select configuration
+options required for running Presto.</p>
+<p>For more information, see <a class="reference internal" href="installation-yarn-configuration-options.html"><span class="doc">Presto Configuration Options for YARN-Based Clusters</span></a>.</p>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="using-ambari-slider-view-to-install-presto-on-a-yarn-based-cluster">
+<h2><a class="toc-backref" href="#id6">Using Ambari Slider View to Install Presto on a YARN-Based Cluster</a><a class="headerlink" href="#using-ambari-slider-view-to-install-presto-on-a-yarn-based-cluster" title="Permalink to this headline">¶</a></h2>
+<p>Ambari supports deploying Slider application packages using Slider View and
+provides Slider integration. Slider View for Ambari allows you to deploy and
+manage Slider apps from Ambari Web.</p>
+<p>Use Ambari Slider View and the following steps to deploy Presto on YARN:</p>
+<ol class="arabic simple">
+<li>Install the Ambari server. See:
+<a class="reference external" href="http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html">http://docs.hortonworks.com/HDPDocuments/Ambari-2.1.0.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html</a>.</li>
+<li>Download the Apache Slider package. See:
+<a class="reference external" href="https://slider.incubator.apache.org/">https://slider.incubator.apache.org/</a></li>
+<li>Copy the Presto app package
+<code class="docutils literal"><span class="pre">presto-yarn-package-&lt;version&gt;-&lt;presto-version&gt;.zip</span></code> to
+<code class="docutils literal"><span class="pre">/var/lib/ambari-server/resources/apps/</span></code> directory on your Ambari
+server node.</li>
+<li>Restart ambari-server.</li>
+<li>Log on to Apache Ambari, <code class="docutils literal"><span class="pre">http://ambariserver_ip:8080</span></code>
+#username-admin password-admin</li>
+<li>Name your cluster, provide the configuration of the cluster, and
+follow the steps on the WebUI.</li>
+<li>Customize/configure the services and install them. A minimum of HDFS,
+YARN, Zookeeper is required for Slider to work. You must also
+select Slider to be installed.</li>
+<li>For the Slider client installed, you need to update its configuration if
+you are not using the default installation paths for Hadoop and Zookeeper.
+Thus <code class="docutils literal"><span class="pre">slider-env.sh</span></code> should point to your JAVA_HOME and HADOOP_CONF_DIR</li>
+</ol>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">JAVA_HOME</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">java</span>
+<span class="n">export</span> <span class="n">HADOOP_CONF_DIR</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">hadoop</span><span class="o">/</span><span class="n">conf</span>
+</pre></div>
+</div>
+<ol class="arabic" start="9">
+<li><p class="first">For zookeeper, if you are using a different installation directory from the
+default one at <code class="docutils literal"><span class="pre">/usr/lib/zookeeper</span></code>:</p>
+<ul class="simple">
+<li>Add a custom property to the <code class="docutils literal"><span class="pre">slider-client</span></code> section in
+Slider configuration with the key:
+<code class="docutils literal"><span class="pre">zk.home</span></code> and value: <code class="docutils literal"><span class="pre">path_to_your_zookeeper</span></code>.</li>
+<li>If using a different  port from the default <code class="docutils literal"><span class="pre">2181</span></code>, then add the key
+<code class="docutils literal"><span class="pre">slider.zookeeper.quorum</span></code> and value: <code class="docutils literal"><span class="pre">master:5181</span></code>, where <code class="docutils literal"><span class="pre">master</span></code>
+is the node and <code class="docutils literal"><span class="pre">5181</span></code> is the  port.</li>
+</ul>
+</li>
+<li><p class="first">Once you have all the services up and running on the cluster, you can
+configure Slider in Ambari to create and manage your application by creating
+a &#8220;View&#8221;.</p>
+<ol class="loweralpha simple">
+<li>Go to <code class="docutils literal"><span class="pre">admin</span></code> (top right corner) -&gt; <code class="docutils literal"><span class="pre">Manage</span> <span class="pre">Ambari</span></code>.</li>
+<li>From the left pane, select <code class="docutils literal"><span class="pre">Views</span></code>.</li>
+<li>Create a Slider View by populating all the necessary fields with a preferred instance name (for example, Slider). <code class="docutils literal"><span class="pre">ambari.server.url</span></code> can be of the format <code class="docutils literal"><span class="pre">http://&lt;ambari-server-url&gt;:8080/api/v1/clusters/&lt;clustername&gt;</span></code>, where <code class="docutils literal"><span class="pre">&lt;clustername&gt;</span></code> is what you have named your Ambari cluster.</li>
+<li>Select the &#8220;Views&#8221; control icon in the upper right.</li>
+<li>Select the instance you created in the previous step (for example, &#8220;Slider&#8221;).</li>
+<li>Click <code class="docutils literal"><span class="pre">Create</span> <span class="pre">App</span></code> to create a new Presto YARN application.</li>
+</ol>
+</li>
+<li><p class="first">Provide details of the Presto service. By default, the UI will be
+populated with the values you have in the <code class="docutils literal"><span class="pre">*-default.json</span></code> files in
+your <code class="docutils literal"><span class="pre">presto-yarn-package-*.zip</span></code>.</p>
+</li>
+<li><p class="first">The app name should be of lower case. For example: presto1.</p>
+</li>
+<li><p class="first">You can set the configuration property fields required for your cluster. For example,
+if you want to set a connector for Presto, you can update the <code class="docutils literal"><span class="pre">global.catalog</span></code> property. See
+the following for an explanation of each configuration property.</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="installation-yarn-configuration-options.html"><span class="doc">Presto Configuration Options for YARN-Based Clusters</span></a></div>
+</div>
+</li>
+<li><p class="first">Prepare HDFS for Slider. The user directory you create here should be
+for the same user you set in the <code class="docutils literal"><span class="pre">global.app_user</span></code> field. If the
+<code class="docutils literal"><span class="pre">app_user</span></code> is going to be <code class="docutils literal"><span class="pre">yarn</span></code> then do the following:</p>
+</li>
+</ol>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">su</span> <span class="n">hdfs</span> <span class="n">hdfs</span> <span class="n">dfs</span> <span class="o">-</span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">yarn</span>
+<span class="n">su</span> <span class="n">hdfs</span> <span class="n">hdfs</span> <span class="n">dfs</span> <span class="o">-</span><span class="n">chown</span> <span class="n">yarn</span><span class="p">:</span><span class="n">yarn</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">yarn</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="15">
+<li>Change the <code class="docutils literal"><span class="pre">global.presto_server_port</span></code> from 8080 to another unused port, for
+example, 8089, since Ambari by default uses 8080.</li>
+<li>Pre-create the data directory in the UI (added in <code class="docutils literal"><span class="pre">appConfig-default.json</span></code>
+eg: <code class="docutils literal"><span class="pre">/var/lib/presto/</span></code>) on all nodes. The directory must be owned by
+<code class="docutils literal"><span class="pre">global.app_user</span></code>, otherwise Slider will fail to start Presto due to
+permission errors.</li>
+</ol>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">presto</span><span class="o">/</span><span class="n">data</span>
+<span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="n">yarn</span><span class="p">:</span><span class="n">hadoop</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">presto</span><span class="o">/</span><span class="n">data</span>
+</pre></div>
+</div>
+<ol class="arabic" start="18">
+<li><p class="first">If you want to add any additional custom properties, use the Custom
+property section. Additional properties currently supported are:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">site.global.plugin</span></code></li>
+<li><code class="docutils literal"><span class="pre">site.global.additional_config_properties</span></code></li>
+<li><code class="docutils literal"><span class="pre">site.global.additional_node_properties</span></code>.</li>
+</ul>
+<p>For the requirements and format of these properties, see:</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="installation-yarn-configuration-options.html"><span class="doc">Presto Configuration Options for YARN-Based Clusters</span></a></div>
+</div>
+</li>
+<li><p class="first">Click Finish. This is the equivalent of <code class="docutils literal"><span class="pre">package</span>&nbsp; <span class="pre">--install</span></code> and <code class="docutils literal"><span class="pre">create</span></code>
+performed with the bin/slider script. If successfully deployed, you will see the YARN
+application started for Presto. You can do the following:</p>
+<ul class="simple">
+<li>Click <code class="docutils literal"><span class="pre">app</span> <span class="pre">launched</span></code> and monitor the status from Slider view.</li>
+<li>Click``Quick Links``, which should take you to the YARN WebUI.</li>
+</ul>
+<p>If your application is running successfully, it should always be available
+in the YARN resource manager as a &#8220;RUNNING&#8221; application.</p>
+</li>
+<li><p class="first">If the job fails, check the job history’s logs and the logs on the node’s disk.
+See <a class="reference internal" href="installation-yarn-debugging-logging.html"><span class="doc">Debugging and Logging for YARN-Based Clusters</span></a>.</p>
+</li>
+<li><p class="first">You can manage the application lifecycle (for example: start, stop, flex, and
+destroy) from the View UI.</p>
+</li>
+</ol>
+</div>
+<hr class="docutils" />
+<div class="section" id="additional-configuration-options">
+<h2><a class="toc-backref" href="#id7">Additional Configuration Options</a><a class="headerlink" href="#additional-configuration-options" title="Permalink to this headline">¶</a></h2>
+<p>After you install Presto and Slider, you can reconfigure Presto or perform
+additional configuration.</p>
+<div class="section" id="reconfiguring-presto-in-slider-view">
+<h3><a class="toc-backref" href="#id8">Reconfiguring Presto in Slider View</a><a class="headerlink" href="#reconfiguring-presto-in-slider-view" title="Permalink to this headline">¶</a></h3>
+<p>After you launch Presto you can update its configuration. For example, you
+can add a new connector.</p>
+<ol class="arabic simple">
+<li>On the Slider View instance screen, go to <code class="docutils literal"><span class="pre">Actions.</span></code></li>
+<li>Stop the running Presto application.</li>
+<li>Click <cite>Destroy`</cite> to remove the existing Presto instance running in Slider.</li>
+<li>Click the <code class="docutils literal"><span class="pre">Create</span> <span class="pre">App</span></code> button to re-create a new Presto instance in Slider
+and make configuration updates.</li>
+</ol>
+</div>
+<div class="section" id="advanced-configuration-options">
+<h3><a class="toc-backref" href="#id9">Advanced Configuration Options</a><a class="headerlink" href="#advanced-configuration-options" title="Permalink to this headline">¶</a></h3>
+<p>The following advanced configuration options are available:</p>
+<ul class="simple">
+<li>Configuring memory, CPU, and YARN CGroups</li>
+<li>Failure policy</li>
+<li>YARN label</li>
+</ul>
+<p>For more information, see <a class="reference internal" href="installation-yarn-configuration-options-advanced.html"><span class="doc">Advanced Configuration Options for YARN-Based Clusters</span></a></p>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="debugging-and-logging">
+<h2><a class="toc-backref" href="#id10">Debugging and Logging</a><a class="headerlink" href="#debugging-and-logging" title="Permalink to this headline">¶</a></h2>
+<p>For more information, see <a class="reference internal" href="installation-yarn-debugging-logging.html"><span class="doc">Debugging and Logging for YARN-Based Clusters</span></a>.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="links">
+<h2><a class="toc-backref" href="#id11">Links</a><a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://slider.incubator.apache.org/docs/getting_started.html">http://slider.incubator.apache.org/docs/getting_started.html</a></li>
+<li><a class="reference external" href="http://docs.hortonworks.com/HDPDocuments/Ambari-2.0.1.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html">http://docs.hortonworks.com/HDPDocuments/Ambari-2.0.1.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Automated Installation on a YARN-Based Cluster</a><ul>
+<li><a class="reference internal" href="#deploying-presto-on-a-yarn-based-cluster">Deploying Presto on a YARN-Based Cluster</a><ul>
+<li><a class="reference internal" href="#pre-requisites">Pre-Requisites</a></li>
+<li><a class="reference internal" href="#presto-installation-directory-structure">Presto Installation Directory Structure</a></li>
+<li><a class="reference internal" href="#presto-installation-configuration-options">Presto Installation Configuration Options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-ambari-slider-view-to-install-presto-on-a-yarn-based-cluster">Using Ambari Slider View to Install Presto on a YARN-Based Cluster</a></li>
+<li><a class="reference internal" href="#additional-configuration-options">Additional Configuration Options</a><ul>
+<li><a class="reference internal" href="#reconfiguring-presto-in-slider-view">Reconfiguring Presto in Slider View</a></li>
+<li><a class="reference internal" href="#advanced-configuration-options">Advanced Configuration Options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#debugging-and-logging">Debugging and Logging</a></li>
+<li><a class="reference internal" href="#links">Links</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation-yarn-manual.html"
+                        title="previous chapter">Manual Installation on a YARN-Based Cluster</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation-yarn-directory-structure.html"
+                        title="next chapter">Presto Installation Directory Structure on YARN-Based Clusters</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation-yarn-automated.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation-yarn-directory-structure.html" title="Presto Installation Directory Structure on YARN-Based Clusters"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation-yarn-manual.html" title="Manual Installation on a YARN-Based Cluster"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>
