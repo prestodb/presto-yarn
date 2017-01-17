@@ -23,10 +23,23 @@
     <comment>Presto DB</comment>
     <version>${presto.version}</version>
 
+       <exportGroups>
+        <exportGroup>
+          <name>Presto</name>
+          <exports>
+            <export>
+              <name>coordinator_host</name>
+              <value>${COORDINATOR_HOST}:${site.global.presto_server_port}</value>
+            </export>
+          </exports>
+        </exportGroup>
+      </exportGroups>
+     
       <components>
           <component>
               <name>COORDINATOR</name>
               <category>MASTER</category>
+              <appExports>Presto-coordinator_host</appExports>
               <minInstanceCount>1</minInstanceCount>
               <maxInstanceCount>1</maxInstanceCount>
               <commandScript>
