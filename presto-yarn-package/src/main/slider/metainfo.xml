@@ -28,7 +28,7 @@
           <name>Presto</name>
           <exports>
             <export>
-              <name>coordinator_host</name>
+              <name>coordinator_address</name>
               <value>${COORDINATOR_HOST}:${site.global.presto_server_port}</value>
             </export>
           </exports>
@@ -39,7 +39,7 @@
           <component>
               <name>COORDINATOR</name>
               <category>MASTER</category>
-              <appExports>Presto-coordinator_host</appExports>
+              <appExports>Presto-coordinator_address</appExports>
               <minInstanceCount>1</minInstanceCount>
               <maxInstanceCount>1</maxInstanceCount>
               <commandScript>
