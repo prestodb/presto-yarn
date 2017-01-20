@@ -185,6 +185,16 @@ If you want to check the status of running application you run the following, an
 bin/slider status presto1 --out status_file
 ```
 
+##### Check where the coordinator is running
+
+Use the following command to check what is the host and port of presto coordinator after deployment, so that you can connect to it. You can use output of this command to specify --server flag on presto command line. 
+
+```
+bin/slider registry --name presto1 --getexp presto
+```
+
+You can also view this information through Slider REST API and YARN Application UI. 
+
 ##### Destroy the app and re-create
 
 If you want to re-create the app due to some failures or you want to reconfigure Presto (eg: add a new connector)
