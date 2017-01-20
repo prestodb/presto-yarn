@@ -271,11 +271,16 @@ Follow the steps here and configure the presto-yarn configuration files to match
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
 ```
 
-11. ``site.global.additional_node_properties`` and ``site.global.additional_config_properties`` (optional) (default - None): Presto launched via Slider will use ``config.properties`` and ``node.properties`` created from templates ``presto-yarn-package/package/templates/config.properties*.j2`` and ``presto-yarn-package/package/target/node.properties.j2`` respectively. If you want to add any additional properties to these configuration files, add ``site.global.additional_config_properties`` and ``site.global.additional_node_properties`` to your ``appConfig.json``. The value of these has to be a string representation of an array of entries (key=value) that has to go to the ``.properties`` file. Eg:
+11. ``site.global.log_properties``: This allows you to configure logging level in presto. Default value is "['com.facebook.presto=INFO']" which is equivalent of the default logging level INFO. Since, presto needs the ``log.properties`` file to be a list of options, one per line, this property must be a String representation of list of strings. Each entry of this list will be a new line in your ``log.properties``. For example, below configuration will change the logging level to WARN for hive and will maintain the logging level of presto server to INFO.
+  ```
+ "site.global.log_properties": "['com.facebook.presto.hive=WARN', 'com.facebook.presto.server=INFO']"
+```
+
+12. ``site.global.additional_node_properties`` and ``site.global.additional_config_properties`` (optional) (default - None): Presto launched via Slider will use ``config.properties`` and ``node.properties`` created from templates ``presto-yarn-package/package/templates/config.properties*.j2`` and ``presto-yarn-package/package/target/node.properties.j2`` respectively. If you want to add any additional properties to these configuration files, add ``site.global.additional_config_properties`` and ``site.global.additional_node_properties`` to your ``appConfig.json``. The value of these has to be a string representation of an array of entries (key=value) that has to go to the ``.properties`` file. Eg:
 
   ```
     "site.global.additional_config_properties": "['task.max-worker-threads=50', 'distributed-joins-enabled=true']"
-```    
+```
 
 12. ``site.global.plugin`` (optional) (default - None): This allows you to add any additional jars you want to copy to plugin ``presto-server-<version>/plugin/<connector>`` directory in addition to what is already available there. It should be of the format {'connector1' : ['jar1', 'jar2'..], 'connector2' : ['jar3', 'jar4'..]..}. This will copy jar1, jar2 to Presto plugin directory at plugin/connector1 directory and jar3, jar4 at plugin/connector2 directory. Make sure you have the plugin jars you want to add to Presto available at ```presto-yarn-package/src/main/slider/package/plugins/``` prior to building the presto-yarn app package and thus the app package built ``presto-yarn-package-<version>-<presto-version>.zip`` will have the jars under ```package/plugins``` directory.
 
