@@ -15,7 +15,7 @@
     "site.global.presto_server_port": "8080",
 
     "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
-
+    "site.global.log_properties": "['com.facebook.presto=INFO']",
     "application.def": ".slider/package/PRESTO/${app.package.name}.zip",
     "java_home": "/usr/java/jdk1.8.0_92"
   },
