@@ -4,3 +4,10 @@ jdk:
   - oraclejdk8
 
 dist: trusty
+
+install:
+  - ./mvnw package -v -B
+
+script:
+ - ./mvnw package -DskipTests -B
+
