@@ -94,6 +94,14 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>teradata</id>
+            <name>Teradata public maven repository</name>
+            <url>http://teradata-presto.s3.amazonaws.com/maven/repository/release/</url>
+        </repository>
+    </repositories>
+    
     <build>
         <plugins>
             <plugin>
