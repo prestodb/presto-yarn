@@ -134,26 +134,44 @@ hostname.
 
 ::
 
-        "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
+   "site.global.jvm_args": "['-server', '-Xmx1024M', '-XX:+UseG1GC', '-XX:G1HeapRegionSize=32M', '-XX:+UseGCOverheadLimit', '-XX:+ExplicitGCInvokesConcurrent', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:OnOutOfMemoryError=kill -9 %p']",
 
-11. ``site.global.additional_node_properties`` and
-    ``site.global.additional_config_properties`` (optional) (default -
-    None): Presto launched via Slider will use ``config.properties`` and
-    ``node.properties`` created from templates
-    ``presto-yarn-package/package/templates/config.properties*.j2`` and
-    ``presto-yarn-package/package/target/node.properties.j2``
-    respectively. If you want to add any additional properties to these
-    configuration files, add ``site.global.additional_config_properties``
-    and ``site.global.additional_node_properties`` to your
-    ``appConfig.json``. The value of these has to be a string
-    representation of an array of entries (key=value) that has to go to
-    the ``.properties`` file. Eg:
+11. ``site.global.log_properties``: This allows you to configure
+    logging level in presto. Default value is
+    "['com.facebook.presto=INFO']" which is equivalent of the default
+    logging level INFO. Since, presto needs the ``log.properties``
+    file to be a list of options, one per line, this property must be
+    a String representation of list of strings. Each entry of this
+    list will be a new line in your ``log.properties``. For example,
+    below configuration will change the logging level to WARN for hive
+    and will maintain the logging level of presto server to INFO.
 
 ::
+       
+   "site.global.log_properties": "['com.facebook.presto.hive=WARN',
+   'com.facebook.presto.server=INFO']"
 
-        "site.global.additional_config_properties": "['task.max-worker-threads=50', 'distributed-joins-enabled=true']"
+12. ``site.global.additional_node_properties`` and
+    ``site.global.additional_config_properties`` (optional) (default -
+    None): Presto launched via Slider will use ``config.properties``
+    and ``node.properties`` created from templates
+    ``presto-yarn-package/package/templates/config.properties*.j2``
+    and ``presto-yarn-package/package/target/node.properties.j2``
+    respectively. If you want to add any additional properties to
+    these configuration files, add
+    ``site.global.additional_config_properties`` and
+    ``site.global.additional_node_properties`` to your
+    ``appConfig.json``. The value of these has to be a string
+    representation of an array of entries (key=value) that has to go
+    to the ``.properties`` file. Eg:
+  		  
+::
 
-12. ``site.global.plugin`` (optional) (default - None): This allows you
+   "site.global.additional_config_properties":
+    "['task.max-worker-threads=50', 'distributed-joins-enabled=true']"
+   
+
+13. ``site.global.plugin`` (optional) (default - None): This allows you
     to add any additional jars you want to copy to plugin
     ``presto-server-<version>/plugin/<connector>`` directory in addition
     to what is already available there. It should be of the format
@@ -171,13 +189,25 @@ hostname.
 
         "site.global.plugin": "{'ml': ['presto-ml-${presto.version}.jar']}",
 
-13. ``java_home`` (default - ``/usr/lib/jvm/java``): Presto requires Java
+14. ``site.global.app_name`` (optional) (default - ``presto-server-0.130``)
+    This value should be the name of the tar.gz file contained within
+    the zip file produced by presto-yarn (in package/files/ within the
+    zip). If you use a custom presto server distribution or anything
+    other than the default presto-yarn package settings, please be
+    sure to modify this.
+
+15. ``application.def`` For Slider users, when the command to install the
+    presto package is run, the logs will explicitly tell the user
+    which value to use for this parameter. Changing this is only
+    required if you are using a custom built presto package.
+	
+16. ``java_home`` (default - ``/usr/lib/jvm/java``): Presto requires Java
     1.8. So make jdk8 the default java or add it to ``java_home`` here
 
-14. Variables in ``appConfig.json`` like ``${COORDINATOR_HOST}``,
+17. Variables in ``appConfig.json`` like ``${COORDINATOR_HOST}``,
     ``${AGENT_WORK_ROOT}`` etc. do not need any substitution and will be
     appropriately configured during runtime.
-
+    
  .. _resources-json-label:
 
 resources.json

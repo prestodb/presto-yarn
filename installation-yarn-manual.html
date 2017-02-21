@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Manual Installation on a YARN-Based Cluster &mdash; Presto YARN 1.3 documentation</title>
+    <title>Manual Installation on a YARN-Based Cluster &mdash; Presto YARN 1.4 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3',
+        VERSION:     '1.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Presto YARN 1.3 documentation" href="index.html" />
+    <link rel="top" title="Presto YARN 1.4 documentation" href="index.html" />
     <link rel="next" title="Automated Installation on a YARN-Based Cluster" href="installation-yarn-automated.html" />
     <link rel="prev" title="Presto YARN Integration" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="Presto YARN Integration"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -65,16 +65,17 @@
 <li><a class="reference internal" href="#using-apache-slider-to-manually-install-presto-on-a-yarn-based-cluster" id="id6">Using Apache Slider to Manually Install Presto on a YARN-Based Cluster</a><ul>
 <li><a class="reference internal" href="#additional-slider-commands" id="id7">Additional Slider Commands</a><ul>
 <li><a class="reference internal" href="#check-the-status" id="id8">Check the Status</a></li>
-<li><a class="reference internal" href="#destroy-the-app-and-re-create" id="id9">Destroy the App and Re-create</a></li>
-<li><a class="reference internal" href="#completely-remove-the-app" id="id10">Completely Remove the App</a></li>
-<li><a class="reference internal" href="#flex-ible-app" id="id11">&#8216;Flex&#8217;ible App</a></li>
+<li><a class="reference internal" href="#check-where-the-coordinator-is-running" id="id9">Check where the coordinator is running</a></li>
+<li><a class="reference internal" href="#destroy-the-app-and-re-create" id="id10">Destroy the App and Re-create</a></li>
+<li><a class="reference internal" href="#completely-remove-the-app" id="id11">Completely Remove the App</a></li>
+<li><a class="reference internal" href="#flex-ible-app" id="id12">&#8216;Flex&#8217;ible App</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#advanced-configuration-options" id="id12">Advanced Configuration Options</a></li>
+<li><a class="reference internal" href="#advanced-configuration-options" id="id13">Advanced Configuration Options</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#debugging-and-logging" id="id13">Debugging and Logging</a></li>
-<li><a class="reference internal" href="#links" id="id14">Links</a></li>
+<li><a class="reference internal" href="#debugging-and-logging" id="id14">Debugging and Logging</a></li>
+<li><a class="reference internal" href="#links" id="id15">Links</a></li>
 </ul>
 </li>
 </ul>
@@ -193,8 +194,18 @@ following, and you will have status printed to a file <code class="docutils lite
 </pre></div>
 </div>
 </div>
+<div class="section" id="check-where-the-coordinator-is-running">
+<h4><a class="toc-backref" href="#id9">Check where the coordinator is running</a><a class="headerlink" href="#check-where-the-coordinator-is-running" title="Permalink to this headline">¶</a></h4>
+<blockquote>
+<div><p>Use the following command to check what is the host and port of presto coordinator after deployment, so that you can connect to it. You can use output of this command to specify &#8211;server flag on presto command line.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">bin</span><span class="o">/</span><span class="n">slider</span> <span class="n">registry</span> <span class="o">--</span><span class="n">name</span> <span class="n">presto1</span> <span class="o">--</span><span class="n">getexp</span> <span class="n">presto</span>
+</pre></div>
+</div>
+<p>You can also view this information through Slider REST API and YARN Application UI.</p>
+</div></blockquote>
+</div>
 <div class="section" id="destroy-the-app-and-re-create">
-<h4><a class="toc-backref" href="#id9">Destroy the App and Re-create</a><a class="headerlink" href="#destroy-the-app-and-re-create" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id10">Destroy the App and Re-create</a><a class="headerlink" href="#destroy-the-app-and-re-create" title="Permalink to this headline">¶</a></h4>
 <p>If you want to re-create the app due to some failures or you want to
 reconfigure Presto (eg: add a new connector)</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">bin</span><span class="o">/</span><span class="n">slider</span> <span class="n">destroy</span> <span class="n">presto1</span>
@@ -203,14 +214,14 @@ reconfigure Presto (eg: add a new connector)</p>
 </div>
 </div>
 <div class="section" id="completely-remove-the-app">
-<h4><a class="toc-backref" href="#id10">Completely Remove the App</a><a class="headerlink" href="#completely-remove-the-app" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id11">Completely Remove the App</a><a class="headerlink" href="#completely-remove-the-app" title="Permalink to this headline">¶</a></h4>
 <p>Delete the app including the app package.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">bin</span><span class="o">/</span><span class="n">slider</span> <span class="n">package</span> <span class="o">--</span><span class="n">delete</span> <span class="o">--</span><span class="n">name</span> <span class="n">PRESTO</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="flex-ible-app">
-<h4><a class="toc-backref" href="#id11">&#8216;Flex&#8217;ible App</a><a class="headerlink" href="#flex-ible-app" title="Permalink to this headline">¶</a></h4>
+<h4><a class="toc-backref" href="#id12">&#8216;Flex&#8217;ible App</a><a class="headerlink" href="#flex-ible-app" title="Permalink to this headline">¶</a></h4>
 <p>Flex the number of Presto workers to the new value. If greater than
 before, new copies of the worker will be requested. If less, component
 instances will be destroyed.</p>
@@ -234,7 +245,7 @@ above command will destroy one of them and retain 2 WORKERs.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="advanced-configuration-options">
-<h3><a class="toc-backref" href="#id12">Advanced Configuration Options</a><a class="headerlink" href="#advanced-configuration-options" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id13">Advanced Configuration Options</a><a class="headerlink" href="#advanced-configuration-options" title="Permalink to this headline">¶</a></h3>
 <p>The following advanced configuration options are available:</p>
 <ul class="simple">
 <li>Configuring memory, CPU, and YARN CGroups</li>
@@ -246,12 +257,12 @@ above command will destroy one of them and retain 2 WORKERs.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="debugging-and-logging">
-<h2><a class="toc-backref" href="#id13">Debugging and Logging</a><a class="headerlink" href="#debugging-and-logging" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id14">Debugging and Logging</a><a class="headerlink" href="#debugging-and-logging" title="Permalink to this headline">¶</a></h2>
 <p>For more information, see: <a class="reference internal" href="installation-yarn-debugging-logging.html"><span class="doc">Debugging and Logging for YARN-Based Clusters</span></a>.</p>
 </div>
 <hr class="docutils" />
 <div class="section" id="links">
-<h2><a class="toc-backref" href="#id14">Links</a><a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id15">Links</a><a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://slider.incubator.apache.org/docs/getting_started.html">http://slider.incubator.apache.org/docs/getting_started.html</a></li>
 <li><a class="reference external" href="http://docs.hortonworks.com/HDPDocuments/Ambari-2.0.1.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html">http://docs.hortonworks.com/HDPDocuments/Ambari-2.0.1.0/bk_Installing_HDP_AMB/content/ch_Installing_Ambari.html</a></li>
@@ -277,6 +288,7 @@ above command will destroy one of them and retain 2 WORKERs.</p>
 <li><a class="reference internal" href="#using-apache-slider-to-manually-install-presto-on-a-yarn-based-cluster">Using Apache Slider to Manually Install Presto on a YARN-Based Cluster</a><ul>
 <li><a class="reference internal" href="#additional-slider-commands">Additional Slider Commands</a><ul>
 <li><a class="reference internal" href="#check-the-status">Check the Status</a></li>
+<li><a class="reference internal" href="#check-where-the-coordinator-is-running">Check where the coordinator is running</a></li>
 <li><a class="reference internal" href="#destroy-the-app-and-re-create">Destroy the App and Re-create</a></li>
 <li><a class="reference internal" href="#completely-remove-the-app">Completely Remove the App</a></li>
 <li><a class="reference internal" href="#flex-ible-app">&#8216;Flex&#8217;ible App</a></li>
@@ -330,7 +342,7 @@ above command will destroy one of them and retain 2 WORKERs.</p>
         <li class="right" >
           <a href="index.html" title="Presto YARN Integration"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Presto Configuration Options for YARN-Based Clusters &mdash; Presto YARN 1.3 documentation</title>
+    <title>Presto Configuration Options for YARN-Based Clusters &mdash; Presto YARN 1.4 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3',
+        VERSION:     '1.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Presto YARN 1.3 documentation" href="index.html" />
+    <link rel="top" title="Presto YARN 1.4 documentation" href="index.html" />
     <link rel="next" title="Advanced Configuration Options for YARN-Based Clusters" href="installation-yarn-configuration-options-advanced.html" />
     <link rel="prev" title="Presto Installation Directory Structure on YARN-Based Clusters" href="installation-yarn-directory-structure.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="installation-yarn-directory-structure.html" title="Presto Installation Directory Structure on YARN-Based Clusters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -173,23 +173,40 @@ your jvm.config. For example the configuration should look like:</li>
 </pre></div>
 </div>
 <ol class="arabic simple" start="11">
-<li><code class="docutils literal"><span class="pre">site.global.additional_node_properties</span></code> and
-<code class="docutils literal"><span class="pre">site.global.additional_config_properties</span></code> (optional) (default -
-None): Presto launched via Slider will use <code class="docutils literal"><span class="pre">config.properties</span></code> and
-<code class="docutils literal"><span class="pre">node.properties</span></code> created from templates
-<code class="docutils literal"><span class="pre">presto-yarn-package/package/templates/config.properties*.j2</span></code> and
-<code class="docutils literal"><span class="pre">presto-yarn-package/package/target/node.properties.j2</span></code>
-respectively. If you want to add any additional properties to these
-configuration files, add <code class="docutils literal"><span class="pre">site.global.additional_config_properties</span></code>
-and <code class="docutils literal"><span class="pre">site.global.additional_node_properties</span></code> to your
-<code class="docutils literal"><span class="pre">appConfig.json</span></code>. The value of these has to be a string
-representation of an array of entries (key=value) that has to go to
-the <code class="docutils literal"><span class="pre">.properties</span></code> file. Eg:</li>
+<li><code class="docutils literal"><span class="pre">site.global.log_properties</span></code>: This allows you to configure
+logging level in presto. Default value is
+&#8220;[&#8216;com.facebook.presto=INFO&#8217;]&#8221; which is equivalent of the default
+logging level INFO. Since, presto needs the <code class="docutils literal"><span class="pre">log.properties</span></code>
+file to be a list of options, one per line, this property must be
+a String representation of list of strings. Each entry of this
+list will be a new line in your <code class="docutils literal"><span class="pre">log.properties</span></code>. For example,
+below configuration will change the logging level to WARN for hive
+and will maintain the logging level of presto server to INFO.</li>
 </ol>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;site.global.additional_config_properties&quot;</span><span class="p">:</span> <span class="s2">&quot;[&#39;task.max-worker-threads=50&#39;, &#39;distributed-joins-enabled=true&#39;]&quot;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;site.global.log_properties&quot;</span><span class="p">:</span> <span class="s2">&quot;[&#39;com.facebook.presto.hive=WARN&#39;,</span>
+<span class="s1">&#39;com.facebook.presto.server=INFO&#39;</span><span class="p">]</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="12">
+<li><code class="docutils literal"><span class="pre">site.global.additional_node_properties</span></code> and
+<code class="docutils literal"><span class="pre">site.global.additional_config_properties</span></code> (optional) (default -
+None): Presto launched via Slider will use <code class="docutils literal"><span class="pre">config.properties</span></code>
+and <code class="docutils literal"><span class="pre">node.properties</span></code> created from templates
+<code class="docutils literal"><span class="pre">presto-yarn-package/package/templates/config.properties*.j2</span></code>
+and <code class="docutils literal"><span class="pre">presto-yarn-package/package/target/node.properties.j2</span></code>
+respectively. If you want to add any additional properties to
+these configuration files, add
+<code class="docutils literal"><span class="pre">site.global.additional_config_properties</span></code> and
+<code class="docutils literal"><span class="pre">site.global.additional_node_properties</span></code> to your
+<code class="docutils literal"><span class="pre">appConfig.json</span></code>. The value of these has to be a string
+representation of an array of entries (key=value) that has to go
+to the <code class="docutils literal"><span class="pre">.properties</span></code> file. Eg:</li>
+</ol>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;site.global.additional_config_properties&quot;</span><span class="p">:</span>
+ <span class="s2">&quot;[&#39;task.max-worker-threads=50&#39;, &#39;distributed-joins-enabled=true&#39;]&quot;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="13">
 <li><code class="docutils literal"><span class="pre">site.global.plugin</span></code> (optional) (default - None): This allows you
 to add any additional jars you want to copy to plugin
 <code class="docutils literal"><span class="pre">presto-server-&lt;version&gt;/plugin/&lt;connector&gt;</span></code> directory in addition
@@ -207,7 +224,17 @@ jars under <code class="docutils literal"><span class="pre">package/plugins</spa
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;site.global.plugin&quot;</span><span class="p">:</span> <span class="s2">&quot;{&#39;ml&#39;: [&#39;presto-ml-$</span><span class="si">{presto.version}</span><span class="s2">.jar&#39;]}&quot;</span><span class="p">,</span>
 </pre></div>
 </div>
-<ol class="arabic simple" start="13">
+<ol class="arabic simple" start="14">
+<li><code class="docutils literal"><span class="pre">site.global.app_name</span></code> (optional) (default - <code class="docutils literal"><span class="pre">presto-server-0.130</span></code>)
+This value should be the name of the tar.gz file contained within
+the zip file produced by presto-yarn (in package/files/ within the
+zip). If you use a custom presto server distribution or anything
+other than the default presto-yarn package settings, please be
+sure to modify this.</li>
+<li><code class="docutils literal"><span class="pre">application.def</span></code> For Slider users, when the command to install the
+presto package is run, the logs will explicitly tell the user
+which value to use for this parameter. Changing this is only
+required if you are using a custom built presto package.</li>
 <li><code class="docutils literal"><span class="pre">java_home</span></code> (default - <code class="docutils literal"><span class="pre">/usr/lib/jvm/java</span></code>): Presto requires Java
 1.8. So make jdk8 the default java or add it to <code class="docutils literal"><span class="pre">java_home</span></code> here</li>
 <li>Variables in <code class="docutils literal"><span class="pre">appConfig.json</span></code> like <code class="docutils literal"><span class="pre">${COORDINATOR_HOST}</span></code>,
@@ -311,7 +338,7 @@ Ambari.</p>
         <li class="right" >
           <a href="installation-yarn-directory-structure.html" title="Presto Installation Directory Structure on YARN-Based Clusters"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

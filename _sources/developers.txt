@@ -4,9 +4,11 @@ Developers
 Create Presto App Package
 -------------------------
 
+
 First step is to build the ``presto-yarn-package-<version>-<presto-version>.zip`` package to deploy Presto on YARN.
 
 Run ```mvn clean package``` and the presto app package will be packaged at ``presto-yarn-package/target/presto-yarn-package-<version>-<presto-version>.zip``.
+To specify a specific version of Presto run ```mvn clean package  -Dpresto.version=<version>```
 
 This .zip will have ``presto-server-<version>.tar.gz`` from Presto under ``package/files/``. The Presto installed will use the configuration templates under ``package/templates``.
 
@@ -41,4 +43,3 @@ The app package built should look something like:
 	  2020  2015-11-30 22:57   metainfo.xml
      ---------                     -------
      411474867                     20 files
-

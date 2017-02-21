@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Developers &mdash; Presto YARN 1.3 documentation</title>
+    <title>Developers &mdash; Presto YARN 1.4 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3',
+        VERSION:     '1.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Presto YARN 1.3 documentation" href="index.html" />
+    <link rel="top" title="Presto YARN 1.4 documentation" href="index.html" />
     <link rel="prev" title="Debugging and Logging for a YARN-Based Cluster" href="installation-yarn-debugging-logging.html" /> 
   </head>
   <body role="document">
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="installation-yarn-debugging-logging.html" title="Debugging and Logging for a YARN-Based Cluster"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,7 +50,8 @@
 <div class="section" id="create-presto-app-package">
 <h2>Create Presto App Package<a class="headerlink" href="#create-presto-app-package" title="Permalink to this headline">¶</a></h2>
 <p>First step is to build the <code class="docutils literal"><span class="pre">presto-yarn-package-&lt;version&gt;-&lt;presto-version&gt;.zip</span></code> package to deploy Presto on YARN.</p>
-<p>Run <code class="docutils literal"><span class="pre">`mvn</span> <span class="pre">clean</span> <span class="pre">package`</span></code> and the presto app package will be packaged at <code class="docutils literal"><span class="pre">presto-yarn-package/target/presto-yarn-package-&lt;version&gt;-&lt;presto-version&gt;.zip</span></code>.</p>
+<p>Run <code class="docutils literal"><span class="pre">`mvn</span> <span class="pre">clean</span> <span class="pre">package`</span></code> and the presto app package will be packaged at <code class="docutils literal"><span class="pre">presto-yarn-package/target/presto-yarn-package-&lt;version&gt;-&lt;presto-version&gt;.zip</span></code>.
+To specify a specific version of Presto run <code class="docutils literal"><span class="pre">`mvn</span> <span class="pre">clean</span> <span class="pre">package</span>&nbsp; <span class="pre">-Dpresto.version=&lt;version&gt;`</span></code></p>
 <p>This .zip will have <code class="docutils literal"><span class="pre">presto-server-&lt;version&gt;.tar.gz</span></code> from Presto under <code class="docutils literal"><span class="pre">package/files/</span></code>. The Presto installed will use the configuration templates under <code class="docutils literal"><span class="pre">package/templates</span></code>.</p>
 <p>The app package built should look something like:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">unzip</span> <span class="o">-</span><span class="n">l</span> <span class="s2">&quot;$@&quot;</span> <span class="o">../</span><span class="n">presto</span><span class="o">-</span><span class="n">yarn</span><span class="o">-</span><span class="n">package</span><span class="o">-</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">SNAPSHOT</span><span class="o">-</span><span class="mf">0.130</span><span class="o">.</span><span class="n">zip</span>
@@ -132,7 +133,7 @@
         <li class="right" >
           <a href="installation-yarn-debugging-logging.html" title="Debugging and Logging for a YARN-Based Cluster"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Presto YARN 1.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
