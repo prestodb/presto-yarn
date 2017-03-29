@@ -115,7 +115,7 @@ scripts(bin/slider) as user ``hdfs`` in this case.
 
 ::
 
-        "site.global.catalog": "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
+        "site.global.catalog": "{'hive': ['connector.name=hive-hadoop2', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch']}"
 
 ``Note``: The ``NN_HOST`` used in ``hive.metastore.uri`` is a variable
 for your HDFS Namenode and this expects that your hive metastore is up

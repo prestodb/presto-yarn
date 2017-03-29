@@ -30,7 +30,7 @@
     "site.global.additional_node_properties" : "['plugin.dir=${AGENT_WORK_ROOT}/app/install/presto-server-0.130/plugin']",
     "yarn.vcores" : "1",
     "site.global.security_enabled" : "false",
-    "site.global.catalog" : "{'hive': ['connector.name=hive-cdh5', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch'], 'jmx': ['connector.name=jmx']}",
+    "site.global.catalog" : "{'hive': ['connector.name=hive-hadoop2', 'hive.metastore.uri=thrift://${NN_HOST}:9083'], 'tpch': ['connector.name=tpch'], 'jmx': ['connector.name=jmx']}",
     "java_home" : "/usr/lib/jvm/java",
     "zookeeper.quorum" : "master:5181",
     "slider.cluster.directory.permissions" : "0770",

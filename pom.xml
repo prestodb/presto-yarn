@@ -61,7 +61,7 @@
     </modules>
 
     <properties>
-        <presto.version>0.157.1</presto.version>
+        <presto.version>0.167</presto.version>
         <slider.version>0.80.0-incubating</slider.version>
         <junit.version>4.11</junit.version>
         <tempto.version>1.4</tempto.version>
