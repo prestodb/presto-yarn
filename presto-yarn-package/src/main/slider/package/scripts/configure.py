@@ -47,7 +47,7 @@ def set_configuration(component=None):
     if params.jvm_args:
         _parse_array_and_write(params.jvm_args, format("{params.conf_dir}/jvm.config"))
 
-    if params.jvm_args:
+    if params.log_properties:
         _parse_array_and_write(params.log_properties, format("{params.conf_dir}/log.properties"))
 
     if params.additional_config_properties:        
