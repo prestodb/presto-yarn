@@ -49,7 +49,10 @@ def set_configuration(component=None):
 
     if params.log_properties:
         _parse_array_and_write(params.log_properties, format("{params.conf_dir}/log.properties"))
-
+ 
+    if params.event_listener_properties:
+        _parse_array_and_write(params.event_listener_properties, format("{params.conf_dir}/event-listener.properties"))
+        
     if params.additional_config_properties:        
         _parse_array_and_write(params.additional_config_properties, format("{params.conf_dir}/config.properties"))
 
