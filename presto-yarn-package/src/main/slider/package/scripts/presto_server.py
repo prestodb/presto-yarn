@@ -20,7 +20,7 @@ limitations under the License.
 
 from resource_management import *
 from configure import set_configuration
-
+import os
 
 class PrestoServer(Script):
     def __init__(self, component):
@@ -39,6 +39,7 @@ class PrestoServer(Script):
         env.set_params(params)
 
         self.configure()
+        os.symlink('{conf_dir}','{presto_root}')
         process_cmd = format("PATH={java8_home}/bin:$PATH {presto_root}/bin/launcher run --node-config {conf_dir}/node.properties --jvm-config {conf_dir}/jvm.config --config {conf_dir}/config.properties >> {log_file} 2>&1")
 
         Execute(process_cmd,
