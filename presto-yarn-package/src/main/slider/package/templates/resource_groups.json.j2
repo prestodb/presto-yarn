@@ -1,0 +1,28 @@
+{
+  "rootGroups": [
+    {
+      "name": "global",
+      "softMemoryLimit": "80%",
+      "hardConcurrencyLimit": 100,
+      "maxQueued": 1000,
+      "schedulingPolicy": "weighted",
+      "jmxExport": true,
+      "subGroups": [
+        {
+          "name": "adhoc_${USER}",
+          "softMemoryLimit": "10%",
+          "hardConcurrencyLimit": 2,
+          "maxQueued": 1,
+          "schedulingWeight": 9,
+          "schedulingPolicy": "query_priority"
+        }
+      ]
+    }
+  ],
+  "selectors": [
+
+    {
+      "group": "global.adhoc_${USER}"
+    }
+  ]
+}
