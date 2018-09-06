@@ -61,3 +61,9 @@ node_id = uuid.uuid1()
 catalog_properties = default('/configurations/global/catalog', '')
 additional_config_properties=default('/configurations/global/additional_config_properties', '')
 additional_node_properties=default('/configurations/global/additional_node_properties', '')
+
+discovery_host = default('/configurations/global/discovery_host', coordinator_host)
+discovery_port = default('/configurations/global/discovery_port', presto_server_port)
+
+node_environment = default('/configurations/global/node_environment', 'test')
+
