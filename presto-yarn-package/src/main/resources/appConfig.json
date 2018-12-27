@@ -13,6 +13,7 @@
     "site.global.coordinator_host": "${COORDINATOR_HOST}",
     "site.global.presto_query_max_memory": "50GB",
     "site.global.presto_query_max_memory_per_node": "600MB",
+    "site.global.presto_query_max_total_memory_per_node":  "600MB",
     "site.global.presto_server_port": "8080",
 
     "site.global.catalog": "{'tpch': ['connector.name=tpch']}",
